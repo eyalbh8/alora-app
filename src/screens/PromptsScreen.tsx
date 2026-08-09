@@ -2,11 +2,16 @@ import { useEffect, useMemo, useState } from 'react'
 import { listPrompts, listTopics } from '../api/airops'
 import type { ApiFilter, PromptRow, PromptVolume } from '../api/types'
 import { DataTable, type Column } from '../components/DataTable'
-import { Pill, toneFromColor, type PillTone } from '../components/Pill'
+import { Pill, type PillTone } from '../components/Pill'
 import { TrendBadge } from '../components/TrendBadge'
 import { useApi } from '../hooks/useApi'
 import { lastNDaysEndingYesterday } from '../lib/dates'
 import { formatPercent } from '../lib/format'
+import {
+  promptTypeDotColor,
+  promptTypeLabel,
+  resolveTopicColor,
+} from '../lib/topicColors'
 
 const VOLUME_CONFIG: Record<PromptVolume, { label: string; tone: PillTone }> = {
   very_low: { label: 'Very low', tone: 'grey' },
@@ -21,6 +26,43 @@ function VolumePill({ volume }: { volume: PromptVolume | null }) {
   }
   const { label, tone } = VOLUME_CONFIG[volume]
   return <Pill tone={tone}>{label}</Pill>
+}
+
+function TopicCell({
+  name,
+  color,
+  id,
+}: {
+  name: string
+  color: string | null | undefined
+  id?: number | null
+}) {
+  const swatch = resolveTopicColor(color, id ?? name)
+  return (
+    <span className="inline-flex max-w-[14rem] items-center gap-2">
+      <span
+        className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
+        style={{ backgroundColor: swatch }}
+        aria-hidden
+      />
+      <span className="truncate text-sm text-slate-700" title={name}>
+        {name}
+      </span>
+    </span>
+  )
+}
+
+function PromptTypeCell({ brandMentioned }: { brandMentioned: boolean }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+      <span
+        className="h-1.5 w-1.5 shrink-0 rounded-full"
+        style={{ backgroundColor: promptTypeDotColor(brandMentioned) }}
+        aria-hidden
+      />
+      {promptTypeLabel(brandMentioned)}
+    </span>
+  )
 }
 
 export function PromptsScreen() {
@@ -76,19 +118,31 @@ export function PromptsScreen() {
       ),
     },
     {
-      key: 'keyword',
-      header: 'Keyword',
-      render: (row) => <span className="text-slate-500">{row.keyword || '—'}</span>,
-    },
-    {
       key: 'topic',
       header: 'Topic',
       render: (row) => {
-        // Prefer the included topic object; fall back to topic_id resolved via /topics/list.
-        const topic = row.topic ?? (row.topic_id ? topicById.get(row.topic_id) : undefined)
+        // Prefer /topics/list for color — included topic objects often omit it.
+        const fromList = row.topic_id ? topicById.get(row.topic_id) : undefined
+        const topic = fromList ?? row.topic ?? undefined
         if (!topic) return <span className="text-slate-300">—</span>
-        return <Pill tone={toneFromColor(topic.color)}>{topic.name}</Pill>
+        return (
+          <TopicCell
+            name={topic.name}
+            color={fromList?.color ?? topic.color}
+            id={topic.id}
+          />
+        )
       },
+    },
+    {
+      key: 'brand_mentioned',
+      header: 'Prompt Type',
+      render: (row) => <PromptTypeCell brandMentioned={row.brand_mentioned} />,
+    },
+    {
+      key: 'keyword',
+      header: 'Keyword',
+      render: (row) => <span className="text-slate-500">{row.keyword || '—'}</span>,
     },
     {
       key: 'prompt_volume',
@@ -123,18 +177,20 @@ export function PromptsScreen() {
 
   return (
     <div className="flex flex-col gap-4">
+      <h1 className="font-serif text-2xl font-semibold tracking-tight text-[#101414]">Prompts</h1>
+
       <div className="flex flex-wrap items-center gap-3">
         <input
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search prompts…"
-          className="w-64 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm shadow-sm placeholder:text-slate-400 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 focus:outline-none"
+          className="w-64 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm shadow-sm placeholder:text-slate-400 focus:border-brand-400 focus:ring-1 focus:ring-brand-400 focus:outline-none"
         />
         <select
           value={topicId}
           onChange={(e) => setTopicId(e.target.value)}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600 shadow-sm focus:border-indigo-400 focus:outline-none"
+          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600 shadow-sm focus:border-brand-400 focus:outline-none"
         >
           <option value="">All topics</option>
           {(topics.data ?? []).map((topic) => (

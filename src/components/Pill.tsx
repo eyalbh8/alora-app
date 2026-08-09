@@ -10,6 +10,7 @@ export type PillTone =
   | 'yellow'
   | 'pink'
   | 'teal'
+  | 'coral'
 
 const TONE_CLASSES: Record<PillTone, string> = {
   grey: 'bg-slate-100 text-slate-600',
@@ -21,11 +22,14 @@ const TONE_CLASSES: Record<PillTone, string> = {
   yellow: 'bg-amber-50 text-amber-700',
   pink: 'bg-pink-50 text-pink-700',
   teal: 'bg-brand-50 text-brand-700',
+  coral: 'bg-orange-50 text-orange-700',
 }
 
 /** Maps AirOps topic `color` values onto our pill tones. */
 export function toneFromColor(color: string | null | undefined): PillTone {
   const normalized = (color ?? '').toLowerCase()
+  if (normalized === 'gray') return 'grey'
+  if (normalized === 'coral') return 'coral'
   if (normalized in TONE_CLASSES) return normalized as PillTone
   return 'grey'
 }
