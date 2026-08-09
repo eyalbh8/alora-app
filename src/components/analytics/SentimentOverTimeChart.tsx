@@ -18,7 +18,7 @@ import { EmptyState } from '../EmptyState'
 import { ErrorState } from '../ErrorState'
 import { ChartSkeleton } from '../LoadingSpinner'
 
-const SERIES_COLORS = ['#10b981', '#6366f1', '#0ea5e9', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6']
+const SERIES_COLORS = ['#2fc9bc', '#0e3b3a', '#148f85', '#7fd4cc', '#ca8a04', '#0ea5e9', '#64748b']
 const SERIES_MODES: SentimentSeriesMode[] = ['overall', 'provider', 'topic', 'theme']
 
 interface SentimentOverTimeChartProps {
@@ -121,9 +121,9 @@ export function SentimentOverTimeChart({
               type="monotone"
               dataKey="value"
               name={brandName}
-              stroke="#10b981"
+              stroke="#2fc9bc"
               strokeWidth={2}
-              dot={{ r: 3, fill: '#10b981' }}
+              dot={{ r: 3, fill: '#2fc9bc' }}
               connectNulls
             />
           </LineChart>

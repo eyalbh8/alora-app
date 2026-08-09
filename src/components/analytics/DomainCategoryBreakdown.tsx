@@ -4,12 +4,12 @@ import { ErrorState } from '../ErrorState'
 import { ChartSkeleton } from '../LoadingSpinner'
 
 const CATEGORY_COLORS = [
-  '#0d9488', // teal — Educational
-  '#166534', // dark green — Products
+  '#2fc9bc', // turquoise — Educational
+  '#0e3b3a', // deep teal — Products
   '#ca8a04', // gold — Reviews
   '#64748b', // slate — +N more / Other
-  '#0369a1',
-  '#7c3aed',
+  '#148f85',
+  '#7fd4cc',
   '#be123c',
 ]
 

@@ -16,9 +16,9 @@ interface ChartCardProps {
 
 export function ChartCard({ title, subtitle, loading, error, onRetry, hasData, children }: ChartCardProps) {
   return (
-    <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm">
+    <div className="rounded-xl border border-slate-200/60 bg-white p-4 shadow-sm">
       <div className="mb-3">
-        <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
+        <h2 className="text-sm font-semibold text-[#101414]">{title}</h2>
         {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
       </div>
       {loading ? (

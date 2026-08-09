@@ -19,7 +19,7 @@ export function TrendBadge({ value, percent = false, invert = false }: TrendBadg
   }
   const improving = invert ? value < 0 : value > 0
   const arrow = value > 0 ? '↑' : '↓'
-  const color = improving ? 'text-emerald-600' : 'text-red-600'
+  const color = improving ? 'text-brand-600' : 'text-red-600'
   return (
     <span className={`text-xs font-medium ${color}`}>
       {arrow} {formatNumber(Math.abs(value))}

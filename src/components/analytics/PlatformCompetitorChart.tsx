@@ -29,7 +29,7 @@ interface PlatformCompetitorChartProps {
   hasData: boolean
 }
 
-const COLORS = ['#10b981', '#6366f1', '#0ea5e9', '#f59e0b', '#ec4899', '#8b5cf6']
+const COLORS = ['#2fc9bc', '#0e3b3a', '#148f85', '#7fd4cc', '#ca8a04', '#64748b']
 
 export function PlatformCompetitorChart({
   title,

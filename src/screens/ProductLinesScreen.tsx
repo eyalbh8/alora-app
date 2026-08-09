@@ -42,13 +42,13 @@ export function ProductLinesScreen() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">Product Lines</h2>
+          <h2 className="font-serif text-lg font-semibold text-[#101414]">Product Lines</h2>
           <p className="text-sm text-slate-500">Offerings, positioning, ICP, and competitors.</p>
         </div>
         <button
           type="button"
           onClick={addLine}
-          className="rounded-lg bg-emerald-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-900"
+          className="rounded-lg bg-brand-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-900"
         >
           Add Product Line
         </button>
@@ -118,7 +118,7 @@ export function ProductLinesScreen() {
                         <h4 className="text-sm font-semibold text-slate-800">Competitors</h4>
                         <button
                           type="button"
-                          className="text-xs font-medium text-emerald-800 hover:underline"
+                          className="text-xs font-medium text-brand-800 hover:underline"
                           onClick={() =>
                             updateLine(pl.id, {
                               competitors: [
@@ -152,7 +152,7 @@ export function ProductLinesScreen() {
                                 })
                               }
                               placeholder="Name"
-                              className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-700/30"
+                              className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-brand-700/30"
                             />
                             <input
                               value={c.domain}
@@ -164,7 +164,7 @@ export function ProductLinesScreen() {
                                 })
                               }
                               placeholder="domain.com"
-                              className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-700/30"
+                              className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-brand-700/30"
                             />
                             <button
                               type="button"
@@ -190,7 +190,7 @@ export function ProductLinesScreen() {
                               }
                               placeholder="Details (optional)"
                               rows={2}
-                              className="sm:col-span-3 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-700/30"
+                              className="sm:col-span-3 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-brand-700/30"
                             />
                           </div>
                         ))}
@@ -226,13 +226,13 @@ function Field({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           rows={3}
-          className="w-full rounded-lg border border-slate-200 bg-slate-50/40 px-3 py-2 text-sm outline-none ring-emerald-700/30 focus:ring-2"
+          className="w-full rounded-lg border border-slate-200 bg-slate-50/40 px-3 py-2 text-sm outline-none ring-brand-700/30 focus:ring-2"
         />
       ) : (
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded-lg border border-slate-200 bg-slate-50/40 px-3 py-2 text-sm outline-none ring-emerald-700/30 focus:ring-2"
+          className="w-full rounded-lg border border-slate-200 bg-slate-50/40 px-3 py-2 text-sm outline-none ring-brand-700/30 focus:ring-2"
         />
       )}
     </label>

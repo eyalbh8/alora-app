@@ -50,7 +50,7 @@ export function EditableField({
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-50 hover:text-emerald-800"
+            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-50 hover:text-brand-800"
             aria-label={`Edit ${label}`}
           >
             <PencilIcon />
@@ -69,7 +69,7 @@ export function EditableField({
               type="button"
               onClick={save}
               disabled={!dirty}
-              className="rounded-lg bg-emerald-800 px-2.5 py-1 text-xs font-medium text-white disabled:opacity-40"
+              className="rounded-lg bg-brand-800 px-2.5 py-1 text-xs font-medium text-white disabled:opacity-40"
             >
               Save
             </button>
@@ -84,7 +84,7 @@ export function EditableField({
             onChange={(e) => setDraft(e.target.value)}
             rows={rows}
             placeholder={placeholder}
-            className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm leading-relaxed text-slate-800 outline-none ring-emerald-700/30 focus:ring-2"
+            className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm leading-relaxed text-slate-800 outline-none ring-brand-700/30 focus:ring-2"
           />
         ) : (
           <input
@@ -92,7 +92,7 @@ export function EditableField({
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={placeholder}
-            className="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-800 outline-none ring-emerald-700/30 focus:ring-2"
+            className="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-800 outline-none ring-brand-700/30 focus:ring-2"
           />
         )
       ) : (

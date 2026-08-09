@@ -75,7 +75,7 @@ export function CitationRankTable({
                           href={row.href.startsWith('http') ? row.href : `https://${row.href}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="truncate text-slate-700 hover:text-emerald-700 hover:underline"
+                          className="truncate text-slate-700 hover:text-brand-700 hover:underline"
                           title={row.label}
                         >
                           {urlMode ? truncateMiddle(row.label, 48) : row.label}

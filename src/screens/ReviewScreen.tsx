@@ -33,7 +33,7 @@ export function ReviewScreen() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">Review & Submit</h2>
+          <h2 className="font-serif text-lg font-semibold text-[#101414]">Review & Submit</h2>
           <p className="text-sm text-slate-500">
             Here&apos;s what changed locally vs. the last fetched Brand Kit.
           </p>
@@ -71,7 +71,7 @@ export function ReviewScreen() {
                 clearSubmitFeedback()
                 void submit()
               }}
-              className="rounded-lg bg-emerald-800 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-900 disabled:opacity-50"
+              className="rounded-lg bg-brand-800 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-900 disabled:opacity-50"
             >
               {submitting ? 'Sending…' : 'Confirm & send for review'}
             </button>
@@ -84,7 +84,7 @@ export function ReviewScreen() {
       )}
 
       {submitSuccess && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+        <div className="rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-900">
           {submitSuccess}
         </div>
       )}

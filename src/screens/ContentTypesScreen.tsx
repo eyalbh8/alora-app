@@ -46,7 +46,7 @@ export function ContentTypesScreen() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">Content Types</h2>
+          <h2 className="font-serif text-lg font-semibold text-[#101414]">Content Types</h2>
           <p className="text-sm text-slate-500">
             Formats like blog posts, landing pages, and social copy.
           </p>
@@ -54,7 +54,7 @@ export function ContentTypesScreen() {
         <button
           type="button"
           onClick={add}
-          className="rounded-lg bg-emerald-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-900"
+          className="rounded-lg bg-brand-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-900"
         >
           Add Content Type
         </button>
@@ -93,7 +93,7 @@ export function ContentTypesScreen() {
                   value={ct.template_outline ?? ''}
                   onChange={(e) => update(ct.id, { template_outline: e.target.value })}
                   rows={4}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs outline-none ring-emerald-700/30 focus:ring-2"
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs outline-none ring-brand-700/30 focus:ring-2"
                 />
               </label>
               <div className="grid gap-3 sm:grid-cols-3">
@@ -102,7 +102,7 @@ export function ContentTypesScreen() {
                   <input
                     value={ct.cta_text ?? ''}
                     onChange={(e) => update(ct.id, { cta_text: e.target.value })}
-                    className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-700/30"
+                    className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-brand-700/30"
                   />
                 </label>
                 <label className="block">
@@ -110,7 +110,7 @@ export function ContentTypesScreen() {
                   <input
                     value={ct.cta_url ?? ''}
                     onChange={(e) => update(ct.id, { cta_url: e.target.value })}
-                    className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-700/30"
+                    className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-brand-700/30"
                   />
                 </label>
                 <label className="block">
@@ -118,7 +118,7 @@ export function ContentTypesScreen() {
                   <select
                     value={ct.header_case ?? 'title_case'}
                     onChange={(e) => update(ct.id, { header_case: e.target.value })}
-                    className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-700/30"
+                    className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-brand-700/30"
                   >
                     {HEADER_CASE_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -136,7 +136,7 @@ export function ContentTypesScreen() {
                   </h4>
                   <button
                     type="button"
-                    className="text-xs font-medium text-emerald-800"
+                    className="text-xs font-medium text-brand-800"
                     onClick={() =>
                       update(ct.id, {
                         writing_rules: [

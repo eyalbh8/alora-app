@@ -1,10 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { listCitations, listDomains } from '../api/airops'
 import type { ApiFilter, CitationRow, DomainRow } from '../api/types'
+import { CitationRankTable } from '../components/analytics/CitationRankTable'
+import { ChartCard } from '../components/ChartCard'
 import { DataTable, type Column } from '../components/DataTable'
+import { EmptyState } from '../components/EmptyState'
+import { ErrorState } from '../components/ErrorState'
+import { LoadingSpinner } from '../components/LoadingSpinner'
+import { MetricCard } from '../components/MetricCard'
 import { Pill, type PillTone } from '../components/Pill'
 import { useApi } from '../hooks/useApi'
-import { lastNDaysEndingYesterday } from '../lib/dates'
+import { summarizeRedditCommunity } from '../lib/community'
+import { lastNDaysThroughToday } from '../lib/dates'
 import { formatNumber, formatPercent, truncateMiddle } from '../lib/format'
 
 const DOMAIN_CATEGORIES = [
@@ -35,6 +42,9 @@ const CATEGORY_TONES: Record<string, PillTone> = {
   Competitors: 'red',
   Other: 'grey',
 }
+
+const OFFSITE_TABS = ['citations', 'domains', 'community'] as const
+type OffsiteTab = (typeof OFFSITE_TABS)[number]
 
 function CategoryPill({ category }: { category: string | null }) {
   if (!category) return <span className="text-slate-300">—</span>
@@ -78,8 +88,30 @@ function InfluenceScoreCell({ row }: { row: CitationRow }) {
   )
 }
 
+/** Fetch every citations page for community aggregation. */
+async function listAllCitationsForRange(range: {
+  start_date: string
+  end_date: string
+}): Promise<CitationRow[]> {
+  const all: CitationRow[] = []
+  let page = 1
+  let totalPages = 1
+  do {
+    const res = await listCitations({
+      ...range,
+      sort: '-citation_count',
+      per_page: 100,
+      page,
+    })
+    all.push(...res.data)
+    totalPages = res.meta.total_pages || 1
+    page += 1
+  } while (page <= totalPages)
+  return all
+}
+
 function CitationsTab() {
-  const range = useMemo(() => lastNDaysEndingYesterday(30), [])
+  const range = useMemo(() => lastNDaysThroughToday(30), [])
   const [page, setPage] = useState(1)
   const [sort, setSort] = useState('-citation_count')
   const [category, setCategory] = useState('')
@@ -120,7 +152,7 @@ function CitationsTab() {
           target="_blank"
           rel="noreferrer"
           title={row.url}
-          className="text-indigo-600 hover:underline"
+          className="text-brand-700 hover:underline"
         >
           {truncateMiddle(row.url, 48)}
         </a>
@@ -173,7 +205,7 @@ function CitationsTab() {
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600 shadow-sm focus:border-indigo-400 focus:outline-none"
+          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600 shadow-sm focus:border-brand-400 focus:outline-none"
         >
           <option value="">All categories</option>
           {DOMAIN_CATEGORIES.map((name) => (
@@ -205,7 +237,7 @@ function CitationsTab() {
 }
 
 function DomainsTab() {
-  const range = useMemo(() => lastNDaysEndingYesterday(30), [])
+  const range = useMemo(() => lastNDaysThroughToday(30), [])
   const [page, setPage] = useState(1)
   const [sort, setSort] = useState('-citation_count')
 
@@ -276,20 +308,161 @@ function DomainsTab() {
   )
 }
 
-export function OffsiteScreen() {
-  const [tab, setTab] = useState<'citations' | 'domains'>('citations')
+function CommunityTab() {
+  const range = useMemo(() => lastNDaysThroughToday(30), [])
+  const inventory = useApi(() => listAllCitationsForRange(range), [range.start_date, range.end_date])
+
+  const summary = useMemo(
+    () => summarizeRedditCommunity(inventory.data ?? []),
+    [inventory.data],
+  )
+
+  const topUrlRows = useMemo(
+    () =>
+      summary.urls.slice(0, 10).map((row, i) => ({
+        id: `${row.url}-${i}`,
+        label: row.url,
+        href: row.url,
+        logoUrl: row.logo_url,
+        citationShare: row.citation_share,
+        citationCount: row.citation_count,
+      })),
+    [summary.urls],
+  )
+
+  const maxSubredditRate = Math.max(1, ...summary.subreddits.map((s) => s.citationRate))
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1 shadow-sm self-start">
-        {(['citations', 'domains'] as const).map((name) => (
+      {inventory.error ? (
+        <ErrorState message={inventory.error} onRetry={inventory.retry} />
+      ) : (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <MetricCard
+            label="Reddit Citation Rate"
+            value={formatPercent(summary.citationRate)}
+            loading={inventory.loading}
+            trend={null}
+          />
+          <MetricCard
+            label="Reddit Citations"
+            value={formatNumber(summary.citationCount)}
+            loading={inventory.loading}
+            trend={null}
+            trendPercent={false}
+          />
+        </div>
+      )}
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <div className="rounded-xl border border-slate-200/60 bg-white p-4 shadow-sm">
+          <div className="mb-3">
+            <h2 className="text-sm font-semibold text-[#101414]">Citation Rate by Subreddit</h2>
+            <p className="text-xs text-slate-400">
+              How often the top subreddits are cited in AI responses
+            </p>
+          </div>
+          {inventory.loading ? (
+            <LoadingSpinner />
+          ) : inventory.error ? (
+            <ErrorState message={inventory.error} onRetry={inventory.retry} />
+          ) : summary.subreddits.length === 0 ? (
+            <EmptyState
+              title="No subreddit citations"
+              message="No Reddit threads were cited in AI answers for this period."
+            />
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {summary.subreddits.map((sub) => (
+                <li key={sub.subreddit} className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 shrink-0 rounded-full bg-brand-400" />
+                      <a
+                        href={`https://www.reddit.com/r/${sub.subreddit}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm font-medium text-slate-800 hover:text-brand-700 hover:underline"
+                      >
+                        {sub.label}
+                      </a>
+                    </div>
+                    <span className="text-sm tabular-nums text-slate-600">
+                      {formatPercent(sub.citationRate)}
+                    </span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className="h-full rounded-full bg-brand-400 transition-all"
+                      style={{ width: `${(sub.citationRate / maxSubredditRate) * 100}%` }}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <CitationRankTable
+          title="Top Reddit URLs"
+          subtitle="Reddit posts cited more often"
+          rows={topUrlRows}
+          loading={inventory.loading}
+          error={inventory.error}
+          onRetry={inventory.retry}
+          hasData={topUrlRows.length > 0}
+          urlMode
+        />
+      </div>
+
+      <ChartCard
+        title="Subreddit Citation Rate"
+        subtitle="Citation rate across subreddits cited in AI answers."
+        loading={inventory.loading}
+        error={inventory.error}
+        onRetry={inventory.retry}
+        hasData={summary.subreddits.length > 0}
+      >
+        <ul className="flex flex-col gap-3 pt-1">
+          {summary.subreddits.map((sub) => (
+            <li key={sub.subreddit} className="grid grid-cols-[7rem_1fr_3.5rem] items-center gap-3">
+              <span className="truncate text-sm font-medium text-slate-700" title={sub.label}>
+                {sub.label}
+              </span>
+              <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className="h-full rounded-full bg-brand-500"
+                  style={{ width: `${(sub.citationRate / maxSubredditRate) * 100}%` }}
+                />
+              </div>
+              <span className="text-right text-sm tabular-nums text-slate-600">
+                {formatPercent(sub.citationRate)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </ChartCard>
+    </div>
+  )
+}
+
+export function OffsiteScreen() {
+  const [tab, setTab] = useState<OffsiteTab>('citations')
+
+  return (
+    <div className="flex flex-col gap-4">
+      <h1 className="font-serif text-2xl font-semibold tracking-tight text-[#101414]">Offsite</h1>
+
+      <div className="flex gap-5 border-b border-slate-200">
+        {OFFSITE_TABS.map((name) => (
           <button
             key={name}
+            type="button"
             onClick={() => setTab(name)}
-            className={`rounded-md px-4 py-1.5 text-sm font-medium capitalize transition ${
+            className={`-mb-px border-b-2 pb-2.5 text-sm font-medium capitalize transition ${
               tab === name
-                ? 'bg-indigo-50 text-indigo-700'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'border-brand-400 text-[#101414]'
+                : 'border-transparent text-slate-500 hover:text-[#101414]'
             }`}
           >
             {name}
@@ -297,7 +470,13 @@ export function OffsiteScreen() {
         ))}
       </div>
 
-      {tab === 'citations' ? <CitationsTab /> : <DomainsTab />}
+      {tab === 'citations' ? (
+        <CitationsTab />
+      ) : tab === 'domains' ? (
+        <DomainsTab />
+      ) : (
+        <CommunityTab />
+      )}
     </div>
   )
 }

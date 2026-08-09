@@ -122,7 +122,7 @@ function ThemeAnswers({
               <span
                 className={
                   a.sentiment === 'positive'
-                    ? 'text-emerald-600'
+                    ? 'text-brand-600'
                     : a.sentiment === 'negative'
                       ? 'text-red-600'
                       : 'text-slate-500'

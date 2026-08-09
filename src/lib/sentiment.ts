@@ -26,7 +26,7 @@ export function sentimentBand(score: number | null | undefined): SentimentBand |
 export function sentimentBandColor(band: SentimentBand | null): string {
   switch (band) {
     case 'positive':
-      return '#10b981'
+      return '#2fc9bc'
     case 'negative':
       return '#ef4444'
     case 'neutral':
@@ -43,13 +43,13 @@ export function sentimentBandColor(band: SentimentBand | null): string {
 export function sentimentTreemapColor(score: number | null | undefined): string {
   if (score === null || score === undefined || Number.isNaN(score)) return '#e2e8f0'
   const t = Math.min(1, Math.max(0, score / 100))
-  // pink #f9a8d4 → slate #94a3b8 → teal #14b8a6
+  // pink #f9a8d4 → slate #94a3b8 → turquoise #2fc9bc
   if (t < 0.5) {
     const u = t * 2
     return mixHex('#f9a8d4', '#94a3b8', u)
   }
   const u = (t - 0.5) * 2
-  return mixHex('#94a3b8', '#14b8a6', u)
+  return mixHex('#94a3b8', '#2fc9bc', u)
 }
 
 function mixHex(a: string, b: string, t: number): string {

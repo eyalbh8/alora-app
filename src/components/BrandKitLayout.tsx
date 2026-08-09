@@ -12,7 +12,7 @@ export function BrandKitLayout() {
   if (!draft) return null
 
   return (
-    <div className="mx-auto max-w-5xl rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8">
+    <div className="mx-auto max-w-5xl rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
       <Outlet />
     </div>
   )

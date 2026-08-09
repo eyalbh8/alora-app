@@ -20,13 +20,13 @@ export function CustomVariablesScreen() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">Custom Variables</h2>
+          <h2 className="font-serif text-lg font-semibold text-[#101414]">Custom Variables</h2>
           <p className="text-sm text-slate-500">Key–value pairs available to Playbooks and agents.</p>
         </div>
         <button
           type="button"
           onClick={add}
-          className="rounded-lg bg-emerald-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-900"
+          className="rounded-lg bg-brand-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-900"
         >
           Add Variable
         </button>
@@ -69,7 +69,7 @@ export function CustomVariablesScreen() {
                           ),
                         })
                       }
-                      className="w-full rounded-md border border-slate-200 px-2 py-1.5 font-mono text-xs outline-none focus:ring-2 focus:ring-emerald-700/30"
+                      className="w-full rounded-md border border-slate-200 px-2 py-1.5 font-mono text-xs outline-none focus:ring-2 focus:ring-brand-700/30"
                     />
                   </td>
                   <td className="px-4 py-2">
@@ -83,7 +83,7 @@ export function CustomVariablesScreen() {
                           ),
                         })
                       }
-                      className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-emerald-700/30"
+                      className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-brand-700/30"
                     />
                   </td>
                   <td className="px-4 py-2 text-right">

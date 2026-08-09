@@ -18,8 +18,8 @@ export function AnalyticsTabs() {
           className={({ isActive }) =>
             `-mb-px border-b-2 pb-2.5 text-sm font-medium transition ${
               isActive
-                ? 'border-emerald-600 text-slate-900'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-brand-400 text-[#101414]'
+                : 'border-transparent text-slate-500 hover:text-[#101414]'
             }`
           }
         >

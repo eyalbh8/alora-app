@@ -29,7 +29,7 @@ export function MarkdownRule({
             <button
               type="button"
               onClick={() => setEditing((v) => !v)}
-              className="text-xs font-medium text-slate-500 hover:text-emerald-800"
+              className="text-xs font-medium text-slate-500 hover:text-brand-800"
             >
               {editing ? 'Done' : 'Edit'}
             </button>
@@ -50,7 +50,7 @@ export function MarkdownRule({
           value={text}
           onChange={(e) => onChange(e.target.value)}
           rows={8}
-          className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 font-mono text-xs leading-relaxed text-slate-800 outline-none ring-emerald-700/30 focus:ring-2"
+          className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 font-mono text-xs leading-relaxed text-slate-800 outline-none ring-brand-700/30 focus:ring-2"
         />
       ) : (
         <div className="prose-rule text-sm leading-relaxed text-slate-700">

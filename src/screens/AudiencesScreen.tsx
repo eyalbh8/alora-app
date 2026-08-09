@@ -34,13 +34,13 @@ export function AudiencesScreen() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">Audiences</h2>
+          <h2 className="font-serif text-lg font-semibold text-[#101414]">Audiences</h2>
           <p className="text-sm text-slate-500">Who you write for, with optional scoped rules.</p>
         </div>
         <button
           type="button"
           onClick={add}
-          className="rounded-lg bg-emerald-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-900"
+          className="rounded-lg bg-brand-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-900"
         >
           Add Audience
         </button>
@@ -64,7 +64,7 @@ export function AudiencesScreen() {
                 value={aud.description}
                 onChange={(e) => update(aud.id, { description: e.target.value })}
                 rows={3}
-                className="w-full rounded-lg border border-slate-200 bg-slate-50/40 px-3 py-2 text-sm outline-none ring-emerald-700/30 focus:ring-2"
+                className="w-full rounded-lg border border-slate-200 bg-slate-50/40 px-3 py-2 text-sm outline-none ring-brand-700/30 focus:ring-2"
               />
               <div className="mt-3 space-y-2">
                 <div className="flex items-center justify-between">
@@ -73,7 +73,7 @@ export function AudiencesScreen() {
                   </h4>
                   <button
                     type="button"
-                    className="text-xs font-medium text-emerald-800"
+                    className="text-xs font-medium text-brand-800"
                     onClick={() =>
                       update(aud.id, {
                         writing_rules: [

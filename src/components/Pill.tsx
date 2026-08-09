@@ -14,13 +14,13 @@ export type PillTone =
 const TONE_CLASSES: Record<PillTone, string> = {
   grey: 'bg-slate-100 text-slate-600',
   blue: 'bg-blue-50 text-blue-700',
-  green: 'bg-emerald-50 text-emerald-700',
+  green: 'bg-brand-50 text-brand-700',
   orange: 'bg-orange-50 text-orange-700',
   red: 'bg-red-50 text-red-700',
   purple: 'bg-purple-50 text-purple-700',
   yellow: 'bg-amber-50 text-amber-700',
   pink: 'bg-pink-50 text-pink-700',
-  teal: 'bg-teal-50 text-teal-700',
+  teal: 'bg-brand-50 text-brand-700',
 }
 
 /** Maps AirOps topic `color` values onto our pill tones. */

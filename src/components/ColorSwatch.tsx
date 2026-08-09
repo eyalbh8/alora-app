@@ -40,7 +40,7 @@ export function ColorSwatch({
         />
         <span className="min-w-0">
           <span className="block truncate text-sm font-medium text-slate-900">{name}</span>
-          <span className="font-mono text-xs text-slate-500 group-hover:text-emerald-800">
+          <span className="font-mono text-xs text-slate-500 group-hover:text-brand-800">
             {copied ? 'Copied!' : value}
           </span>
         </span>
@@ -51,7 +51,7 @@ export function ColorSwatch({
             value={usageInstructions}
             onChange={(e) => onUsageChange(e.target.value)}
             rows={2}
-            className="mt-3 w-full resize-y rounded-lg border border-slate-200 bg-slate-50/50 px-2.5 py-1.5 text-xs text-slate-700 outline-none ring-emerald-700/30 focus:ring-2"
+            className="mt-3 w-full resize-y rounded-lg border border-slate-200 bg-slate-50/50 px-2.5 py-1.5 text-xs text-slate-700 outline-none ring-brand-700/30 focus:ring-2"
           />
         ) : (
           <p className="mt-3 text-xs leading-relaxed text-slate-500">{usageInstructions}</p>

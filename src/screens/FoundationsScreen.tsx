@@ -10,7 +10,7 @@ export function FoundationsScreen() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-slate-900">Foundations</h2>
+        <h2 className="font-serif text-lg font-semibold text-[#101414]">Foundations</h2>
         <p className="text-sm text-slate-500">
           Core identity, voice, and global writing rules for {draft.brand_name}.
         </p>

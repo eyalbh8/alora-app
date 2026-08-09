@@ -77,7 +77,7 @@ export function TopicMentionChart({
                         aria-hidden
                       />
                       <div
-                        className="absolute top-1/2 z-10 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-emerald-600 text-[9px] font-bold text-white shadow"
+                        className="absolute top-1/2 z-10 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-brand-600 text-[9px] font-bold text-white shadow"
                         style={{ left: `${Math.min(100, Math.max(0, pct))}%` }}
                         title={`${brandName}: ${formatPercent(item.value)}`}
                       >

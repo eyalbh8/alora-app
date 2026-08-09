@@ -15,7 +15,7 @@ import { ErrorState } from '../ErrorState'
 import { ChartSkeleton } from '../LoadingSpinner'
 import { formatPercent } from '../../lib/format'
 
-const SERIES_COLORS = ['#10b981', '#6366f1', '#0ea5e9', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6']
+const SERIES_COLORS = ['#2fc9bc', '#0e3b3a', '#148f85', '#7fd4cc', '#ca8a04', '#0ea5e9', '#64748b']
 
 interface MultiSeriesRateChartProps {
   title: string

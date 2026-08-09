@@ -53,7 +53,7 @@ function BrandHeader() {
   const rangeLabel = formatRangeLabel(lastNDaysThroughToday(30))
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 bg-white px-6 py-3.5">
+    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/60 bg-white px-6 py-3.5">
       {loading ? (
         <div className="flex items-center gap-3">
           <Skeleton className="h-6 w-28" />
@@ -61,10 +61,10 @@ function BrandHeader() {
         </div>
       ) : (
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-base font-semibold text-slate-900">
-            {settings?.brand_name ?? 'RiddleDay'}
+          <h1 className="font-serif text-lg font-semibold tracking-tight text-[#101414]">
+            {settings?.brand_name ?? 'Alora'}
             {onBrandKit ? (
-              <span className="ml-2 text-sm font-normal text-slate-400">Brand Kit</span>
+              <span className="ml-2 font-sans text-sm font-normal text-slate-400">Brand Kit</span>
             ) : null}
           </h1>
           {settings?.brand_url && (
@@ -72,7 +72,7 @@ function BrandHeader() {
               href={`https://${settings.brand_url.replace(/^https?:\/\//, '')}`}
               target="_blank"
               rel="noreferrer"
-              className="text-xs text-slate-400 hover:text-slate-600 hover:underline"
+              className="text-xs text-slate-400 hover:text-brand-700 hover:underline"
             >
               {settings.brand_url}
             </a>
@@ -102,7 +102,7 @@ function BrandHeader() {
             className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
               isDirty
                 ? 'border-amber-200 bg-amber-50 text-amber-900'
-                : 'border-emerald-200 bg-emerald-50 text-emerald-900'
+                : 'border-brand-200 bg-brand-50 text-brand-900'
             }`}
           >
             {isDirty ? 'Draft — unsaved changes' : 'Published'}
@@ -111,7 +111,7 @@ function BrandHeader() {
             type="button"
             disabled={!isDirty}
             onClick={() => navigate('/brand-kit/review')}
-            className="rounded-lg bg-emerald-800 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-emerald-900 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-lg bg-brand-900 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-brand-950 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Review & Submit Changes
           </button>
@@ -127,13 +127,15 @@ export function Layout() {
   const { pathname } = useLocation()
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="fixed inset-y-0 left-0 z-10 flex w-52 flex-col border-r border-slate-200/80 bg-white">
-        <div className="flex items-center gap-2 px-5 py-4">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 text-xs font-bold text-white">
-            RD
-          </div>
-          <span className="text-sm font-semibold tracking-tight text-slate-900">RiddleDay</span>
+    <div className="flex min-h-screen bg-[#fafafa]">
+      <aside className="fixed inset-y-0 left-0 z-10 flex w-52 flex-col border-r border-slate-200/60 bg-white">
+        <div className="flex flex-col gap-0.5 px-5 py-5">
+          <span className="font-serif text-2xl font-medium leading-none tracking-tight text-brand-900">
+            Alora
+          </span>
+          <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-brand-500">
+            AI Visibility
+          </span>
         </div>
 
         <nav className="mt-1 flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 pb-4">
@@ -152,8 +154,8 @@ export function Layout() {
                 className={() =>
                   `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
                     isActive
-                      ? 'bg-slate-100 text-slate-900'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'bg-brand-50 text-brand-900'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-[#101414]'
                   }`
                 }
               >
@@ -179,15 +181,15 @@ export function Layout() {
             className={({ isActive }) =>
               `rounded-lg px-3 py-2 text-sm font-medium transition ${
                 isActive || pathname.startsWith('/brand-kit')
-                  ? 'bg-emerald-50 text-emerald-900'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-brand-50 text-brand-900'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-[#101414]'
               }`
             }
           >
             Brand Kit
           </NavLink>
           {pathname.startsWith('/brand-kit') && (
-            <div className="ml-2 mt-0.5 flex flex-col gap-0.5 border-l border-slate-200 pl-2">
+            <div className="ml-2 mt-0.5 flex flex-col gap-0.5 border-l border-brand-100 pl-2">
               {BRAND_KIT_NAV.map((tab) => (
                 <NavLink
                   key={tab.to}
@@ -196,8 +198,8 @@ export function Layout() {
                   className={({ isActive }) =>
                     `rounded-md px-2.5 py-1.5 text-xs font-medium transition ${
                       isActive
-                        ? 'bg-white text-emerald-900 shadow-sm ring-1 ring-slate-200/80'
-                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                        ? 'bg-white text-brand-900 shadow-sm ring-1 ring-brand-200/80'
+                        : 'text-slate-500 hover:bg-slate-50 hover:text-[#101414]'
                     }`
                   }
                 >

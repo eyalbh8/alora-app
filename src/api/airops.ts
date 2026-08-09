@@ -58,8 +58,160 @@ export function listCitations(params: CitationsListParams = {}): Promise<ListRes
   return apiPost<ListResponse<CitationRow>>(kitPath('/citations/list'), params)
 }
 
-export function listDomains(params: DomainsListParams = {}): Promise<ListResponse<DomainRow>> {
-  return apiPost<ListResponse<DomainRow>>(kitPath('/domains/list'), params)
+/** Fetch every page from /citations/list (max 100 per page). */
+async function listAllCitationPages(
+  params: Pick<CitationsListParams, 'start_date' | 'end_date' | 'filters'>,
+): Promise<CitationRow[]> {
+  const all: CitationRow[] = []
+  let page = 1
+  let totalPages = 1
+  do {
+    const res = await listCitations({
+      ...params,
+      sort: '-citation_count',
+      per_page: 100,
+      page,
+    })
+    all.push(...res.data)
+    totalPages = res.meta.total_pages || 1
+    page += 1
+  } while (page <= totalPages)
+  return all
+}
+
+/**
+ * Aggregate citation URLs into domain-level rows.
+ *
+ * AirOps has no public `/domains/list` endpoint (returns 404). Domain inventory
+ * is derived from `/citations/list`, matching how the AirOps UI builds this view.
+ */
+function aggregateDomainsFromCitations(rows: CitationRow[]): DomainRow[] {
+  type Acc = {
+    domain_id: number
+    domain_name: string
+    domain_category: string | null
+    logo_url: string | null
+    citation_count: number
+    citation_count_trend: number | null
+    urls: Set<string>
+    citation_rate: number
+    citation_rate_trend: number | null
+    citation_share_trend: number | null
+  }
+
+  const byDomain = new Map<number, Acc>()
+
+  for (const row of rows) {
+    const id = Number(row.domain)
+    if (!Number.isFinite(id)) continue
+    const existing = byDomain.get(id)
+    if (existing) {
+      existing.citation_count += row.citation_count ?? 0
+      existing.urls.add(row.url)
+      if (!existing.logo_url && row.logo_url) existing.logo_url = row.logo_url
+      if (!existing.domain_category && row.domain_category) {
+        existing.domain_category = row.domain_category
+      }
+      // Domain citation rate ≈ unique answers citing any URL on the domain;
+      // URL rates can overlap, so use the max as a lower-bound proxy.
+      if ((row.citation_rate ?? 0) > existing.citation_rate) {
+        existing.citation_rate = row.citation_rate ?? 0
+        existing.citation_rate_trend = row.citation_rate_trend
+      }
+    } else {
+      byDomain.set(id, {
+        domain_id: id,
+        domain_name: row.domain_name || String(id),
+        domain_category: row.domain_category,
+        logo_url: row.logo_url,
+        citation_count: row.citation_count ?? 0,
+        citation_count_trend: row.citation_count_trend,
+        urls: new Set([row.url]),
+        citation_rate: row.citation_rate ?? 0,
+        citation_rate_trend: row.citation_rate_trend,
+        citation_share_trend: row.citation_share_trend,
+      })
+    }
+  }
+
+  const totalCitations =
+    [...byDomain.values()].reduce((sum, d) => sum + d.citation_count, 0) || 1
+
+  return [...byDomain.values()].map((d) => ({
+    domain_id: d.domain_id,
+    domain_name: d.domain_name,
+    domain_category: d.domain_category,
+    logo_url: d.logo_url,
+    citation_count: d.citation_count,
+    citation_count_trend: d.citation_count_trend,
+    url_count: d.urls.size,
+    citation_share: (d.citation_count / totalCitations) * 100,
+    citation_share_trend: d.citation_share_trend,
+    citation_rate: d.citation_rate,
+    citation_rate_trend: d.citation_rate_trend,
+  }))
+}
+
+function sortDomainRows(rows: DomainRow[], sort = '-citation_count'): DomainRow[] {
+  const descending = sort.startsWith('-')
+  const field = (descending ? sort.slice(1) : sort) as keyof DomainRow
+  const sortable: Array<keyof DomainRow> = [
+    'citation_count',
+    'citation_share',
+    'citation_rate',
+    'url_count',
+    'domain_name',
+  ]
+  if (!sortable.includes(field)) return rows
+
+  return [...rows].sort((a, b) => {
+    const av = a[field]
+    const bv = b[field]
+    if (typeof av === 'string' && typeof bv === 'string') {
+      return descending ? bv.localeCompare(av) : av.localeCompare(bv)
+    }
+    const an = typeof av === 'number' ? av : 0
+    const bn = typeof bv === 'number' ? bv : 0
+    return descending ? bn - an : an - bn
+  })
+}
+
+/**
+ * Domain inventory for Offsite.
+ * Derived from `/citations/list` — there is no public `/domains/list` route.
+ */
+export async function listDomains(
+  params: DomainsListParams = {},
+): Promise<ListResponse<DomainRow>> {
+  const citations = await listAllCitationPages({
+    start_date: params.start_date,
+    end_date: params.end_date,
+    filters: params.filters,
+  })
+  const sorted = sortDomainRows(aggregateDomainsFromCitations(citations), params.sort)
+
+  const page = params.page ?? 1
+  const perPage = params.per_page ?? 25
+  const totalCount = sorted.length
+  const totalPages = Math.max(1, Math.ceil(totalCount / perPage))
+  const start = (page - 1) * perPage
+
+  return {
+    data: sorted.slice(start, start + perPage),
+    meta: {
+      page,
+      per_page: perPage,
+      total_count: totalCount,
+      total_pages: totalPages,
+      start_date: params.start_date,
+      end_date: params.end_date,
+      data_availability: {
+        earliest_data_date: null,
+        latest_data_date: null,
+        requested_period_has_data: totalCount > 0,
+      },
+    },
+  }
 }
 
 export async function listTopics(): Promise<Topic[]> {

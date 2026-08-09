@@ -8,7 +8,7 @@ interface DiffRowProps {
 export function DiffRow({ change }: DiffRowProps) {
   const tone =
     change.kind === 'added'
-      ? 'border-emerald-100 bg-emerald-50/60'
+      ? 'border-brand-100 bg-brand-50/60'
       : change.kind === 'removed'
         ? 'border-red-100 bg-red-50/50'
         : 'border-slate-200/80 bg-white'
@@ -27,12 +27,12 @@ export function DiffRow({ change }: DiffRowProps) {
             <p className="text-slate-400 line-through">{change.before}</p>
           )}
           {change.after != null && (
-            <p className="rounded-md bg-emerald-50 px-2 py-1 text-emerald-900">{change.after}</p>
+            <p className="rounded-md bg-brand-50 px-2 py-1 text-brand-900">{change.after}</p>
           )}
         </div>
       )}
       {change.kind === 'added' && change.after && (
-        <p className="mt-2 text-xs text-emerald-800">{change.after}</p>
+        <p className="mt-2 text-xs text-brand-800">{change.after}</p>
       )}
       {change.kind === 'removed' && change.before && (
         <p className="mt-2 text-xs text-red-700 line-through">{change.before}</p>

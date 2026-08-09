@@ -1,7 +1,23 @@
 @import "tailwindcss";
 
-body {
-  @apply bg-[#f3f4f6] text-slate-800 antialiased;
-  font-family: "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, -apple-system,
+@theme {
+  --color-brand-50: #f0faf9;
+  --color-brand-100: #d8f3f0;
+  --color-brand-200: #b4e6e1;
+  --color-brand-300: #7fd4cc;
+  --color-brand-400: #2fc9bc;
+  --color-brand-500: #1aada0;
+  --color-brand-600: #148f85;
+  --color-brand-700: #12726c;
+  --color-brand-800: #125b57;
+  --color-brand-900: #0e3b3a;
+  --color-brand-950: #082726;
+
+  --font-sans: "Inter", "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, -apple-system,
     sans-serif;
+  --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+}
+
+body {
+  @apply bg-[#fafafa] text-[#101414] antialiased font-sans;
 }

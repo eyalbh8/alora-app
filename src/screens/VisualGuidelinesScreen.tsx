@@ -13,7 +13,7 @@ export function VisualGuidelinesScreen() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-slate-900">Visual Guidelines</h2>
+        <h2 className="font-serif text-lg font-semibold text-[#101414]">Visual Guidelines</h2>
         <p className="text-sm text-slate-500">
           Logos, colors, and typography. Public REST does not return these collections —
           values may be seeded for local editing.
@@ -81,7 +81,7 @@ export function VisualGuidelinesScreen() {
                       })
                     }
                     rows={3}
-                    className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50/40 px-2.5 py-1.5 text-xs outline-none focus:ring-2 focus:ring-emerald-700/30"
+                    className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50/40 px-2.5 py-1.5 text-xs outline-none focus:ring-2 focus:ring-brand-700/30"
                   />
                 </article>
               ))}
@@ -172,7 +172,7 @@ export function VisualGuidelinesScreen() {
                         href={font.google_font_link}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs text-emerald-800 hover:underline"
+                        className="text-xs text-brand-800 hover:underline"
                       >
                         Google Fonts
                       </a>
@@ -191,7 +191,7 @@ export function VisualGuidelinesScreen() {
                       })
                     }
                     rows={2}
-                    className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50/40 px-2.5 py-1.5 text-xs outline-none focus:ring-2 focus:ring-emerald-700/30"
+                    className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50/40 px-2.5 py-1.5 text-xs outline-none focus:ring-2 focus:ring-brand-700/30"
                   />
                   {sizes.length > 0 && (
                     <div className="mt-3 overflow-x-auto">

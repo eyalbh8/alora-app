@@ -81,9 +81,9 @@ export function MetricOverTimeChart({
               type="monotone"
               dataKey="value"
               name={brandName}
-              stroke="#10b981"
+              stroke="#2fc9bc"
               strokeWidth={2}
-              dot={{ r: 3, fill: '#10b981' }}
+              dot={{ r: 3, fill: '#2fc9bc' }}
               connectNulls
             />
           </LineChart>
