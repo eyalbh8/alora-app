@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+body {
+  @apply bg-[#f3f4f6] text-slate-800 antialiased;
+  font-family: "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, -apple-system,
+    sans-serif;
+}
