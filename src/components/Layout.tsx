@@ -17,14 +17,14 @@ const INSIGHTS_NAV = [
       pathname === '/sentiment',
   },
   {
-    to: '/pages',
-    label: 'Onsite',
-    icon: 'M4.5 4.5h15v15h-15v-15zM4.5 9h15M9 9v10.5',
-  },
-  {
     to: '/prompts',
     label: 'Prompts',
     icon: 'M8 10h8M8 14h5m-8.5 5.5L8 17h9a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v12.5z',
+  },
+  {
+    to: '/pages',
+    label: 'Onsite',
+    icon: 'M4.5 4.5h15v15h-15v-15zM4.5 9h15M9 9v10.5',
   },
   {
     to: '/offsite',
