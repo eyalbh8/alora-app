@@ -25,7 +25,7 @@ const TONE_CLASSES: Record<PillTone, string> = {
   coral: 'bg-orange-50 text-orange-700',
 }
 
-/** Maps AirOps topic `color` values onto our pill tones. */
+/** Maps topic color token names onto pill tones. */
 export function toneFromColor(color: string | null | undefined): PillTone {
   const normalized = (color ?? '').toLowerCase()
   if (normalized === 'gray') return 'grey'

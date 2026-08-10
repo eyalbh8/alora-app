@@ -9,8 +9,8 @@
 
 [
   {
-    "source": "/api/airops/<*>",
-    "target": "https://YOUR_LAMBDA_FUNCTION_URL/api/airops/<*>",
+    "source": "/api/snapshots/<*>",
+    "target": "https://YOUR_LAMBDA_FUNCTION_URL/api/snapshots/<*>",
     "status": "200",
     "condition": null
   },

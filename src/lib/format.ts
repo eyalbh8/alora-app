@@ -1,96 +1,66 @@
 /**
- * Formatting rules:
- *  - rate/percentage metrics → 1 decimal place + "%"
- *  - null/undefined → "—" (never coerced to 0; "no data" is not "zero")
+ * Formatting helpers for snapshot-driven UI.
+ * null/undefined → "—" (never coerced to 0; "no data" is not "zero")
  */
 
-export function formatPercent(value: number | null | undefined): string {
+export function formatPercent(value: number | null | undefined, digits = 1): string {
   if (value === null || value === undefined || Number.isNaN(value)) return '—'
-  return `${value.toFixed(1)}%`
+  return `${value.toFixed(digits)}%`
 }
 
-export function formatNumber(value: number | null | undefined): string {
+export function formatNumber(value: number | null | undefined, digits = 1): string {
   if (value === null || value === undefined || Number.isNaN(value)) return '—'
-  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value)
+  return new Intl.NumberFormat('en-US', { maximumFractionDigits: digits }).format(value)
 }
 
-const PERCENT_METRICS = new Set([
-  'mention_rate',
-  'share_of_voice',
-  'citation_rate',
-  'citation_share',
-  'sentiment_score',
-  'first_mention_rate',
-  'ctr',
-])
-
-export function isPercentMetric(metric: string): boolean {
-  return PERCENT_METRICS.has(metric)
+export function formatScore(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return '—'
+  return value.toFixed(1)
 }
 
-export function formatMetricValue(metric: string, value: number | null | undefined): string {
-  return isPercentMetric(metric) ? formatPercent(value) : formatNumber(value)
+export const PROVIDER_LABELS: Record<string, string> = {
+  CHATGPT: 'ChatGPT',
+  CHAT_GPT: 'ChatGPT',
+  GPT: 'ChatGPT',
+  GEMINI: 'Gemini',
+  PERPLEXITY: 'Perplexity',
+  CLAUDE: 'Claude',
+  GROK: 'Grok',
+  COPILOT: 'Microsoft Copilot',
+  MICROSOFT_COPILOT: 'Microsoft Copilot',
+  GOOGLE_AI_MODE: 'Google AI Mode',
+  GOOGLE_AI_OVERVIEW: 'Google AI Overview',
+  ALL: 'All providers',
 }
-
-import type { Provider } from '../api/types'
-
-export const PROVIDER_LABELS: Record<Provider, string> = {
-  chat_gpt: 'ChatGPT',
-  gemini: 'Gemini',
-  perplexity: 'Perplexity',
-  google_ai_mode: 'Google AI Mode',
-  google_ai_overview: 'Google AI Overview',
-  claude: 'Claude',
-  grok: 'Grok',
-  microsoft_copilot: 'Microsoft Copilot',
-}
-
-export const ALL_PROVIDERS: Provider[] = [
-  'chat_gpt',
-  'gemini',
-  'perplexity',
-  'google_ai_mode',
-  'google_ai_overview',
-  'claude',
-  'grok',
-  'microsoft_copilot',
-]
 
 export function providerLabel(provider: string): string {
-  return (PROVIDER_LABELS as Record<string, string>)[provider] ?? provider
+  const key = provider.toUpperCase().replace(/\s+/g, '_')
+  return PROVIDER_LABELS[key] ?? provider
 }
 
-export const CORE_METRIC_LABELS: Record<string, string> = {
-  mention_rate: 'Mention Rate',
-  share_of_voice: 'Share of Voice',
-  citation_rate: 'Citation Rate',
-  citation_share: 'Citation Share',
-  citation_count: 'Citations',
-  sentiment_score: 'Sentiment Score',
-  average_position: 'Average Position',
-}
-
-export function metricLabel(metric: string): string {
-  return CORE_METRIC_LABELS[metric] ?? metric
-}
-
-export function ordinalRank(rank: number): string {
-  const mod100 = rank % 100
-  if (mod100 >= 11 && mod100 <= 13) return `${rank}th`
-  switch (rank % 10) {
-    case 1:
-      return `${rank}st`
-    case 2:
-      return `${rank}nd`
-    case 3:
-      return `${rank}rd`
-    default:
-      return `${rank}th`
+export function regionLabel(code: string): string {
+  const map: Record<string, string> = {
+    us: 'United States',
+    gb: 'United Kingdom',
+    uk: 'United Kingdom',
+    ca: 'Canada',
+    au: 'Australia',
+    de: 'Germany',
+    fr: 'France',
   }
+  return map[code.toLowerCase()] ?? code.toUpperCase()
 }
 
 export function truncateMiddle(text: string, max = 60): string {
   if (text.length <= max) return text
   const half = Math.floor((max - 1) / 2)
   return `${text.slice(0, half)}…${text.slice(-half)}`
+}
+
+export function formatBytes(value: number | null | undefined): string {
+  if (value == null || Number.isNaN(value)) return '—'
+  if (value < 1024) return `${value} B`
+  if (value < 1024 ** 2) return `${(value / 1024).toFixed(1)} KB`
+  if (value < 1024 ** 3) return `${(value / 1024 ** 2).toFixed(1)} MB`
+  return `${(value / 1024 ** 3).toFixed(2)} GB`
 }

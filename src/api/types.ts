@@ -1,572 +1,314 @@
-// ---------------------------------------------------------------------------
-// Shared primitives
-// ---------------------------------------------------------------------------
+/** Exact screen keys stored in whitelabel_screen_snapshots.screen */
+export const SCREEN_KEYS = [
+  'dashboard',
+  'dashboard_top_sources',
+  'prompts',
+  'topics',
+  'mentions_chart',
+  'mentions_sentiment',
+  'sentiment',
+  'sentiment_historical',
+  'competitors',
+  'ai_traffic',
+  'ai_crawlers',
+] as const
 
-export type FilterOperator =
-  | 'EQUALS'
-  | 'CONTAINS'
-  | 'STARTS_WITH'
-  | 'EQ'
-  | 'NEQ'
-  | 'GT'
-  | 'LT'
-  | 'GEQ'
-  | 'LEQ'
-  | 'IN'
+export type ScreenKey = (typeof SCREEN_KEYS)[number]
 
-export interface ApiFilter {
-  field: string
-  operator: FilterOperator
-  value: unknown
+export interface TenantInfo {
+  id: string
+  name: string | null
+  domain: string | null
+  sourceAccountId: string
 }
 
-export interface DataAvailability {
-  earliest_data_date: string | null
-  latest_data_date: string | null
-  requested_period_has_data: boolean
+export interface AvailableDay {
+  day: string
+  status: string
+  finishedAt: string | null
+  errorSummary: string | null
+  pulledAt: string | null
 }
 
-export interface ListMeta {
-  page: number
-  per_page: number
-  total_pages: number
-  total_count: number
-  start_date?: string
-  end_date?: string
-  data_availability?: DataAvailability
+export interface TenantResponse {
+  tenant: TenantInfo
+  availableDays: AvailableDay[]
 }
 
-export interface ListResponse<T> {
-  data: T[]
-  meta: ListMeta
+export interface ScreenSnapshot {
+  day: string
+  screen: ScreenKey | string
+  payload: unknown
+  source: string | null
+  schemaVersion: number
+  pulledAt: string | null
+  error: string | null
 }
 
-// ---------------------------------------------------------------------------
-// Analytics
-// ---------------------------------------------------------------------------
-
-export type AnalyticsMetric =
-  | 'mention_rate'
-  | 'share_of_voice'
-  | 'citation_rate'
-  | 'citation_share'
-  | 'citation_count'
-  | 'sentiment_score'
-  | 'average_position'
-  | 'answer_count'
-  | 'first_mention_rate'
-
-export type AnalyticsDimension =
-  | 'date'
-  | 'provider'
-  | 'topic'
-  | 'country'
-  | 'persona'
-  | 'domain'
-  | 'competitor'
-  | 'domain_category'
-  | 'theme'
-
-export type AnalyticsGrain = 'daily' | 'weekly' | 'monthly' | 'total'
-
-/** Prompt type filter — maps to AirOps UI "Category Related" vs brand-related. */
-export type BrandMentionedFilter = 'category' | 'brand'
-
-export type Provider =
-  | 'chat_gpt'
-  | 'gemini'
-  | 'perplexity'
-  | 'google_ai_mode'
-  | 'google_ai_overview'
-  | 'claude'
-  | 'grok'
-  | 'microsoft_copilot'
-
-export interface AnalyticsParams {
-  metrics: AnalyticsMetric[]
-  dimensions?: AnalyticsDimension[]
-  grain?: AnalyticsGrain
-  start_date?: string
-  end_date?: string
-  providers?: Provider[]
-  countries?: string[]
-  topics?: number[]
-  personas?: number[]
-  /**
-   * Prompt type: `category` = generic prompts (AirOps default for visibility),
-   * `brand` = prompts that mention the brand. Maps from UI "Prompt Type".
-   */
-  brand_mentioned?: BrandMentionedFilter
-  /** e.g. "mention_rate DESC" */
-  order_by?: string
-  tags?: number[] | { operator: 'IN' | 'HAS_ALL' | 'NOT_IN'; value: number[] }
-  themes?: number[]
-  limit?: number
-  offset?: number
+export interface SnapshotsResponse {
+  tenant: TenantInfo
+  range: { startDate: string; endDate: string }
+  availableDays: AvailableDay[]
+  snapshots: ScreenSnapshot[]
 }
-
-/** Rows are keyed by the requested dimensions plus one key per metric. */
-export type AnalyticsRow = {
-  date?: string
-  provider?: string
-  topic?: string | number
-  country?: string
-  persona?: string | number
-  domain?: string | number
-  competitor?: string | number
-  domain_category?: string
-  theme?: string | number
-  /** Present on some theme-dimension responses alongside `theme`. */
-  theme_id?: number
-  theme_name?: string
-} & Partial<Record<AnalyticsMetric, number | null>>
-
-export interface AnalyticsResponse {
-  query: {
-    metrics: AnalyticsMetric[]
-    dimensions: AnalyticsDimension[]
-    filters: Record<string, unknown>
-    grain: AnalyticsGrain
-    limit: number
-    offset: number
-  }
-  data: AnalyticsRow[]
-  meta: {
-    row_count: number
-    total_count: number
-    execution_time_ms: number
-    data_availability: DataAvailability
-    start_date: string
-    end_date: string
-  }
-  chart_image_url: string | null
-}
-
 
 // ---------------------------------------------------------------------------
-// Sentiment theme answers
+// Payload shapes (tolerant; generated from sample DB rows)
 // ---------------------------------------------------------------------------
 
-export interface SentimentThemeAnswersParams {
-  sentiment_theme_id: number
-  start_date?: string
-  end_date?: string
-  providers?: Provider[]
-  countries?: string[]
-  topics?: number[]
-  personas?: number[]
-  page?: number
-  per_page?: number
-}
-
-export type AnswerSentiment = 'positive' | 'neutral' | 'negative'
-
-export interface SentimentThemeAnswer {
-  answer_id: number
-  query_id: number
+export interface ProviderMention {
   provider: string
-  sentiment: AnswerSentiment
-  confidence: number
-  date: string
-  answer_text: string
+  count: number
+  countChange?: number | null
+  historicalData?: Array<{ date: string; value: number }>
 }
 
-export interface SentimentThemeAnswersResponse {
-  answers: SentimentThemeAnswer[]
-  pagination: {
-    page: number
-    per_page: number
-    total_count: number
-    total_pages: number
-  }
-  error?: string | null
+export interface CompetitorPerformance {
+  id: string
+  name: string
+  logo?: string | null
+  site?: string | null
+  domain?: string | null
+  avgRank?: number | null
+  position?: number | null
+  occurrences?: number | null
+  avgRankDelta?: number | null
+  occurrencesDelta?: number | null
+  sentimentScore?: number | null
+  sentimentScoreDelta?: number | null
+  topics?: string[]
+  historicalData?: Array<{ date: string; value: number }>
+  status?: string | null
 }
 
-// ---------------------------------------------------------------------------
-// Web pages (Onsite)
-// ---------------------------------------------------------------------------
-
-export interface WebPagesListParams {
-  start_date?: string
-  end_date?: string
-  filters?: ApiFilter[]
-  sort?: string
-  page?: number
-  per_page?: number
+export interface AgentPost {
+  topic?: string | null
+  prompt?: string | null
+  createdAt?: string | null
+  generationId?: string | null
+  socialMediaProvider?: string | null
 }
 
-export interface WebPageRow {
-  id: number
-  web_page_id: number
-  url: string
-  folder_name: string | null
-  primary_keyword: string
-  tracked: boolean
-  citations_count: number
-  citations_count_diff: number
-  citation_rate: number | null
-  citation_rate_diff: number
-  prompts_count: number
-  prompts_count_diff: number
-  // Google Search Console — null means GSC is not connected
-  clicks: number | null
-  clicks_diff: number | null
-  impressions: number | null
-  impressions_diff: number | null
-  ctr: number | null
-  ctr_diff: number | null
-  position: number | null
-  position_diff: number | null
-  // GA4 — null means GA4 is not connected
-  traffic: number | null
-  traffic_diff: number | null
-  sessions: number | null
-  sessions_diff: number | null
-  engagement: number | null
-  engagement_diff: number | null
-  average_session_engagement: number | null
-  average_session_engagement_diff: number | null
-  events: number | null
-  amplitude_events: number | null
+export interface DashboardData {
+  hasPages?: boolean
+  promptsCount?: number
+  providerMentions?: ProviderMention[]
+  competitorsPerformance?: CompetitorPerformance[]
+  agentPosts?: { posts?: AgentPost[]; totalCount?: number }
+  weeklyInsights?: { count?: number; latestDate?: string | null }
+  topSourceDomains?: TopSource[]
 }
 
-// ---------------------------------------------------------------------------
-// Prompts
-// ---------------------------------------------------------------------------
-
-export type PromptVolume = 'very_low' | 'low' | 'medium' | 'high'
-
-export interface PromptsListParams {
-  filters?: ApiFilter[]
-  fields?: string[]
-  includes?: Array<'topic' | 'tags'>
-  sort?: string
-  page?: number
-  per_page?: number
-  start_date?: string
-  end_date?: string
+export interface DashboardPayload {
+  data?: DashboardData
+  isLive?: boolean
+  computedAt?: string
+  dataVersion?: number
 }
+
+export interface TopSource {
+  domain: string
+  pageCount?: number
+  occurrences?: number
+}
+
+export interface TopicRow {
+  id: string
+  name: string
+  state?: string | null
+  volume?: number | null
+  priority?: number | null
+  promptsCount?: number | null
+}
+
+export interface PromptTopicRef {
+  id: string
+  name: string
+  state?: string | null
+  volume?: number | null
+  priority?: number | null
+}
+
+/** Tags may be plain strings or iGEO objects `{ name, tagId, colorRow }`. */
+export interface PromptTagObject {
+  name?: string | null
+  tagId?: string | null
+  colorRow?: string | null
+}
+
+export type PromptTag = string | PromptTagObject
 
 export interface PromptRow {
-  id: number
-  text: string
-  keyword: string
-  brand_mentioned: boolean
-  prompt_volume: PromptVolume | null
-  mention_rate: number | null
-  citation_rate: number | null
-  mention_rate_trend?: number | null
-  citation_rate_trend?: number | null
-  topic_id?: number | null
-  topic?: Topic | null
-  created_at?: string
+  id: string
+  prompt: string
+  topicId?: string | null
+  topic?: PromptTopicRef | null
+  tags?: PromptTag[] | null
+  type?: string | null
+  regions?: string[] | null
+  meInPrompt?: boolean | null
+  avgVisibility?: number | null
+  avgSentimentScore?: number | null
+  avgRank?: number | null
+  volume?: number | null
+  visibilityChange?: number | null
+  sentimentChange?: number | null
+  rankChange?: number | null
+  state?: string | null
+  isActive?: boolean | null
+  sentimentBreakdown?: {
+    mixed?: number
+    neutral?: number
+    negative?: number
+    positive?: number
+  } | null
 }
 
-// ---------------------------------------------------------------------------
-// Citations & Domains (Offsite)
-// ---------------------------------------------------------------------------
-
-export type DomainCategory =
-  | 'Social'
-  | 'Communities'
-  | 'Reviews'
-  | 'Media'
-  | 'Educational'
-  | 'Marketplaces'
-  | 'Products'
-  | 'Affiliates'
-  | 'Other'
-  | 'Owned'
-  | 'Competitors'
-  | 'No Category'
-
-export interface CitationsListParams {
-  /** Only EQUALS / EQ / IN operators are supported on this endpoint. */
-  filters?: ApiFilter[]
-  sort?: string
-  page?: number
-  per_page?: number
-  start_date?: string
-  end_date?: string
+export interface PromptsPayload {
+  total?: number
+  prompts?: PromptRow[]
 }
 
-export interface InfluenceScoreBreakdown {
-  coverage_score: number
-  impact_score: number
-  da_score: number
+export interface MentionsChartData {
+  posts?: unknown[]
+  providers?: ProviderMention[]
+  trackedRecommendations?: Array<{
+    id: string
+    recommendationTitle?: string
+    urls?: string[]
+    totalAppearances?: number
+    createdAt?: string
+  }>
 }
 
-export interface CitationRow {
+export interface MentionsChartPayload {
+  data?: MentionsChartData
+  isLive?: boolean
+  computedAt?: string
+}
+
+export interface ResponseSource {
   url: string
-  domain: number
-  domain_name: string
-  domain_category: string | null
-  logo_url: string | null
-  citation_count: number
-  citation_count_trend: number | null
-  citation_share: number
-  citation_share_trend: number | null
-  citation_rate: number
-  citation_rate_trend: number | null
-  influence_score: number
-  influence_score_breakdown: InfluenceScoreBreakdown | null
-  page_type: string | null
-  brand_mentioned: boolean | null
-  brand_sentiment: string | null
-  mentioned_competitor_domains: string[] | null
-  domain_authority: number | null
+  title?: string | null
+  isMe?: boolean
+  isTracked?: boolean
 }
 
-export interface DomainsListParams {
-  filters?: ApiFilter[]
-  sort?: string
-  page?: number
-  per_page?: number
-  start_date?: string
-  end_date?: string
+export interface ResponseRow {
+  id: string
+  model?: string | null
+  provider?: string | null
+  myRank?: number | null
+  region?: string | null
+  topicId?: string | null
+  promptId?: string | null
+  promptText?: string | null
+  response?: string | null
+  responsePreview?: string | null
+  sentimentScore?: number | null
+  /** Typo present in some iGEO snapshots */
+  sentinemtScore?: number | null
+  visibilityAverage?: number | null
+  createdAt?: string | null
+  timestamp?: string | null
+  sources?: ResponseSource[]
+  meInPrompt?: boolean | null
+  isCompanyInPrompt?: boolean | null
+  tags?: PromptTag[] | null
+  promptType?: string | null
+  type?: string | null
+  topic?: string | null
+  countries?: string[] | null
 }
 
-export interface DomainRow {
-  domain_id: number
-  domain_name: string
-  domain_category: string | null
-  logo_url: string | null
-  citation_count: number
-  citation_count_trend: number | null
-  url_count: number
-  citation_share: number
-  citation_share_trend: number | null
-  citation_rate: number
-  citation_rate_trend: number | null
+export interface ResponsesPayloadData {
+  total?: number
+  responses?: ResponseRow[]
 }
 
-// ---------------------------------------------------------------------------
-// Topics
-// ---------------------------------------------------------------------------
-
-export interface Topic {
-  id: number
-  name: string
-  color: string | null
+export interface ResponsesEnvelope {
+  data?: ResponsesPayloadData
+  isLive?: boolean
+  computedAt?: string
 }
 
-// ---------------------------------------------------------------------------
-// Brand kit settings
-// ---------------------------------------------------------------------------
-
-export interface BrandKitCompetitor {
-  id: number
-  name: string
-  domain_url?: string | null
-  domain?: string | null
+export interface SentimentHistoricalPoint {
+  date: string
+  provider: string
+  sentimentScore: number
 }
 
-export interface BrandKitSettings {
-  id: number
-  brand_name: string
-  brand_url: string | null
-  countries: string[]
-  aeo_enabled: boolean
-  prompts_count: number | null
-  competitors: BrandKitCompetitor[]
-  personas: unknown[]
+export interface SentimentHistoricalPayload {
+  data?: SentimentHistoricalPoint[]
+  isLive?: boolean
+  computedAt?: string
 }
 
-// ---------------------------------------------------------------------------
-// Brand Kit editor (full model for Brand Kit UI + webhook submit)
-// ---------------------------------------------------------------------------
-
-/** Brand Kit shapes aligned with AirOps Brand Kit UI / MCP get_brand_kit. */
-
-export interface BrandKit {
-  id: number
-  workspace_name: string
-  brand_name: string
-  brand_url: string
-  brand_about: string
-  brand_customer?: string
-  brand_competitors?: string
-  brand_point_of_view?: string
-  writing_persona: string
-  writing_tone: string
-  writing_cta?: string
-  writing_cta_url?: string
-  primary_color?: string | null
-  secondary_color?: string | null
-  accent_color?: string | null
-  header_case?: string | null
-  header_case_custom_value?: string | null
-  countries: string[]
-  aeo_enabled: boolean
-  prompts_count: number
-  status: 'published' | 'draft' | string
-  unpublished_changes: boolean
-  created_at: string
-  updated_at: string
-  product_lines: ProductLine[]
-  audiences: Audience[]
-  content_types: ContentType[]
-  regions: Region[]
-  writing_rules: WritingRule[]
-  custom_variables: CustomVariable[]
-  logo_variants: LogoVariant[]
-  logo_sizes: LogoSize[]
-  usage_rules: UsageRule[]
-  palettes: Palette[]
-  fonts: Font[]
-  type_sizes: TypeSize[]
-  visual_examples: VisualExample[]
-}
-
-export interface ProductLine {
-  id: number
-  name: string
-  details: string
-  positioning: string
-  ideal_customer_profile: string
+export interface CitationLink {
   url: string
-  generation_status?: string
-  competitors: Competitor[]
+  title?: string | null
+  isMe?: boolean
+  isTracked?: boolean
 }
 
-export interface Competitor {
-  id: number
-  name: string
-  domain: string
-  details: string | null
+export interface CompetitorsData {
+  ranking?: CompetitorPerformance[]
+  competitors?: CompetitorPerformance[]
+  citations?: Record<string, CitationLink[]>
+  citationCounts?: Record<string, number>
 }
 
-export interface Audience {
-  id: number
-  name: string
-  description: string
-  writing_rules: WritingRule[]
+export interface CompetitorsPayload {
+  data?: CompetitorsData
+  isLive?: boolean
+  computedAt?: string
 }
 
-export interface ContentSample {
-  id: number
-  title?: string
-  body?: string
-  url?: string
+export interface AiTrafficPayload {
+  hasEvents?: boolean
+  preferences?: unknown
+  llmProviders?: Array<Record<string, unknown>>
+  topSources?: Array<Record<string, unknown>>
+  topPages?: Array<Record<string, unknown>>
+  topLocations?: Array<Record<string, unknown>>
+  topDevices?: Array<Record<string, unknown>>
+  topBrowsers?: Array<Record<string, unknown>>
+  historicalData?: Array<Record<string, unknown>>
+  availableCountries?: string[]
+  // error-shaped snapshots
+  error?: boolean
+  message?: string
+  detail?: string
+  statusCode?: number
+  path?: string
 }
 
-export interface ContentType {
-  id: number
-  name: string
-  template_outline?: string
-  cta_text?: string
-  cta_url?: string
-  header_case?: string
-  content_samples?: ContentSample[]
-  writing_rules?: WritingRule[]
+export interface AiCrawlersPayload {
+  totalRequests?: number
+  totalBytes?: number
+  changePercents?: Record<string, number>
+  byBot?: Array<Record<string, unknown>>
+  topPaths?: Array<Record<string, unknown>>
+  timeSeriesData?: Array<Record<string, unknown>>
+  error?: boolean
+  message?: string
+  detail?: string
+  statusCode?: number
+  path?: string
 }
 
-export interface Region {
-  id: number
-  name: string
-  description: string
-  icon_name: string
-  writing_rules: WritingRule[]
-}
+/** Branded / me-in-prompt filter values (iGEO AccountIncluded / AccountNotIncluded). */
+export type BrandedFilter = 'AccountIncluded' | 'AccountNotIncluded' | null
 
-export interface WritingRule {
-  id: number
-  text: string
-}
-
-export interface CustomVariable {
-  id: number
-  name: string
-  value: string
-}
-
-export interface LogoVariant {
-  id: number
-  name: string
-  background_color: string
-  usage_instructions: string
-  file_url: string
-}
-
-export interface LogoSize {
-  id: number
-  name: string
-  width?: number
-  height?: number
-  usage_instructions?: string
-}
-
-export interface UsageRule {
-  id: number
-  applies_to: 'logo' | 'color' | 'typography' | 'visual_examples'
-  name: string
-}
-
-export interface PaletteColor {
-  id: number
-  name: string
-  value: string
-  usage_instructions: string
-}
-
-export interface Palette {
-  id: number
-  name: string
-  colors: PaletteColor[]
-}
-
-export interface Font {
-  id: number
-  name: string
-  usage_instructions: string
-  google_font_link?: string
-  file_url?: string | null
-}
-
-export interface TypeSize {
-  id: number
-  font_id: number
-  name: string
-  weight: number
-  size: number
-  line_height: number
-  usage_instructions: string
-}
-
-export interface VisualExample {
-  id: number
-  title: string
-  sample_url?: string
-  file_url?: string
-  usage_instructions?: string
-}
-
-export type DiffKind = 'updated' | 'added' | 'removed'
-
-export interface DiffChange {
-  path: string
-  entity: string
-  label: string
-  kind: DiffKind
-  before?: string
-  after?: string
-}
-
-export interface BrandKitDiff {
-  brand_kit_id: number
-  brand_name: string
-  submitted_at: string
-  changes: DiffChange[]
-  /** Full current local snapshot for the Playbook agent to apply. */
-  current: BrandKit
-  /** Original fetched snapshot for reference. */
-  original: BrandKit
-}
-
-export interface ListBrandKitsParams {
-  filters?: Array<{ field: string; operator: string; value: unknown }>
-  includes?: Array<'product_lines' | 'competitors' | 'audiences' | 'content_types'>
-  fields?: string[]
-  page?: number
-  per_page?: number
+export interface GeoFilters {
+  startDate: string
+  endDate: string
+  providers: string[]
+  topics: string[]
+  prompts: string[]
+  regions: string[]
+  tags: string[]
+  branded: BrandedFilter
+  promptTypes: string[]
+  crawlers: string[]
 }

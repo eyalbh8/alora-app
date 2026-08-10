@@ -1,63 +1,40 @@
 import { API_BASE_PATH } from '../config'
 
-/** Typed error thrown for any non-2xx AirOps API response or network failure. */
-export class AirOpsApiError extends Error {
+/** Typed error for snapshot API failures. */
+export class SnapshotApiError extends Error {
   readonly status: number | null
-  readonly validationErrors: unknown
 
-  constructor(message: string, status: number | null = null, validationErrors: unknown = null) {
+  constructor(message: string, status: number | null = null) {
     super(message)
-    this.name = 'AirOpsApiError'
+    this.name = 'SnapshotApiError'
     this.status = status
-    this.validationErrors = validationErrors
   }
 }
 
-const STATUS_HINTS: Record<number, string> = {
-  400: 'Invalid filter, operator, or sort field.',
-  401: 'Missing or invalid API key — check your .env file.',
-  404: "Endpoint or Brand Kit not found, or you don't have access.",
-  412: 'AEO is not configured for this Brand Kit.',
-  422: 'Invalid analytics query (end_date must be before today, max 3 dimensions, grain range limits).',
-}
-
-async function request<T>(path: string, init: RequestInit): Promise<T> {
+async function request<T>(path: string): Promise<T> {
   let response: Response
   try {
-    response = await fetch(`${API_BASE_PATH}${path}`, init)
+    response = await fetch(`${API_BASE_PATH}${path}`)
   } catch (err) {
-    throw new AirOpsApiError(
-      `Network error calling AirOps API: ${err instanceof Error ? err.message : String(err)}. Is the dev server proxy running?`,
+    throw new SnapshotApiError(
+      `Network error calling snapshot API: ${err instanceof Error ? err.message : String(err)}. Is the dev server running?`,
     )
   }
 
   if (!response.ok) {
-    let body: unknown = null
+    let detail = response.statusText
     try {
-      body = await response.json()
+      const body = (await response.json()) as { error?: string }
+      if (body.error) detail = body.error
     } catch {
-      // non-JSON error body — ignore
+      // ignore
     }
-    const bodyObj = body as { message?: string; error?: string; validation_errors?: unknown } | null
-    const detail = bodyObj?.message ?? bodyObj?.error ?? STATUS_HINTS[response.status] ?? response.statusText
-    throw new AirOpsApiError(
-      `AirOps API error ${response.status}: ${detail}`,
-      response.status,
-      bodyObj?.validation_errors ?? null,
-    )
+    throw new SnapshotApiError(`Snapshot API error ${response.status}: ${detail}`, response.status)
   }
 
   return (await response.json()) as T
 }
 
-export function apiPost<T>(path: string, body: unknown): Promise<T> {
-  return request<T>(path, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body ?? {}),
-  })
-}
-
 export function apiGet<T>(path: string): Promise<T> {
-  return request<T>(path, { method: 'GET' })
+  return request<T>(path)
 }

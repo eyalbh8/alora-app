@@ -1,25 +1,26 @@
-# riddleday-airops
+# Alora iGEO (white-label snapshots)
 
-React + Vite + TypeScript app for RiddleDay’s AirOps workspace: **Insights** (Analytics, Onsite, Prompts, Offsite) plus a **Brand Kit editor**.
+React + Vite + TypeScript app that renders **iGEO analytics screens from a Postgres snapshot DB** — not live iGEO APIs.
 
-## What’s included
+## Screens
 
-### Insights (existing)
-- **Analytics** — `/` Overview, `/visibility`, `/citations`, `/sentiment`
-- **Onsite** — `/pages`
-- **Prompts** — `/prompts`
-- **Offsite** — `/offsite` (citations & domains inventory)
+| Route | Snapshot keys |
+| --- | --- |
+| `/` Dashboard | `dashboard`, `dashboard_top_sources` |
+| `/prompts` | `prompts`, `topics` (+ response detail from `mentions_sentiment`) |
+| `/mentions` | `mentions_chart`, `mentions_sentiment` |
+| `/sentiment` | `sentiment`, `sentiment_historical` |
+| `/competitors` | `competitors` |
+| `/ai-traffic` | `ai_traffic` |
+| `/ai-crawlers` | `ai_crawlers` |
 
-### Brand Kit editor (added)
-- Routes under `/brand-kit/*` (Overview, Foundations, Product Lines, Content Types, Audiences, Regions, Visual Guidelines, Custom Variables, Review)
-- Live READ via `GET /brand_kits/{id}` + `POST /brand_kits/list`
-- Local edits + diff review; submit posts to `VITE_SUBMIT_WEBHOOK_URL` (Playbook webhook) — **not** a direct AirOps write (no public write API exists)
+Filters are applied **client-side** on payload JSON. Unavailable dimensions are disabled with “Not available in snapshot.”
 
 ## Setup
 
 ```bash
 npm install
-cp .env.example .env   # fill AIROPS_API_KEY, optional webhook URL
+cp .env.example .env   # fill DATABASE_URL + WHITELABEL_TENANT_ID
 npm run dev
 ```
 
@@ -27,74 +28,63 @@ Open http://localhost:5173.
 
 | Variable | Purpose |
 | --- | --- |
-| `AIROPS_API_KEY` | **Recommended.** Proxy-only; never bundled. |
-| `AIROPS_API_BASE` | Defaults to `https://api.airops.com`. |
-| `VITE_AIROPS_BRAND_KIT_ID` | Brand Kit id (client-readable). |
-| `VITE_SUBMIT_WEBHOOK_URL` | Playbook webhook for Brand Kit submit queue. |
-| `VITE_SEED_MISSING_ENTITIES` | Seed REST-missing Brand Kit entities (default `true`). |
+| `DATABASE_URL` | **Server-only.** Postgres connection to `whitelabel_*` tables. |
+| `WHITELABEL_TENANT_ID` | **Server-only.** Fixed tenant UUID (`whitelabel_tenants.id`). |
+| `ALLOWED_ORIGIN` | Lambda only — CORS allowlist (optional). |
 
-## Security
+Never prefix `DATABASE_URL` or `WHITELABEL_TENANT_ID` with `VITE_`.
 
-Frontend reads call `/api/airops/*`. The Vite proxy injects `Authorization` from `AIROPS_API_KEY` on the Node side. This only works for `npm run dev` / `preview` — production needs a small backend/serverless proxy. Never ship the key with a `VITE_` prefix.
+## Architecture
 
-## Deploy to Amplify (fix the production 404)
-
-Amplify hosts a static SPA only. It does **not** run the Vite proxy, so `/api/airops/...` was returning `index.html` and the app showed `AirOps API error 404`.
-
-### 1. Deploy the Lambda proxy
-
-Files live in [`functions/airops-proxy/index.mjs`](functions/airops-proxy/index.mjs).
-
-1. AWS Console → **Lambda** → Create function  
-   - Runtime: **Node.js 20.x**  
-   - Handler: leave default; paste the contents of `index.mjs` (ESM: set package type or rename as needed — for a single-file Function URL, set **Runtime settings → Handler** to `index.handler` and ensure the file exports `handler`)
-2. Configuration → **Environment variables**  
-   - `AIROPS_API_KEY` = your AirOps key (same as local `.env`)  
-   - optional: `AIROPS_API_BASE` = `https://api.airops.com`
-3. Configuration → **Function URL** → Create  
-   - Auth type: **NONE**  
-   - Copy the Function URL (e.g. `https://xxxx.lambda-url.us-east-1.on.aws/`)
-
-Quick zip deploy from the repo:
-
-```bash
-cd functions/airops-proxy
-zip -j airops-proxy.zip index.mjs
-# Upload airops-proxy.zip in Lambda → Code → Upload from → .zip file
+```
+Browser → /api/snapshots/* → [Vite middleware (dev) | Lambda (prod)] → Postgres
 ```
 
-If Lambda expects CommonJS and rejects ESM, add a tiny `package.json` next to the file with `{ "type": "module" }` inside the zip.
+The browser never receives credentials and cannot choose a tenant. Endpoints:
+
+- `GET /api/snapshots/health`
+- `GET /api/snapshots/tenant`
+- `GET /api/snapshots/snapshots?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&screens=a,b`
+
+Date ranges are capped at **90 days**.
+
+## Deploy to Amplify
+
+### 1. Lambda snapshots API
+
+```bash
+cd functions/snapshots-api
+npm install --omit=dev
+zip -r snapshots-api.zip index.mjs db.mjs package.json node_modules
+```
+
+Create a Lambda (Node.js 20.x), upload the zip, set handler `index.handler`, and env:
+
+- `DATABASE_URL`
+- `WHITELABEL_TENANT_ID`
+- optional `ALLOWED_ORIGIN`
+
+Create a **Function URL** (Auth type: NONE).
 
 ### 2. Amplify rewrites
 
-Amplify Console → your app → **Hosting** → **Rewrites and redirects** → Open text editor.
+Paste [`amplify-redirects.json`](amplify-redirects.json), replacing `YOUR_LAMBDA_FUNCTION_URL` with the Function URL host. Keep the API rule above the SPA catch-all.
 
-Paste [`amplify-redirects.json`](amplify-redirects.json), replacing `YOUR_LAMBDA_FUNCTION_URL` with the Function URL **host** (no trailing path).
+### 3. Amplify build
 
-Order matters: API proxy rule first, SPA `404 → /index.html` second.
+[`amplify.yml`](amplify.yml) runs `npm ci` + `npm run build` and publishes `dist/`. No `VITE_` secrets are required for the snapshot UI.
 
-### 3. Amplify build env vars
+## Scripts
 
-Amplify → **Environment variables** (for the frontend build only):
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Vite + local `/api/snapshots` middleware |
+| `npm run build` | Typecheck + production bundle |
+| `npm run lint` | oxlint |
+| `npm test` | Vitest unit tests for snapshot helpers |
 
-| Variable | Required | Notes |
-| --- | --- | --- |
-| `VITE_AIROPS_BRAND_KIT_ID` | Yes | Same as local |
-| `VITE_SUBMIT_WEBHOOK_URL` | If using Brand Kit submit | Playbook webhook |
-| `VITE_SEED_MISSING_ENTITIES` | Optional | Default true |
+## Data model
 
-Do **not** add `VITE_AIROPS_API_KEY`. Keep `AIROPS_API_KEY` only on the Lambda.
-
-[`amplify.yml`](amplify.yml) builds with `npm ci` + `npm run build` and publishes `dist/`.
-
-### 4. Verify
-
-After redeploy, open DevTools → Network. A request like:
-
-`https://main....amplifyapp.com/api/airops/public_api/brand_kits/list`
-
-should return **JSON**, not HTML. Offsite / Analytics should load.
-
-## Brand Kit write limitation
-
-Public REST Brand Kit endpoints are **read-only**. Submit queues a diff to your Playbook webhook for MCP apply + human publish. If a direct-write REST endpoint appears later, only `submitBrandKitChanges` in `src/api/airops.ts` needs to change.
+- `whitelabel_tenants` — tenant registry (`enabled` must be true)
+- `whitelabel_export_runs` — per-day export status
+- `whitelabel_screen_snapshots` — `(tenant_id, day, screen)` → `payload` JSONB + `error` + `pulled_at`
