@@ -49,14 +49,20 @@ function inDateRange(date: string, range: DateRange): boolean {
   return day >= range.startDate && day <= range.endDate
 }
 
+function isAggregateProvider(rawProvider: string, provider: string): boolean {
+  const key = rawProvider.toUpperCase()
+  return provider === 'TOTAL' || key === 'ALL_ENTRIES' || key === 'TOTAL'
+}
+
 function parseProviderRows(payload: AiTrafficPayload): Map<string, TrafficProviderMetric> {
   const map = new Map<string, TrafficProviderMetric>()
   const changePercents = (payload.changePercents ?? {}) as Record<string, number>
 
   for (const row of payload.llmProviders ?? []) {
-    const rawProvider = pickString(row, ['provider', 'name', 'llm', 'engine'])
+    const rawProvider = pickString(row, ['provider', 'name', 'llm', 'engine', 'domain'])
     if (!rawProvider) continue
     const provider = normalizeTrafficProvider(rawProvider)
+    if (isAggregateProvider(rawProvider, provider)) continue
     const count =
       pickNumber(row, ['entries', 'count', 'visits', 'sessions', 'users', 'value']) ?? 0
     const change =
@@ -83,6 +89,16 @@ function parseProviderRows(payload: AiTrafficPayload): Map<string, TrafficProvid
   return map
 }
 
+function addHistoryPoint(
+  byProvider: Map<string, Map<string, number>>,
+  provider: string,
+  date: string,
+  value: number,
+) {
+  if (!byProvider.has(provider)) byProvider.set(provider, new Map())
+  byProvider.get(provider)!.set(date, (byProvider.get(provider)!.get(date) ?? 0) + value)
+}
+
 function parseGlobalHistorical(
   payload: AiTrafficPayload,
   range: DateRange,
@@ -90,16 +106,33 @@ function parseGlobalHistorical(
   const byProvider = new Map<string, Map<string, number>>()
 
   for (const row of payload.historicalData ?? []) {
+    const explicitProvider = pickString(row, ['provider', 'name', 'llm', 'engine'])
+    const nested = row.historicalData
+
+    // iGEO shape: { provider, historicalData: [{ date, value }] }
+    if (explicitProvider && Array.isArray(nested)) {
+      const provider = normalizeTrafficProvider(explicitProvider)
+      if (isAggregateProvider(explicitProvider, provider)) continue
+      for (const point of nested) {
+        const rec = point as Record<string, unknown>
+        const date = pickString(rec, ['date', 'day', 'timestamp']).slice(0, 10)
+        if (!date || !inDateRange(date, range)) continue
+        const value = pickNumber(rec, ['value', 'count', 'visits', 'entries', 'sessions']) ?? 0
+        addHistoryPoint(byProvider, provider, date, value)
+      }
+      continue
+    }
+
     const date = pickString(row, ['date', 'day', 'timestamp']).slice(0, 10)
     if (!date || !inDateRange(date, range)) continue
 
-    const explicitProvider = pickString(row, ['provider', 'name', 'llm', 'engine'])
     const value = pickNumber(row, ['value', 'count', 'visits', 'entries', 'sessions']) ?? 0
 
     if (explicitProvider) {
       const provider = normalizeTrafficProvider(explicitProvider)
-      if (!byProvider.has(provider)) byProvider.set(provider, new Map())
-      byProvider.get(provider)!.set(date, (byProvider.get(provider)!.get(date) ?? 0) + value)
+      if (!isAggregateProvider(explicitProvider, provider)) {
+        addHistoryPoint(byProvider, provider, date, value)
+      }
       continue
     }
 
@@ -168,19 +201,25 @@ export function buildAiTrafficViewModel(
         )
       : providers
 
+  const totalRow = (payload.llmProviders ?? []).find(
+    (row) => pickString(row as Record<string, unknown>, ['provider']).toUpperCase() === 'TOTAL',
+  ) as Record<string, unknown> | undefined
+
   const totalEntries =
     typeof payload.totalEntries === 'number'
       ? payload.totalEntries
-      : filteredProviders.reduce((sum, p) => sum + p.count, 0)
+      : (pickNumber(totalRow ?? {}, ['visits', 'entries', 'count']) ??
+        filteredProviders.reduce((sum, p) => sum + p.count, 0))
 
   const totalChange =
     typeof payload.totalChange === 'number'
       ? payload.totalChange
-      : typeof payload.changePercents?.total === 'number'
-        ? payload.changePercents.total
-        : typeof payload.changePercents?.entries === 'number'
-          ? payload.changePercents.entries
-          : null
+      : (pickNumber(totalRow ?? {}, ['changePercent', 'percentChange', 'change']) ??
+        (typeof payload.changePercents?.total === 'number'
+          ? payload.changePercents.total
+          : typeof payload.changePercents?.entries === 'number'
+            ? payload.changePercents.entries
+            : null))
 
   const chartProviderKeys = filteredProviders
     .filter((p) => p.historicalData.length > 0)

@@ -72,7 +72,8 @@ If both totals are 0, that is acceptable (no scan that day) — note it in `enti
 
 Store these two as JSON snapshots (they are external time-series, not derivable from results):
 
-1. `api_get` path `/traffic/{accountId}/ai-dashboard-data?range=90&includePrev=true` → screen `ai_traffic`
+1. `api_get` path `/traffic/{accountId}/ai-dashboard-data?startDate={ISO}&endDate={ISO}&prevStartDate={ISO}&prevEndDate={ISO}` → screen `ai_traffic`
+   Use a 90-day window ending SYNC_DAY (same logic as `db/trafficApi.mjs`). **All four date params are required** — without them the API returns empty aggregates.
 2. `api_get` path `/traffic/{accountId}/cloudflare/crawler-analytics?range=90` → screen `ai_crawlers`
 
 ```sql

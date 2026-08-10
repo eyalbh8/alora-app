@@ -12,6 +12,7 @@
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { aiDashboardPath } from './trafficApi.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const require = createRequire(path.join(here, '..', 'functions', 'snapshots-api', 'index.mjs'))
@@ -286,8 +287,8 @@ async function main() {
   // ------------------------------------------------- traffic JSON snapshots
   const today = new Date().toISOString().slice(0, 10)
   for (const [screen, p] of [
-    ['ai_traffic', `/traffic/${ACCOUNT_ID}/ai-dashboard-data?range=90&includePrev=true`],
-    ['ai_crawlers', `/traffic/${ACCOUNT_ID}/cloudflare/crawler-analytics?range=90`],
+    ['ai_traffic', aiDashboardPath(ACCOUNT_ID, DAYS)],
+    ['ai_crawlers', `/traffic/${ACCOUNT_ID}/cloudflare/crawler-analytics?range=${DAYS}`],
   ]) {
     const payload = await apiGet(p, { tolerate: [403, 404, 500] })
     const failed = payload?.__error
