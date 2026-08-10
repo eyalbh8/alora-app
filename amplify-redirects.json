@@ -1,16 +1,7 @@
-# Amplify Hosting — paste into Console → Hosting → Rewrites and redirects
-# (Hosting → Rewrites and redirects → Open text editor)
-#
-# 1) Replace YOUR_LAMBDA_FUNCTION_URL with your Function URL origin only, e.g.
-#    https://xxxxxxxx.lambda-url.us-east-1.on.aws
-#    Do NOT add a path after the host.
-#
-# 2) Keep the API rule ABOVE the SPA catch-all.
-
 [
   {
     "source": "/api/snapshots/<*>",
-    "target": "https://YOUR_LAMBDA_FUNCTION_URL/api/snapshots/<*>",
+    "target": "https://zvs6v2vol3rfrplk2stpsdzd5i0zmxnn.lambda-url.us-east-1.on.aws/api/snapshots/<*>",
     "status": "200",
     "condition": null
   },
