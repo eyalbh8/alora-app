@@ -1,5 +1,5 @@
 {
-  "name": "alora-igeo",
+  "name": "alora-app",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.101.4",
     "date-fns": "^4.4.0",
     "pg": "^8.16.3",
     "react": "^19.2.8",
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/react-query-devtools": "^5.101.4",
     "@types/node": "^24.13.3",
     "@types/pg": "^8.15.5",
     "@types/react": "^19.2.17",

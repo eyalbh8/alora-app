@@ -33,7 +33,7 @@ function asRecord(value: unknown): Record<string, unknown> | null {
     : null
 }
 
-/** Unwrap common `{ data: ... }` envelopes used by iGEO exports. */
+/** Unwrap common `{ data: ... }` envelopes used by snapshot exports. */
 export function unwrapData<T = unknown>(payload: unknown): T | null {
   if (payload == null) return null
   const obj = asRecord(payload)

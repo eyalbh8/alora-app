@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <rect x="40" y="40" width="176" height="176" rx="20" fill="#4A90E2"/>
+  <g stroke="#fff" stroke-width="8" stroke-linecap="round">
+    <line x1="128" y1="40" x2="128" y2="20"/>
+    <line x1="128" y1="236" x2="128" y2="216"/>
+    <line x1="40" y1="128" x2="20" y2="128"/>
+    <line x1="236" y1="128" x2="216" y2="128"/>
+    <line x1="68" y1="68" x2="52" y2="52"/>
+    <line x1="188" y1="68" x2="204" y2="52"/>
+    <line x1="68" y1="188" x2="52" y2="204"/>
+    <line x1="188" y1="188" x2="204" y2="204"/>
+  </g>
+  <text x="50%" y="55%" fill="#fff" font-size="72" font-family="Arial" text-anchor="middle" dominant-baseline="middle">LLM</text>
+</svg>

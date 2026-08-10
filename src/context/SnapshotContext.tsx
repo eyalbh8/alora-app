@@ -7,6 +7,8 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { queryKeys } from '../api/queryKeys'
 import { getSnapshots, getTenant } from '../api/snapshots'
 import type {
   AvailableDay,
@@ -36,80 +38,58 @@ interface SnapshotContextValue {
 const SnapshotContext = createContext<SnapshotContextValue | null>(null)
 
 export function SnapshotProvider({ children }: { children: ReactNode }) {
-  const [tenant, setTenant] = useState<TenantInfo | null>(null)
-  const [availableDays, setAvailableDays] = useState<AvailableDay[]>([])
   const [range, setRange] = useState<DateRange | null>(null)
-  const [snapshots, setSnapshots] = useState<ScreenSnapshot[]>([])
-  const [bootError, setBootError] = useState<string | null>(null)
-  const [bootLoading, setBootLoading] = useState(true)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [attempt, setAttempt] = useState(0)
 
-  const latestDay = availableDays[0]?.day ?? null
+  const tenantQuery = useQuery({
+    queryKey: queryKeys.tenant,
+    queryFn: getTenant,
+  })
 
-  // Bootstrap tenant + available days
   useEffect(() => {
-    let cancelled = false
-    setBootLoading(true)
-    getTenant()
-      .then((res) => {
-        if (cancelled) return
-        setTenant(res.tenant)
-        setAvailableDays(res.availableDays)
-        const end = res.availableDays[0]?.day
-        if (end) {
-          setRange(lastNDaysEnding(1, end))
-        } else {
-          setBootError('No snapshot days available for this tenant yet.')
-        }
-        setBootLoading(false)
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return
-        setBootError(err instanceof Error ? err.message : String(err))
-        setBootLoading(false)
-      })
-    return () => {
-      cancelled = true
+    if (!tenantQuery.data || range) return
+    const end = tenantQuery.data.availableDays[0]?.day
+    if (end) {
+      setRange(lastNDaysEnding(1, end))
     }
-  }, [attempt])
+  }, [tenantQuery.data, range])
 
-  // Load snapshots whenever range changes
-  useEffect(() => {
-    if (!range) return
-    let cancelled = false
-    setLoading(true)
-    setError(null)
-    getSnapshots({ startDate: range.startDate, endDate: range.endDate })
-      .then((res) => {
-        if (cancelled) return
-        setSnapshots(res.snapshots)
-        setAvailableDays(res.availableDays)
-        setLoading(false)
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return
-        setError(err instanceof Error ? err.message : String(err))
-        setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [range, attempt])
+  const snapshotsQuery = useQuery({
+    queryKey: range
+      ? queryKeys.snapshots(range.startDate, range.endDate)
+      : ['snapshots', 'pending'],
+    queryFn: () => getSnapshots({ startDate: range!.startDate, endDate: range!.endDate }),
+    enabled: Boolean(range),
+  })
 
-  const retry = useCallback(() => setAttempt((n) => n + 1), [])
+  const retry = useCallback(() => {
+    void tenantQuery.refetch()
+    void snapshotsQuery.refetch()
+  }, [tenantQuery, snapshotsQuery])
 
   const forScreen = useCallback(
-    (screen: ScreenKey | string) => snapshots.filter((s) => s.screen === screen),
-    [snapshots],
+    (screen: ScreenKey | string) =>
+      (snapshotsQuery.data?.snapshots ?? []).filter((s) => s.screen === screen),
+    [snapshotsQuery.data?.snapshots],
   )
+
+  const tenant = tenantQuery.data?.tenant ?? null
+  const availableDays = snapshotsQuery.data?.availableDays ?? tenantQuery.data?.availableDays ?? []
+  const latestDay = availableDays[0]?.day ?? null
+  const snapshots = snapshotsQuery.data?.snapshots ?? []
 
   const freshness = useMemo(() => {
     if (!snapshots.length) return { day: latestDay, pulledAt: availableDays[0]?.pulledAt ?? null }
     const latest = snapshots.reduce((a, b) => (a.day >= b.day ? a : b))
     return { day: latest.day, pulledAt: latest.pulledAt }
   }, [snapshots, latestDay, availableDays])
+
+  const bootLoading = tenantQuery.isLoading
+  const bootError =
+    tenantQuery.error instanceof Error
+      ? tenantQuery.error.message
+      : tenantQuery.error
+        ? String(tenantQuery.error)
+        : null
 
   if (bootLoading) {
     return (
@@ -121,9 +101,26 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
     )
   }
 
-  if (bootError || !tenant || !range) {
+  if (bootError || !tenant) {
     return <ErrorState message={bootError ?? 'Unable to load tenant'} onRetry={retry} />
   }
+
+  if (!range) {
+    return (
+      <ErrorState
+        message="No snapshot days available for this tenant yet."
+        onRetry={retry}
+      />
+    )
+  }
+
+  const loading = snapshotsQuery.isLoading
+  const error =
+    snapshotsQuery.error instanceof Error
+      ? snapshotsQuery.error.message
+      : snapshotsQuery.error
+        ? String(snapshotsQuery.error)
+        : null
 
   const value: SnapshotContextValue = {
     tenant,

@@ -1,20 +1,9 @@
 import { useEffect, useMemo } from 'react'
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
-import { ChartCard } from '../components/ChartCard'
-import { DataTable, type Column } from '../components/DataTable'
-import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
-import { FreshnessBadge } from '../components/FreshnessBadge'
-import { MetricCard } from '../components/MetricCard'
+import { ResponsesTable } from '../components/mentions/ResponsesTable'
+import { CurrentSentimentScore } from '../components/sentiment/CurrentSentimentScore'
+import { SentimentTrendChart } from '../components/sentiment/SentimentTrendChart'
+import { SentimentScreenSkeleton } from '../components/ScreenSkeletons'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
 import { useSnapshots } from '../context/SnapshotContext'
 import {
@@ -25,16 +14,37 @@ import {
   filterResponses,
 } from '../lib/snapshots/filter'
 import { mergePrompts, mergeSentiment } from '../lib/snapshots/merge'
-import { shortDateLabel } from '../lib/dates'
-import { formatPercent, formatScore, providerLabel, regionLabel, truncateMiddle } from '../lib/format'
-import { sentimentOf } from '../lib/snapshots/normalize'
-import type { ResponseRow } from '../api/types'
+import { previousPeriodRange } from '../lib/dates'
+import { getGeoResponses, getGeoSentiment } from '../api/geo'
+import { queryKeys } from '../api/queryKeys'
+import { useGeoScreenData } from '../hooks/useGeoScreen'
+import type { GeoFilters, ResponseRow } from '../api/types'
 
-const COLORS = ['#148f85', '#2fc9bc', '#0e3b3a', '#7fd4cc', '#f59e0b', '#6366f1']
+async function fetchSentimentAndResponses(filters: GeoFilters) {
+  const [sentiment, responses] = await Promise.all([
+    getGeoSentiment(filters),
+    getGeoResponses(filters, { take: 200 }),
+  ])
+  return { sentiment, responses }
+}
+
+function previousScoreFromHistorical(
+  historical: Array<{ date: string; provider: string; sentimentScore: number }>,
+  range: { startDate: string; endDate: string },
+): number | null {
+  const prev = previousPeriodRange(range)
+  const points = historical.filter((p) => {
+    const day = p.date.slice(0, 10)
+    return day >= prev.startDate && day <= prev.endDate
+  })
+  if (!points.length) return null
+  return Math.round(points.reduce((sum, p) => sum + p.sentimentScore, 0) / points.length)
+}
 
 export function SentimentScreen() {
   const { snapshots } = useSnapshots()
   const { filters, setFilterMeta } = useAnalyticsFilters()
+  const geo = useGeoScreenData(queryKeys.geo.sentimentAndResponses, fetchSentimentAndResponses)
 
   const merged = useMemo(() => mergeSentiment(snapshots), [snapshots])
   const promptsMerged = useMemo(() => mergePrompts(snapshots), [snapshots])
@@ -47,6 +57,7 @@ export function SentimentScreen() {
   const historical = merged.historical.payload ?? []
 
   useEffect(() => {
+    if (geo.geoMode) return
     setFilterMeta({
       options: collectFilterOptions({
         providers: historical.map((h) => h.provider).filter((p) => p.toUpperCase() !== 'ALL'),
@@ -62,130 +73,49 @@ export function SentimentScreen() {
           (promptsMerged.prompts.payload?.prompts ?? []).some((p) => p.meInPrompt != null),
       },
     })
-  }, [historical, responses, promptsMerged, setFilterMeta])
+  }, [geo.geoMode, historical, responses, promptsMerged, setFilterMeta])
 
-  const filteredResponses = filterResponses(responses, filters, promptLookup)
-  const filteredHistorical = filterHistoricalSentiment(historical, filters.providers)
-  const overall = averageSentiment(filteredResponses)
+  const filteredResponses: ResponseRow[] = geo.data
+    ? (geo.data.responses.data.responses as unknown as ResponseRow[])
+    : filterResponses(responses, filters, promptLookup)
+  const filteredHistorical = geo.data
+    ? geo.data.sentiment.data.historical
+    : filterHistoricalSentiment(historical, filters.providers)
+  const overall = geo.data
+    ? geo.data.sentiment.data.overallScore
+    : averageSentiment(filteredResponses)
+  const previousOverall = geo.data
+    ? geo.data.sentiment.data.previousOverallScore
+    : previousScoreFromHistorical(filteredHistorical, filters)
 
-  const providerKeys = [
-    ...new Set(
-      filteredHistorical
-        .map((p) => p.provider)
-        .filter((p) => !(filters.providers.length && p.toUpperCase() === 'ALL')),
-    ),
-  ]
-  const dates = [...new Set(filteredHistorical.map((p) => p.date.slice(0, 10)))].sort()
-  const chartRows = dates.map((date) => {
-    const row: Record<string, string | number> = { date: shortDateLabel(date) }
-    for (const p of providerKeys) {
-      const hit = filteredHistorical.find((s) => s.date.slice(0, 10) === date && s.provider === p)
-      if (hit) row[p] = hit.sentimentScore
-    }
-    return row
-  })
+  const responsesTotal = geo.data
+    ? geo.data.responses.data.total
+    : merged.responses.payload?.total
 
-  const columns: Column<ResponseRow>[] = [
-    {
-      key: 'date',
-      header: 'Date',
-      render: (r) => (r.timestamp || r.createdAt || '').slice(0, 10) || '—',
-    },
-    {
-      key: 'provider',
-      header: 'Provider',
-      render: (r) => providerLabel(r.provider || r.model || '—'),
-    },
-    {
-      key: 'prompt',
-      header: 'Prompt',
-      render: (r) => truncateMiddle(r.promptText || '—', 48),
-    },
-    {
-      key: 'region',
-      header: 'Region',
-      render: (r) => (r.region ? regionLabel(r.region) : '—'),
-    },
-    {
-      key: 'sentiment',
-      header: 'Sentiment',
-      align: 'right',
-      render: (r) => formatScore(sentimentOf(r)),
-    },
-    {
-      key: 'visibility',
-      header: 'Visibility',
-      align: 'right',
-      render: (r) => formatPercent(r.visibilityAverage),
-    },
-    {
-      key: 'snippet',
-      header: 'Snippet',
-      render: (r) => truncateMiddle(r.responsePreview || r.response || '—', 80),
-    },
-  ]
+  if (geo.pending) {
+    return <SentimentScreenSkeleton />
+  }
+  if (geo.geoMode && geo.error) {
+    return <ErrorState message={geo.error} onRetry={geo.retry} />
+  }
 
   return (
-    <div className="flex flex-col gap-5">
-      <FreshnessBadge day={merged.freshness.day} pulledAt={merged.freshness.pulledAt} />
-
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        <MetricCard
-          label="Overall sentiment (client-filtered)"
-          value={formatScore(overall)}
+    <div className={`flex flex-col gap-5${geo.geoMode && geo.loading ? ' opacity-70' : ''}`}>
+      <div className="grid gap-4 xl:grid-cols-2">
+        <CurrentSentimentScore score={overall} />
+        <SentimentTrendChart
+          historical={filteredHistorical}
+          currentScore={overall}
+          previousScore={previousOverall}
+          range={{ startDate: filters.startDate, endDate: filters.endDate }}
         />
-        <MetricCard label="Responses shown" value={String(filteredResponses.length)} />
-        <MetricCard label="Historical points" value={String(filteredHistorical.length)} />
       </div>
 
-      <ChartCard
-        title="Sentiment trend"
-        subtitle="From sentiment_historical — average of visible points is client-filtered"
-        loading={false}
-        hasData={chartRows.length > 0}
-        error={merged.historical.error}
-      >
-        <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartRows}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-              <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Legend />
-              {providerKeys.map((p, i) => (
-                <Line
-                  key={p}
-                  type="monotone"
-                  dataKey={p}
-                  name={providerLabel(p)}
-                  stroke={COLORS[i % COLORS.length]}
-                  strokeWidth={2}
-                  dot
-                  connectNulls
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </ChartCard>
-
-      <div>
-        <h2 className="mb-2 text-sm font-semibold text-[#101414]">Response sentiment</h2>
-        {merged.responses.error && !responses.length ? (
-          <ErrorState message={merged.responses.error} />
-        ) : filteredResponses.length === 0 ? (
-          <EmptyState title="No responses" message="No sentiment responses match the filters." />
-        ) : (
-          <DataTable
-            columns={columns}
-            rows={filteredResponses}
-            rowKey={(r) => r.id}
-            loading={false}
-            totalCount={filteredResponses.length}
-          />
-        )}
-      </div>
+      <ResponsesTable
+        rows={filteredResponses}
+        total={responsesTotal}
+        emptyMessage="No sentiment responses match the filters."
+      />
     </div>
   )
 }

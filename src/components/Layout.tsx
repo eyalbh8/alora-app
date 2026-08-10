@@ -1,5 +1,4 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { FreshnessBadge } from './FreshnessBadge'
 import { useSnapshots } from '../context/SnapshotContext'
 
 const NAV = [
@@ -42,7 +41,7 @@ const NAV = [
 ]
 
 export function Layout() {
-  const { tenant, freshness } = useSnapshots()
+  const { tenant } = useSnapshots()
   const { pathname } = useLocation()
 
   return (
@@ -53,7 +52,7 @@ export function Layout() {
             Alora
           </span>
           <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-brand-500">
-            iGEO Analytics
+            AI Favorite
           </span>
         </div>
 
@@ -104,7 +103,6 @@ export function Layout() {
               <span className="text-xs text-slate-400">{tenant.domain}</span>
             )}
           </div>
-          <FreshnessBadge day={freshness.day} pulledAt={freshness.pulledAt} />
         </header>
         <main className="flex-1 px-6 py-6">
           <Outlet />

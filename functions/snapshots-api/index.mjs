@@ -5,6 +5,17 @@
  * Tenant is fixed via WHITELABEL_TENANT_ID (never accepted from the client).
  */
 import { getPool, getTenantId, loadSnapshots, loadTenant, listAvailableDays, SCREEN_KEYS } from './db.mjs'
+import {
+  geoCompetitors,
+  geoDashboard,
+  geoMentions,
+  geoMeta,
+  geoPrompts,
+  geoProviderMentionPrompts,
+  geoResponseDetail,
+  geoResponses,
+  geoSentiment,
+} from './geo.mjs'
 
 function corsHeaders(requestHeaders = {}) {
   const allowed = process.env.ALLOWED_ORIGIN || '*'
@@ -90,6 +101,29 @@ export const handler = async (event) => {
         },
         requestHeaders,
       )
+    }
+
+    // GEO aggregation endpoints computed from the relational mirror tables.
+    if (path.startsWith('/geo/')) {
+      const providerPromptsMatch = path.match(/^\/geo\/provider-mentions\/([^/]+)\/prompts$/)
+      const responseDetailMatch = path.match(/^\/geo\/responses\/([^/]+)$/)
+      const geoHandlers = {
+        '/geo/meta': () => geoMeta(db, tenantId),
+        '/geo/dashboard': () => geoDashboard(db, tenantId, q),
+        '/geo/mentions': () => geoMentions(db, tenantId, q),
+        '/geo/sentiment': () => geoSentiment(db, tenantId, q),
+        '/geo/prompts': () => geoPrompts(db, tenantId, q),
+        '/geo/competitors': () => geoCompetitors(db, tenantId, q),
+        '/geo/responses': () => geoResponses(db, tenantId, q),
+      }
+      const geoHandler =
+        providerPromptsMatch
+          ? () => geoProviderMentionPrompts(db, tenantId, q, decodeURIComponent(providerPromptsMatch[1]))
+          : responseDetailMatch
+            ? () => geoResponseDetail(db, tenantId, decodeURIComponent(responseDetailMatch[1]))
+            : geoHandlers[path]
+      if (!geoHandler) return json(404, { error: `Unknown path ${path}` }, requestHeaders)
+      return json(200, await geoHandler(), requestHeaders)
     }
 
     if (path === '/snapshots') {

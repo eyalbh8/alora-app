@@ -2,15 +2,18 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
 import type { BrandedFilter, GeoFilters } from '../api/types'
-import { lastNDaysEnding, TIME_PRESETS, type DateRange } from '../lib/dates'
+import { lastNDaysEnding, presetRange, yesterdayISO, DEFAULT_TIME_PRESET_DAYS, type DateRange } from '../lib/dates'
+import { useGeoMeta } from './GeoMetaContext'
 import { useSnapshots } from './SnapshotContext'
 
-export type FilterBarVariant = 'geo' | 'analytics'
+export type FilterBarVariant = 'geo' | 'traffic' | 'crawlers'
 
 export interface FilterAvailability {
   providers: boolean
@@ -33,10 +36,18 @@ export interface FilterOptions {
   crawlers: string[]
 }
 
+export interface FactDayBounds {
+  min: string | null
+  max: string | null
+}
+
 interface AnalyticsFiltersState {
   range: DateRange
   setRange: (range: DateRange) => void
   setPresetDays: (days: number) => void
+  resetDateRange: () => void
+  factDays: FactDayBounds | null
+  presetEndDay: string | null
   providers: string[]
   setProviders: (v: string[]) => void
   topics: string[]
@@ -56,7 +67,6 @@ interface AnalyticsFiltersState {
   clearFilters: () => void
   hasActiveFilters: boolean
   filters: GeoFilters
-  /** Screen-provided option lists + availability; updated via setFilterMeta */
   options: FilterOptions
   availability: FilterAvailability
   setFilterMeta: (meta: { options?: Partial<FilterOptions>; availability?: Partial<FilterAvailability> }) => void
@@ -87,6 +97,7 @@ const AnalyticsFiltersContext = createContext<AnalyticsFiltersState | null>(null
 
 export function AnalyticsFiltersProvider({ children }: { children: ReactNode }) {
   const { range, setRange, latestDay } = useSnapshots()
+  const { meta, geoMode } = useGeoMeta()
 
   const [providers, setProviders] = useState<string[]>([])
   const [topics, setTopics] = useState<string[]>([])
@@ -99,13 +110,48 @@ export function AnalyticsFiltersProvider({ children }: { children: ReactNode }) 
   const [options, setOptions] = useState<FilterOptions>(EMPTY_OPTIONS)
   const [availability, setAvailability] = useState<FilterAvailability>(ALL_AVAILABLE)
 
+  const factDays = geoMode ? (meta?.factDays ?? null) : null
+  const presetEndDay = factDays?.max ?? latestDay ?? yesterdayISO()
+  const geoRangeInitialized = useRef(false)
+
+  // Default geo range to last 7 days ending on latest fact day (once).
+  useEffect(() => {
+    if (!geoMode || !factDays?.max || geoRangeInitialized.current) return
+    geoRangeInitialized.current = true
+    setRange(lastNDaysEnding(7, factDays.max))
+  }, [geoMode, factDays?.max, setRange])
+
+  // Clamp custom range to available fact days in geo mode.
+  useEffect(() => {
+    if (!geoMode || !factDays?.max) return
+    const { min, max } = factDays
+    let { startDate, endDate } = range
+    let changed = false
+    if (endDate > max) {
+      endDate = max
+      changed = true
+    }
+    if (min && startDate < min) {
+      startDate = min
+      changed = true
+    }
+    if (startDate > endDate) {
+      startDate = endDate
+      changed = true
+    }
+    if (changed) setRange({ startDate, endDate })
+  }, [geoMode, factDays, range, setRange])
+
   const setPresetDays = useCallback(
     (days: number) => {
-      const end = latestDay ?? range.endDate
-      setRange(lastNDaysEnding(days, end))
+      setRange(presetRange(days, presetEndDay, factDays?.min))
     },
-    [latestDay, range.endDate, setRange],
+    [presetEndDay, factDays?.min, setRange],
   )
+
+  const resetDateRange = useCallback(() => {
+    setRange(presetRange(DEFAULT_TIME_PRESET_DAYS, presetEndDay, factDays?.min))
+  }, [presetEndDay, factDays?.min, setRange])
 
   const clearFilters = useCallback(() => {
     setProviders([])
@@ -117,6 +163,23 @@ export function AnalyticsFiltersProvider({ children }: { children: ReactNode }) 
     setPromptTypes([])
     setCrawlers([])
   }, [])
+
+  // Drop selections that no longer exist in the current option lists.
+  useEffect(() => {
+    const topicIds = new Set(options.topics.map((t) => t.id))
+    const promptIds = new Set(options.prompts.map((p) => p.id))
+    const providerSet = new Set(options.providers)
+    const regionSet = new Set(options.regions)
+    const tagSet = new Set(options.tags)
+    const typeSet = new Set(options.promptTypes)
+
+    setProviders((prev) => (prev.length && providerSet.size ? prev.filter((v) => providerSet.has(v)) : prev))
+    setTopics((prev) => (prev.length && topicIds.size ? prev.filter((v) => topicIds.has(v)) : prev))
+    setPrompts((prev) => (prev.length && promptIds.size ? prev.filter((v) => promptIds.has(v)) : prev))
+    setRegions((prev) => (prev.length && regionSet.size ? prev.filter((v) => regionSet.has(v)) : prev))
+    setTags((prev) => (prev.length && tagSet.size ? prev.filter((v) => tagSet.has(v)) : prev))
+    setPromptTypes((prev) => (prev.length && typeSet.size ? prev.filter((v) => typeSet.has(v)) : prev))
+  }, [options])
 
   const hasActiveFilters = useMemo(
     () =>
@@ -148,20 +211,20 @@ export function AnalyticsFiltersProvider({ children }: { children: ReactNode }) 
   )
 
   const setFilterMeta = useCallback(
-    (meta: { options?: Partial<FilterOptions>; availability?: Partial<FilterAvailability> }) => {
-      if (meta.options) {
+    (metaUpdate: { options?: Partial<FilterOptions>; availability?: Partial<FilterAvailability> }) => {
+      if (metaUpdate.options) {
         setOptions((prev) => ({
-          providers: meta.options?.providers ?? prev.providers,
-          topics: meta.options?.topics ?? prev.topics,
-          prompts: meta.options?.prompts ?? prev.prompts,
-          regions: meta.options?.regions ?? prev.regions,
-          tags: meta.options?.tags ?? prev.tags,
-          promptTypes: meta.options?.promptTypes ?? prev.promptTypes,
-          crawlers: meta.options?.crawlers ?? prev.crawlers,
+          providers: metaUpdate.options?.providers ?? prev.providers,
+          topics: metaUpdate.options?.topics ?? prev.topics,
+          prompts: metaUpdate.options?.prompts ?? prev.prompts,
+          regions: metaUpdate.options?.regions ?? prev.regions,
+          tags: metaUpdate.options?.tags ?? prev.tags,
+          promptTypes: metaUpdate.options?.promptTypes ?? prev.promptTypes,
+          crawlers: metaUpdate.options?.crawlers ?? prev.crawlers,
         }))
       }
-      if (meta.availability) {
-        setAvailability((prev) => ({ ...prev, ...meta.availability }))
+      if (metaUpdate.availability) {
+        setAvailability((prev) => ({ ...prev, ...metaUpdate.availability }))
       }
     },
     [],
@@ -172,6 +235,9 @@ export function AnalyticsFiltersProvider({ children }: { children: ReactNode }) 
       range,
       setRange,
       setPresetDays,
+      resetDateRange,
+      factDays,
+      presetEndDay,
       providers,
       setProviders,
       topics,
@@ -199,6 +265,9 @@ export function AnalyticsFiltersProvider({ children }: { children: ReactNode }) 
       range,
       setRange,
       setPresetDays,
+      resetDateRange,
+      factDays,
+      presetEndDay,
       providers,
       topics,
       prompts,
@@ -227,4 +296,4 @@ export function useAnalyticsFilters(): AnalyticsFiltersState {
   return ctx
 }
 
-export { TIME_PRESETS }
+export { TIME_PRESETS, DEFAULT_TIME_PRESET_DAYS } from '../lib/dates'

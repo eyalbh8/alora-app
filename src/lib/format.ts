@@ -1,3 +1,5 @@
+import { getLlmProviderDisplayName } from './llmProviders'
+
 /**
  * Formatting helpers for snapshot-driven UI.
  * null/undefined → "—" (never coerced to 0; "no data" is not "zero")
@@ -18,24 +20,8 @@ export function formatScore(value: number | null | undefined): string {
   return value.toFixed(1)
 }
 
-export const PROVIDER_LABELS: Record<string, string> = {
-  CHATGPT: 'ChatGPT',
-  CHAT_GPT: 'ChatGPT',
-  GPT: 'ChatGPT',
-  GEMINI: 'Gemini',
-  PERPLEXITY: 'Perplexity',
-  CLAUDE: 'Claude',
-  GROK: 'Grok',
-  COPILOT: 'Microsoft Copilot',
-  MICROSOFT_COPILOT: 'Microsoft Copilot',
-  GOOGLE_AI_MODE: 'Google AI Mode',
-  GOOGLE_AI_OVERVIEW: 'Google AI Overview',
-  ALL: 'All providers',
-}
-
 export function providerLabel(provider: string): string {
-  const key = provider.toUpperCase().replace(/\s+/g, '_')
-  return PROVIDER_LABELS[key] ?? provider
+  return getLlmProviderDisplayName(provider)
 }
 
 export function regionLabel(code: string): string {

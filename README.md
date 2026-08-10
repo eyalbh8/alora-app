@@ -1,6 +1,6 @@
-# Alora iGEO (white-label snapshots)
+# Alora (white-label snapshots)
 
-React + Vite + TypeScript app that renders **iGEO analytics screens from a Postgres snapshot DB** — not live iGEO APIs.
+React + Vite + TypeScript app that renders **Alora analytics screens from a Postgres snapshot DB** — not live upstream APIs.
 
 ## Screens
 

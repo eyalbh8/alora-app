@@ -1,12 +1,21 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  TIME_PRESETS,
   useAnalyticsFilters,
   type FilterBarVariant,
 } from '../../context/AnalyticsFiltersContext'
-import { formatRangeLabel } from '../../lib/dates'
 import { providerLabel, regionLabel } from '../../lib/format'
 import type { BrandedFilter } from '../../api/types'
+import { DateRangePicker } from './DateRangePicker'
+import { CrawlerIcon } from '../ai-crawlers/CrawlerIcon'
+import { ProviderIcon } from '../ProviderIcon'
+import { getCrawlerBotDisplayName } from '../../lib/crawlerBots'
+
+function filterChipClass(disabled: boolean, active: boolean, open: boolean): string {
+  if (disabled) return 'cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400'
+  if (active) return 'border-brand-300 bg-brand-50 text-brand-800 hover:border-brand-400'
+  if (open) return 'border-brand-300 bg-brand-50/70 text-slate-700 hover:border-brand-400'
+  return 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+}
 
 function MultiSelect({
   label,
@@ -16,6 +25,8 @@ function MultiSelect({
   disabled,
   unavailableReason,
   formatOption = (v: string) => v,
+  searchable = false,
+  renderOptionLeading,
 }: {
   label: string
   values: string[]
@@ -24,74 +35,178 @@ function MultiSelect({
   disabled?: boolean
   unavailableReason?: string
   formatOption?: (v: string) => string
+  searchable?: boolean
+  renderOptionLeading?: (value: string) => React.ReactNode
 }) {
-  const summary =
-    values.length === 0
-      ? 'All'
-      : values.length === 1
-        ? formatOption(values[0])
-        : `${formatOption(values[0])} +${values.length - 1}`
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDocClick = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpen(false)
+        setQuery('')
+      }
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
+  }, [open])
+
+  const filteredOptions = useMemo(() => {
+    if (!query.trim()) return options
+    const q = query.trim().toLowerCase()
+    return options.filter(
+      (o) => o.label.toLowerCase().includes(q) || o.value.toLowerCase().includes(q),
+    )
+  }, [options, query])
+
+  const resolveLabel = (value: string) => {
+    const opt = options.find((o) => String(o.value) === String(value))
+    return opt ? String(opt.label) : formatOption(value)
+  }
+
+  const hasSelection = values.length > 0 && !disabled
+  const selectionTitle = hasSelection ? values.map(resolveLabel).join(', ') : undefined
+
+  const toggle = (value: string) => {
+    onChange(values.includes(value) ? values.filter((v) => v !== value) : [...values, value])
+  }
 
   return (
-    <label
-      className={`relative inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-sm ${
-        disabled
-          ? 'cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400'
-          : 'border-slate-200 bg-white hover:border-slate-300'
-      }`}
-      title={disabled ? unavailableReason || 'Not available in snapshot' : undefined}
-    >
-      <span className="font-medium text-slate-400">{label}</span>
-      <span className="max-w-[140px] truncate font-medium text-slate-700">
-        {disabled ? 'N/A' : summary}
-      </span>
-      {!disabled && (
-        <select
-          multiple
-          className="absolute inset-0 cursor-pointer opacity-0"
-          value={values}
-          onChange={(e) => {
-            const selected = Array.from(e.target.selectedOptions).map((o) => o.value)
-            onChange(selected)
-          }}
-        >
-          {options.map((o) => (
-            <option key={String(o.value)} value={String(o.value)}>
-              {String(o.label)}
-            </option>
-          ))}
-        </select>
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        disabled={disabled}
+        title={
+          disabled
+            ? unavailableReason || 'Not available in snapshot'
+            : selectionTitle
+        }
+        onClick={() => {
+          if (disabled) return
+          setOpen((o) => !o)
+          if (open) setQuery('')
+        }}
+        className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-colors ${filterChipClass(Boolean(disabled), hasSelection, open)}`}
+      >
+        <span>{disabled ? `${label} N/A` : label}</span>
+        {hasSelection && values.length > 1 && (
+          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-semibold leading-none text-white">
+            {values.length}
+          </span>
+        )}
+        {!disabled && (
+          <svg className="h-3 w-3 shrink-0 opacity-60" viewBox="0 0 12 12" fill="currentColor" aria-hidden>
+            <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+          </svg>
+        )}
+      </button>
+
+      {open && !disabled && (
+        <div className="absolute left-0 top-full z-50 mt-1 min-w-[220px] max-w-[320px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+          {searchable && options.length > 6 && (
+            <div className="border-b border-slate-100 px-2 py-1.5">
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search…"
+                className="w-full rounded border border-slate-200 px-2 py-1 text-xs outline-none focus:border-brand-400"
+              />
+            </div>
+          )}
+          <div className="max-h-56 overflow-y-auto">
+            {filteredOptions.length === 0 ? (
+              <p className="px-3 py-2 text-xs text-slate-400">No matches</p>
+            ) : (
+              filteredOptions.map((o) => (
+                <label
+                  key={String(o.value)}
+                  className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-xs hover:bg-slate-50"
+                >
+                  <input
+                    type="checkbox"
+                    checked={values.includes(o.value)}
+                    onChange={() => toggle(o.value)}
+                    className="rounded border-slate-300 text-brand-600"
+                  />
+                  {renderOptionLeading?.(o.value)}
+                  <span className="text-slate-700">{String(o.label)}</span>
+                </label>
+              ))
+            )}
+          </div>
+          {values.length > 0 && (
+            <div className="border-t border-slate-100 px-2 py-1.5">
+              <button
+                type="button"
+                onClick={() => onChange([])}
+                className="text-xs font-medium text-slate-500 hover:text-slate-800"
+              >
+                Clear selection
+              </button>
+            </div>
+          )}
+        </div>
       )}
-    </label>
+    </div>
   )
 }
 
 function ChipSelect({
   label,
-  valueLabel,
   disabled,
   title,
+  active,
   children,
 }: {
   label: string
-  valueLabel: string
   disabled?: boolean
   title?: string
+  active?: boolean
   children?: React.ReactNode
 }) {
   return (
     <label
-      className={`relative inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-sm ${
-        disabled
-          ? 'cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400'
-          : 'border-slate-200 bg-white hover:border-slate-300'
-      }`}
+      className={`relative inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-colors ${filterChipClass(Boolean(disabled), Boolean(active), false)}`}
       title={title}
     >
-      <span className="font-medium text-slate-400">{label}</span>
-      <span className="max-w-[160px] truncate font-medium text-slate-700">{valueLabel}</span>
+      <span>{label}</span>
+      {!disabled && (
+        <svg className="h-3 w-3 shrink-0 opacity-60" viewBox="0 0 12 12" fill="currentColor" aria-hidden>
+          <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+        </svg>
+      )}
       {!disabled && children}
     </label>
+  )
+}
+
+function ClearFiltersButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title="Clear filters"
+      aria-label="Clear filters"
+      className="inline-flex shrink-0 items-center justify-center text-slate-400 transition-colors hover:text-slate-600"
+    >
+      <svg
+        className="h-5 w-5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.35"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+        <path d="M21 3v5h-5" />
+      </svg>
+    </button>
   )
 }
 
@@ -100,6 +215,9 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
     range,
     setRange,
     setPresetDays,
+    resetDateRange,
+    factDays,
+    presetEndDay,
     providers,
     setProviders,
     topics,
@@ -122,71 +240,28 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
     availability,
   } = useAnalyticsFilters()
 
-  const presetValue = useMemo(() => {
-    for (const days of TIME_PRESETS) {
-      // Match by span length ending on current endDate
-      const start = new Date(`${range.endDate}T00:00:00`)
-      start.setDate(start.getDate() - (days - 1))
-      const startIso = start.toISOString().slice(0, 10)
-      if (startIso === range.startDate) return String(days)
-    }
-    return 'custom'
-  }, [range])
+  const dateMin = factDays?.min ?? undefined
+  const dateMax = factDays?.max ?? presetEndDay ?? undefined
 
   const geo = variant === 'geo'
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2">
-        <ChipSelect label="Time" valueLabel={formatRangeLabel(range)}>
-          <select
-            className="absolute inset-0 cursor-pointer opacity-0"
-            value={presetValue}
-            onChange={(e) => {
-              const v = e.target.value
-              if (v === 'custom') return
-              setPresetDays(Number(v))
-            }}
-          >
-            {TIME_PRESETS.map((d) => (
-              <option key={d} value={d}>
-                Last {d} day{d === 1 ? '' : 's'}
-              </option>
-            ))}
-            <option value="custom">Custom</option>
-          </select>
-        </ChipSelect>
-
-        <label className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs shadow-sm">
-          <span className="text-slate-400">From</span>
-          <input
-            type="date"
-            value={range.startDate}
-            max={range.endDate}
-            onChange={(e) => setRange({ ...range, startDate: e.target.value })}
-            className="border-0 bg-transparent text-slate-700 outline-none"
+        {geo && (
+          <MultiSelect
+            label="Providers"
+            values={providers}
+            options={options.providers.map((p) => ({ value: p, label: providerLabel(p) }))}
+            onChange={setProviders}
+            disabled={!availability.providers || options.providers.length === 0}
+            unavailableReason="Not available in snapshot"
+            formatOption={providerLabel}
+            renderOptionLeading={(value) => (
+              <ProviderIcon provider={value} size="sm" rounded className="shrink-0" />
+            )}
           />
-        </label>
-        <label className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs shadow-sm">
-          <span className="text-slate-400">To</span>
-          <input
-            type="date"
-            value={range.endDate}
-            min={range.startDate}
-            onChange={(e) => setRange({ ...range, endDate: e.target.value })}
-            className="border-0 bg-transparent text-slate-700 outline-none"
-          />
-        </label>
-
-        <MultiSelect
-          label="Providers"
-          values={providers}
-          options={options.providers.map((p) => ({ value: p, label: providerLabel(p) }))}
-          onChange={setProviders}
-          disabled={!availability.providers || options.providers.length === 0}
-          unavailableReason="Not available in snapshot"
-          formatOption={providerLabel}
-        />
+        )}
 
         {geo && (
           <>
@@ -197,30 +272,34 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
               onChange={setTopics}
               disabled={!availability.topics || options.topics.length === 0}
               unavailableReason="Not available in snapshot"
+              searchable
             />
             <MultiSelect
               label="Prompts"
               values={prompts}
               options={options.prompts.map((p) => ({
                 value: p.id,
-                label: p.text.slice(0, 60),
+                label: p.text.length > 60 ? `${p.text.slice(0, 57)}…` : p.text,
               }))}
               onChange={setPrompts}
               disabled={!availability.prompts || options.prompts.length === 0}
               unavailableReason="Not available in snapshot"
+              searchable
             />
           </>
         )}
 
-        <MultiSelect
-          label={geo ? 'Regions' : 'Countries'}
-          values={regions}
-          options={options.regions.map((r) => ({ value: r, label: regionLabel(r) }))}
-          onChange={setRegions}
-          disabled={!availability.regions || options.regions.length === 0}
-          unavailableReason="Not available in snapshot"
-          formatOption={regionLabel}
-        />
+        {geo && (
+          <MultiSelect
+            label="Regions"
+            values={regions}
+            options={options.regions.map((r) => ({ value: r, label: regionLabel(r) }))}
+            onChange={setRegions}
+            disabled={!availability.regions || options.regions.length === 0}
+            unavailableReason="Not available in snapshot"
+            formatOption={regionLabel}
+          />
+        )}
 
         {geo && (
           <>
@@ -231,21 +310,19 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
               onChange={setTags}
               disabled={!availability.tags || options.tags.length === 0}
               unavailableReason="Not available in snapshot"
+              searchable
             />
 
             <ChipSelect
               label="Branded"
-              valueLabel={
-                !availability.branded
-                  ? 'N/A'
-                  : branded === 'AccountIncluded'
-                    ? 'Me in prompt'
-                    : branded === 'AccountNotIncluded'
-                      ? 'Not in prompt'
-                      : 'All'
+              active={branded != null}
+              title={
+                branded === 'AccountIncluded'
+                  ? 'Me in prompt'
+                  : branded === 'AccountNotIncluded'
+                    ? 'Not in prompt'
+                    : undefined
               }
-              disabled={!availability.branded}
-              title={!availability.branded ? 'Not available in snapshot' : undefined}
             >
               <select
                 className="absolute inset-0 cursor-pointer opacity-0"
@@ -255,8 +332,8 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
                 }
               >
                 <option value="">All</option>
-                <option value="AccountIncluded">Account included</option>
-                <option value="AccountNotIncluded">Account not included</option>
+                <option value="AccountIncluded">Me in prompt</option>
+                <option value="AccountNotIncluded">Not in prompt</option>
               </select>
             </ChipSelect>
 
@@ -271,31 +348,36 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
           </>
         )}
 
-        {variant === 'analytics' && availability.crawlers && (
+        {variant === 'crawlers' && availability.crawlers && (
           <MultiSelect
             label="AI Crawlers"
             values={crawlers}
-            options={options.crawlers.map((c) => ({ value: c, label: c }))}
+            options={options.crawlers.map((c) => ({
+              value: c,
+              label: getCrawlerBotDisplayName(c),
+            }))}
             onChange={setCrawlers}
             disabled={options.crawlers.length === 0}
             unavailableReason="Not available in snapshot"
+            formatOption={getCrawlerBotDisplayName}
+            renderOptionLeading={(value) => (
+              <CrawlerIcon bot={value} size="sm" className="shrink-0" />
+            )}
           />
         )}
 
-        {hasActiveFilters && (
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="px-2 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-800"
-          >
-            Clear Filters
-          </button>
-        )}
+        <DateRangePicker
+          range={range}
+          endDay={presetEndDay ?? range.endDate}
+          minDay={dateMin}
+          maxDay={dateMax}
+          onChange={setRange}
+          onPreset={setPresetDays}
+          onResetDefault={resetDateRange}
+        />
+
+        {hasActiveFilters && <ClearFiltersButton onClick={clearFilters} />}
       </div>
-      <p className="text-[11px] text-slate-400">
-        Empty filter = no restriction. Within a type: OR. Across types: AND.
-        {presetValue === 'custom' ? ' Custom calendar range selected.' : ''}
-      </p>
     </div>
   )
 }

@@ -79,6 +79,7 @@ export interface CompetitorPerformance {
   topics?: string[]
   historicalData?: Array<{ date: string; value: number }>
   status?: string | null
+  isAccount?: boolean
 }
 
 export interface AgentPost {
@@ -129,7 +130,7 @@ export interface PromptTopicRef {
   priority?: number | null
 }
 
-/** Tags may be plain strings or iGEO objects `{ name, tagId, colorRow }`. */
+/** Tags may be plain strings or snapshot objects `{ name, tagId, colorRow }`. */
 export interface PromptTagObject {
   name?: string | null
   tagId?: string | null
@@ -206,7 +207,7 @@ export interface ResponseRow {
   response?: string | null
   responsePreview?: string | null
   sentimentScore?: number | null
-  /** Typo present in some iGEO snapshots */
+  /** Typo present in some upstream snapshots */
   sentinemtScore?: number | null
   visibilityAverage?: number | null
   createdAt?: string | null
@@ -219,6 +220,8 @@ export interface ResponseRow {
   type?: string | null
   topic?: string | null
   countries?: string[] | null
+  /** Geo mirror payload minus heavy response text (companies, sentiment, etc.). */
+  raw?: unknown
 }
 
 export interface ResponsesPayloadData {
@@ -266,6 +269,9 @@ export interface CompetitorsPayload {
 
 export interface AiTrafficPayload {
   hasEvents?: boolean
+  totalEntries?: number
+  totalChange?: number
+  changePercents?: Record<string, number>
   preferences?: unknown
   llmProviders?: Array<Record<string, unknown>>
   topSources?: Array<Record<string, unknown>>
@@ -297,7 +303,7 @@ export interface AiCrawlersPayload {
   path?: string
 }
 
-/** Branded / me-in-prompt filter values (iGEO AccountIncluded / AccountNotIncluded). */
+/** Branded / me-in-prompt filter values (AccountIncluded / AccountNotIncluded). */
 export type BrandedFilter = 'AccountIncluded' | 'AccountNotIncluded' | null
 
 export interface GeoFilters {

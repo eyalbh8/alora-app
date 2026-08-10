@@ -34,6 +34,15 @@ export function tagLabels(tags: PromptTag[] | null | undefined): string[] {
   return tags.map(tagLabel).filter((t): t is string => !!t)
 }
 
+/** Active prompts only — inactive rows are hidden from the Prompts screen. */
+export function isPromptActive(row: Pick<PromptRow, 'isActive'>): boolean {
+  return row.isActive !== false
+}
+
+export function activePrompts(rows: PromptRow[]): PromptRow[] {
+  return rows.filter(isPromptActive)
+}
+
 function includesAny(haystacks: Array<string | null | undefined>, selected: string[]): boolean {
   if (!selected.length) return true
   const set = new Set(selected.map(norm))

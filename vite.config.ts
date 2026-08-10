@@ -28,6 +28,23 @@ interface SnapshotDbModule {
   SCREEN_KEYS: string[]
 }
 
+interface GeoApiModule {
+  geoMeta: (db: unknown, tenantId: string) => Promise<unknown>
+  geoDashboard: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
+  geoMentions: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
+  geoSentiment: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
+  geoPrompts: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
+  geoCompetitors: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
+  geoResponses: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
+  geoResponseDetail: (db: unknown, tenantId: string, responseId: string) => Promise<unknown>
+  geoProviderMentionPrompts: (
+    db: unknown,
+    tenantId: string,
+    q: Record<string, string>,
+    provider: string,
+  ) => Promise<unknown>
+}
+
 function snapshotsApiPlugin(env: Record<string, string>): Plugin {
   return {
     name: 'snapshots-api-dev',
@@ -54,6 +71,17 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
       apiPromise = import(modPath) as Promise<SnapshotDbModule>
     }
     return apiPromise
+  }
+
+  const loadGeo = () => {
+    process.env.DATABASE_URL = env.DATABASE_URL || process.env.DATABASE_URL
+    process.env.WHITELABEL_TENANT_ID =
+      env.WHITELABEL_TENANT_ID || process.env.WHITELABEL_TENANT_ID
+    const modPath = pathToFileURL(
+      path.join(__dirname, 'functions/snapshots-api/geo.mjs'),
+    ).href
+    // Always reload in dev so geo.mjs edits and DB backfills are picked up immediately.
+    return import(`${modPath}?v=${Date.now()}`) as Promise<GeoApiModule>
   }
 
   return async (req, res, next) => {
@@ -126,6 +154,40 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
           ''
         const data = await api.loadSnapshots(db, tenantId, { startDate, endDate, screens })
         send(200, data)
+        return
+      }
+
+      if (pathName.startsWith('/geo/')) {
+        const geo = await loadGeo()
+        const q = Object.fromEntries(url.searchParams.entries())
+        const providerPromptsMatch = pathName.match(/^\/geo\/provider-mentions\/([^/]+)\/prompts$/)
+        const responseDetailMatch = pathName.match(/^\/geo\/responses\/([^/]+)$/)
+        const geoHandlers: Record<string, () => Promise<unknown>> = {
+          '/geo/meta': () => geo.geoMeta(db, tenantId),
+          '/geo/dashboard': () => geo.geoDashboard(db, tenantId, q),
+          '/geo/mentions': () => geo.geoMentions(db, tenantId, q),
+          '/geo/sentiment': () => geo.geoSentiment(db, tenantId, q),
+          '/geo/prompts': () => geo.geoPrompts(db, tenantId, q),
+          '/geo/competitors': () => geo.geoCompetitors(db, tenantId, q),
+          '/geo/responses': () => geo.geoResponses(db, tenantId, q),
+        }
+        const geoHandler = providerPromptsMatch
+          ? () =>
+              geo.geoProviderMentionPrompts(
+                db,
+                tenantId,
+                q,
+                decodeURIComponent(providerPromptsMatch[1]),
+              )
+          : responseDetailMatch
+            ? () =>
+                geo.geoResponseDetail(db, tenantId, decodeURIComponent(responseDetailMatch[1]))
+            : geoHandlers[pathName]
+        if (!geoHandler) {
+          send(404, { error: `Unknown path ${pathName}` })
+          return
+        }
+        send(200, await geoHandler())
         return
       }
 
