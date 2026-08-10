@@ -23,7 +23,7 @@ import type { GeoFilters, ResponseRow } from '../api/types'
 async function fetchSentimentAndResponses(filters: GeoFilters) {
   const [sentiment, responses] = await Promise.all([
     getGeoSentiment(filters),
-    getGeoResponses(filters, { take: 200 }),
+    getGeoResponses(filters, { take: 50 }),
   ])
   return { sentiment, responses }
 }

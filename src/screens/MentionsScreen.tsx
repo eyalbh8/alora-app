@@ -21,7 +21,7 @@ import type { GeoFilters, ResponseRow } from '../api/types'
 async function fetchMentionsAndResponses(filters: GeoFilters) {
   const [mentions, responses] = await Promise.all([
     getGeoMentions(filters),
-    getGeoResponses(filters, { take: 200 }),
+    getGeoResponses(filters, { take: 50 }),
   ])
   return { mentions, responses }
 }

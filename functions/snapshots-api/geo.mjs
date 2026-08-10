@@ -25,10 +25,13 @@ let formatResponsePreview = (raw, max = 400) => {
   return text.length <= max ? text : `${text.slice(0, max - 1)}…`
 }
 
+let formattersLoaded = false
 async function loadResponseFormatters() {
-  const mod = await import(`./responseBody.mjs?t=${Date.now()}`)
+  if (formattersLoaded) return
+  const mod = await import('./responseBody.mjs')
   formatResponseDisplayText = mod.formatResponseDisplayText
   formatResponsePreview = mod.formatResponsePreview
+  formattersLoaded = true
 }
 
 /** Accumulates positional SQL params. */
@@ -762,13 +765,27 @@ export async function geoResponses(db, tenantId, rawQuery) {
                 NULLIF(trim(pr.raw->>'preview'), ''),
                 left(NULLIF(trim(pr.raw->>'response'), ''), 400)
               ) AS response_preview,
-              COALESCE(
-                pr.response_text,
-                NULLIF(trim(pr.raw->>'response'), ''),
-                NULLIF(trim(pr.raw->>'fullResponse'), ''),
-                NULLIF(trim(pr.raw->>'answer'), '')
+              left(
+                COALESCE(
+                  pr.response_text,
+                  NULLIF(trim(pr.raw->>'response'), ''),
+                  NULLIF(trim(pr.raw->>'fullResponse'), ''),
+                  NULLIF(trim(pr.raw->>'answer'), '')
+                ),
+                12000
               ) AS response_text,
-              pr.prompt_id AS "promptId", pr.topic_id AS "topicId", pr.raw,
+              pr.prompt_id AS "promptId", pr.topic_id AS "topicId",
+              jsonb_strip_nulls(
+                jsonb_build_object(
+                  'companies', pr.raw->'companies',
+                  'mentionedCompanies', pr.raw->'mentionedCompanies',
+                  'brands', pr.raw->'brands',
+                  'entities', pr.raw->'entities',
+                  'sentimentScore', pr.raw->'sentimentScore',
+                  'sentinemtScore', pr.raw->'sentinemtScore',
+                  'avgSentimentScore', pr.raw->'avgSentimentScore'
+                )
+              ) AS raw,
               p.prompt AS prompt_text, t.name AS topic_name
        FROM wl_prompt_responses pr
        LEFT JOIN wl_prompts p ON p.id = pr.prompt_id
@@ -783,7 +800,7 @@ export async function geoResponses(db, tenantId, rawQuery) {
   return {
     data: {
       total: countRows[0]?.total ?? 0,
-      responses: rows.map(mapGeoResponseRow),
+      responses: rows.map((r) => mapGeoResponseRow(r, { list: true })),
     },
     isLive: true,
     computedAt: new Date().toISOString(),
@@ -827,10 +844,53 @@ function extractSentimentScore(r) {
   return null
 }
 
-function mapGeoResponseRow(r) {
+function slimResponseRaw(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null
+  const slim = {}
+  for (const key of [
+    'companies',
+    'mentionedCompanies',
+    'brands',
+    'entities',
+    'sentimentScore',
+    'sentinemtScore',
+    'avgSentimentScore',
+  ]) {
+    if (raw[key] !== undefined) slim[key] = raw[key]
+  }
+  return Object.keys(slim).length ? slim : null
+}
+
+function mapGeoResponseRow(r, { list = false } = {}) {
   const rawPreview = extractResponsePreview(r)
   const rawText = extractResponseText(r)
   const sentimentScore = extractSentimentScore(r)
+
+  if (list) {
+    const previewSource = rawPreview || rawText
+    const responsePreview = previewSource ? formatResponsePreview(previewSource) : null
+    return {
+      id: r.id,
+      provider: r.provider,
+      model: r.model,
+      timestamp: r.timestamp,
+      region: r.region,
+      countries: r.country ? [r.country] : [],
+      myRank: r.responseRank,
+      visibilityAverage: r.visibility,
+      sources: r.sources ?? [],
+      status: r.status,
+      promptId: r.promptId,
+      topicId: r.topicId,
+      promptText: r.prompt_text,
+      topic: r.topic_name,
+      responsePreview,
+      response: null,
+      sentimentScore,
+      raw: slimResponseRaw(r.raw),
+    }
+  }
+
   const responseText = rawText
     ? formatResponseDisplayText(rawText)
     : rawPreview

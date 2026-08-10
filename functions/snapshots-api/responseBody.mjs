@@ -204,12 +204,15 @@ function previewSource(text) {
   return text.replace(/\*\*Key Points:\*\*\s*/g, '').trim()
 }
 
+const MAX_FORMAT_CHARS = 16_384
+
 export function formatResponseDisplayText(raw) {
   if (!raw?.trim()) return ''
-  const structured = parseStructuredPayload(raw)
-  let base = structured ?? stripLeadingFence(raw)
+  const input = raw.length > MAX_FORMAT_CHARS ? raw.slice(0, MAX_FORMAT_CHARS) : raw
+  const structured = parseStructuredPayload(input)
+  let base = structured ?? stripLeadingFence(input)
   if (!structured) {
-    const partialCompanies = extractPartialCompaniesPreview(raw)
+    const partialCompanies = extractPartialCompaniesPreview(input)
     if (partialCompanies) base = partialCompanies
     else {
       const domains = formatDomainListText(base)
