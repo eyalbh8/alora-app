@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import {
-  Area,
-  AreaChart,
   CartesianGrid,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -11,6 +11,7 @@ import {
 import { daysInRange, shortDateLabel, type DateRange } from '../../lib/dates'
 import { providerLabel } from '../../lib/format'
 import { ProviderIcon } from '../ProviderIcon'
+import { ProviderSeriesTooltip } from '../ProviderSeriesTooltip'
 import { AI_TRAFFIC_CHART_HEIGHT, trafficProviderColor } from './constants'
 
 interface LlmVisitTrendsChartProps {
@@ -56,46 +57,64 @@ function ChartBody({
   }))
 
   return (
-    <div className={`relative ${expanded ? 'h-[480px]' : 'h-full min-h-[280px]'}`}>
+    <div className={`relative ${expanded ? 'h-[480px]' : 'h-full min-h-[260px]'}`}>
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <span className="select-none font-serif text-5xl font-semibold tracking-tight text-slate-100">
+        <span className="select-none font-serif text-5xl font-semibold tracking-tight text-[#f0ede8]">
           Alora
         </span>
       </div>
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={formattedRows} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-          <defs>
-            {providerKeys.map((p) => (
-              <linearGradient key={p} id={`traffic-area-${p}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={trafficProviderColor(p)} stopOpacity={0.35} />
-                <stop offset="100%" stopColor={trafficProviderColor(p)} stopOpacity={0.05} />
-              </linearGradient>
-            ))}
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-          <XAxis dataKey="date" tick={{ fontSize: 11 }} interval={days <= 7 ? 0 : 'preserveStartEnd'} />
-          <YAxis domain={[0, yMax]} tick={{ fontSize: 11 }} width={32} allowDecimals={false} />
+        <LineChart data={formattedRows} margin={{ top: 10, right: 8, left: -8, bottom: 0 }}>
+          <CartesianGrid vertical={false} stroke="#eae6de" />
+          <XAxis
+            dataKey="date"
+            tick={{ fill: '#9a938a', fontSize: 11 }}
+            tickLine={false}
+            axisLine={{ stroke: '#bdb6ad' }}
+            interval={days <= 7 ? 0 : 'preserveStartEnd'}
+          />
+          <YAxis
+            domain={[0, yMax]}
+            tick={{ fill: '#9a938a', fontSize: 11 }}
+            tickLine={false}
+            axisLine={false}
+            width={38}
+            allowDecimals={false}
+          />
           <Tooltip
-            formatter={(value, name) => [value ?? 0, providerLabel(String(name ?? ''))]}
-            labelFormatter={(_, payload) => {
+            content={({ active, payload }) => {
               const raw = payload?.[0]?.payload?.rawDate
-              return typeof raw === 'string' ? raw : ''
+              return (
+                <ProviderSeriesTooltip
+                  active={active}
+                  date={typeof raw === 'string' ? raw : undefined}
+                  entries={payload?.map((entry) => ({
+                    provider: String(entry.name ?? entry.dataKey ?? ''),
+                    value: entry.value,
+                    color: entry.color,
+                  }))}
+                  valueLabel="visits"
+                />
+              )
             }}
           />
           {providerKeys.map((p) => (
-            <Area
+            <Line
               key={p}
               type="monotone"
               dataKey={p}
               name={p}
               stroke={trafficProviderColor(p)}
               strokeWidth={2}
-              fill={`url(#traffic-area-${p})`}
-              dot={false}
-              activeDot={{ r: 3 }}
+              dot={
+                formattedRows.length === 1
+                  ? { r: 4, fill: trafficProviderColor(p), strokeWidth: 0 }
+                  : false
+              }
+              activeDot={{ r: 3, strokeWidth: 0 }}
             />
           ))}
-        </AreaChart>
+        </LineChart>
       </ResponsiveContainer>
     </div>
   )
@@ -126,20 +145,26 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
 
   return (
     <>
-      <div
-        className="flex flex-col overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-sm"
-        style={{ height: AI_TRAFFIC_CHART_HEIGHT, minHeight: AI_TRAFFIC_CHART_HEIGHT }}
+      <section
+        className="flex flex-col pt-1"
+        style={{ minHeight: AI_TRAFFIC_CHART_HEIGHT }}
       >
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+        <div className="flex shrink-0 items-start justify-between gap-3 pb-4">
           <div>
-            <h2 className="text-base font-medium text-[#101414]">LLM Visit Trends</h2>
-            <p className="mt-0.5 text-sm text-slate-500">
+            <h2 className="text-[19px] font-semibold tracking-[-0.01em] text-[#101414]">
+              LLM Visit Trends
+            </h2>
+            <p className="mt-0.5 text-xs text-[#9a938a]">
               Track visits from different LLM providers over time.
             </p>
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
               {legendKeys.map((p) => (
-                <span key={p} className="inline-flex items-center gap-1.5 text-xs text-slate-600">
-                  <ProviderIcon provider={p} size="sm" />
+                <span key={p} className="inline-flex items-center gap-1.5 text-[11.5px] text-[#5c554c]">
+                  <span
+                    className="h-[7px] w-[7px] rounded-full"
+                    style={{ backgroundColor: trafficProviderColor(p) }}
+                  />
+                  <ProviderIcon provider={p} size="sm" className="h-4 w-4" />
                   {providerLabel(p)}
                 </span>
               ))}
@@ -149,7 +174,7 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
             <button
               type="button"
               onClick={() => setExpanded(true)}
-              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
+              className="p-1.5 text-[#9a938a] transition hover:bg-[#f3f0eb] hover:text-[#101414]"
               title="Expand chart"
               aria-label="Expand chart"
             >
@@ -158,9 +183,9 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
           )}
         </div>
 
-        <div className="min-h-0 flex-1 px-2 pb-4 pt-1">
+        <div className="min-h-[280px] flex-1">
           {!hasData ? (
-            <div className="flex h-full items-center justify-center px-6 text-sm text-slate-500">
+            <div className="flex h-full min-h-[280px] items-center justify-center border-y border-[#eae6de] px-6 text-sm text-[#9a938a]">
               No visit trend data for the selected period.
             </div>
           ) : (
@@ -172,7 +197,7 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
             />
           )}
         </div>
-      </div>
+      </section>
 
       {expanded && hasData && (
         <div
@@ -180,19 +205,23 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
           onClick={() => setExpanded(false)}
         >
           <div
-            className="flex w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-white shadow-xl"
+            className="flex w-full max-w-5xl flex-col overflow-hidden border border-[#eae6de] bg-[#faf9f7] shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-[#eae6de] px-6 py-5">
               <div>
-                <h2 className="text-lg font-semibold text-[#101414]">LLM Visit Trends</h2>
-                <p className="mt-0.5 text-sm text-slate-500">
+                <h2 className="text-[19px] font-semibold text-[#101414]">LLM Visit Trends</h2>
+                <p className="mt-0.5 text-xs text-[#9a938a]">
                   Track visits from different LLM providers over time.
                 </p>
-                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
                   {providerKeys.map((p) => (
-                    <span key={p} className="inline-flex items-center gap-1.5 text-xs text-slate-600">
-                      <ProviderIcon provider={p} size="sm" />
+                    <span key={p} className="inline-flex items-center gap-1.5 text-[11.5px] text-[#5c554c]">
+                      <span
+                        className="h-[7px] w-[7px] rounded-full"
+                        style={{ backgroundColor: trafficProviderColor(p) }}
+                      />
+                      <ProviderIcon provider={p} size="sm" className="h-4 w-4" />
                       {providerLabel(p)}
                     </span>
                   ))}
@@ -201,12 +230,12 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+                className="border border-[#d8d2c9] px-3 py-1.5 text-sm text-[#5c554c] transition hover:bg-[#f3f0eb]"
               >
                 Close
               </button>
             </div>
-            <div className="px-4 py-4">
+            <div className="px-5 py-5">
               <ChartBody
                 chartRows={chartRows}
                 providerKeys={providerKeys}

@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import {
-  Area,
-  AreaChart,
-  CartesianGrid,
+  Line,
+  LineChart,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -10,9 +10,8 @@ import {
 } from 'recharts'
 import type { ProviderMention } from '../../api/types'
 import { daysInRange, shortDateLabel, type DateRange } from '../../lib/dates'
-import { providerLabel } from '../../lib/format'
 import { mergeProviderSeries } from '../../lib/snapshots/merge'
-import { ProviderIcon } from '../ProviderIcon'
+import { ProviderSeriesTooltip } from '../ProviderSeriesTooltip'
 import { MENTIONS_CHART_HEIGHT, MENTIONS_PROVIDER_ORDER, mentionsProviderColor } from './constants'
 
 interface MentionsOverTimeChartProps {
@@ -22,12 +21,20 @@ interface MentionsOverTimeChartProps {
 
 function ExpandIcon() {
   return (
-    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5h-4m4 0v-4m0 4l-5-5"
       />
+    </svg>
+  )
+}
+
+function CloseIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6L6 18" />
     </svg>
   )
 }
@@ -44,46 +51,55 @@ function ChartBody({
   expanded?: boolean
 }) {
   return (
-    <div className={`relative ${expanded ? 'h-[480px]' : 'h-full min-h-[280px]'}`}>
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <span className="select-none font-serif text-5xl font-semibold tracking-tight text-slate-100">
-          Alora
-        </span>
-      </div>
+    <div style={{ height: expanded ? 480 : MENTIONS_CHART_HEIGHT }}>
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartRows} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-          <defs>
-            {providerKeys.map((p) => (
-              <linearGradient key={p} id={`mentions-area-${p}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={mentionsProviderColor(p)} stopOpacity={0.35} />
-                <stop offset="100%" stopColor={mentionsProviderColor(p)} stopOpacity={0.05} />
-              </linearGradient>
-            ))}
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-          <XAxis dataKey="date" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
-          <YAxis domain={[0, yMax]} tick={{ fontSize: 11 }} width={32} allowDecimals={false} />
+        <LineChart data={chartRows} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>
+          <XAxis
+            dataKey="date"
+            axisLine={{ stroke: '#eae6de' }}
+            tickLine={false}
+            tick={{ fill: '#9a938a', fontSize: 10 }}
+            interval="preserveStartEnd"
+            minTickGap={28}
+          />
+          <YAxis hide domain={[0, yMax]} allowDecimals={false} />
+          <ReferenceLine y={0} stroke="#eae6de" />
           <Tooltip
-            formatter={(value, name) => [value ?? 0, providerLabel(String(name ?? ''))]}
-            labelFormatter={(_, payload) => {
+            cursor={{ stroke: '#d8d2c7', strokeWidth: 1 }}
+            content={({ active, payload }) => {
               const raw = payload?.[0]?.payload?.rawDate
-              return typeof raw === 'string' ? raw : ''
+              return (
+                <ProviderSeriesTooltip
+                  active={active}
+                  date={typeof raw === 'string' ? raw : undefined}
+                  entries={payload?.map((entry) => ({
+                    provider: String(entry.name ?? entry.dataKey ?? ''),
+                    value: entry.value,
+                    color: entry.color,
+                  }))}
+                />
+              )
             }}
           />
-          {providerKeys.map((p) => (
-            <Area
-              key={p}
+          {providerKeys.map((provider) => (
+            <Line
+              key={provider}
               type="monotone"
-              dataKey={p}
-              name={p}
-              stroke={mentionsProviderColor(p)}
+              dataKey={provider}
+              name={provider}
+              stroke={mentionsProviderColor(provider)}
               strokeWidth={2}
-              fill={`url(#mentions-area-${p})`}
               dot={false}
-              activeDot={{ r: 3 }}
+              activeDot={{
+                r: 3,
+                fill: mentionsProviderColor(provider),
+                stroke: '#faf9f7',
+                strokeWidth: 1,
+              }}
+              isAnimationActive={false}
             />
           ))}
-        </AreaChart>
+        </LineChart>
       </ResponsiveContainer>
     </div>
   )
@@ -95,16 +111,19 @@ export function MentionsOverTimeChart({ providers, range }: MentionsOverTimeChar
 
   const { chartRows, providerKeys, yMax } = useMemo(() => {
     const series = mergeProviderSeries(providers)
-    const keys: string[] = MENTIONS_PROVIDER_ORDER.filter((p) =>
-      providers.some((m) => m.provider === p && (m.historicalData?.length ?? 0) > 0),
+    const keys: string[] = MENTIONS_PROVIDER_ORDER.filter((provider) =>
+      providers.some(
+        (mention) => mention.provider === provider && (mention.historicalData?.length ?? 0) > 0,
+      ),
     )
-    for (const p of providers) {
-      if (!keys.includes(p.provider) && (p.historicalData?.length ?? 0) > 0) {
-        keys.push(p.provider)
+
+    for (const provider of providers) {
+      if (!keys.includes(provider.provider) && (provider.historicalData?.length ?? 0) > 0) {
+        keys.push(provider.provider)
       }
     }
 
-    const dates = [...new Set(series.map((s) => s.date))].sort()
+    const dates = [...new Set(series.map((point) => point.date))].sort()
     const rows = dates.map((date) => {
       const row: Record<string, string | number> = {
         date:
@@ -113,111 +132,101 @@ export function MentionsOverTimeChart({ providers, range }: MentionsOverTimeChar
             : shortDateLabel(date),
         rawDate: date,
       }
-      for (const p of keys) {
-        const hit = series.find((s) => s.date === date && s.provider === p)
-        row[p] = hit?.value ?? 0
+
+      for (const provider of keys) {
+        row[provider] =
+          series.find((point) => point.date === date && point.provider === provider)?.value ?? 0
       }
+
       return row
     })
 
-    const maxValue = Math.max(0, ...series.map((s) => s.value))
-    const computedMax = maxValue > 0 ? Math.ceil(maxValue * 1.15) : 10
-    const tickStep = computedMax <= 10 ? 2 : computedMax <= 35 ? 7 : Math.ceil(computedMax / 5)
-
+    const maxValue = Math.max(0, ...series.map((point) => point.value))
     return {
       chartRows: rows,
       providerKeys: keys,
-      yMax: Math.max(tickStep, Math.ceil(computedMax / tickStep) * tickStep),
+      yMax: maxValue > 0 ? Math.ceil(maxValue * 1.08) : 10,
     }
   }, [providers, days])
 
   const hasData = chartRows.length > 0 && providerKeys.length > 0
+  const periodLabel = days === 1 ? 'Selected day' : `Last ${days} days`
 
   return (
     <>
-      <div
-        className="flex flex-col overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-sm"
-        style={{ height: MENTIONS_CHART_HEIGHT, minHeight: MENTIONS_CHART_HEIGHT }}
-      >
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+      <section aria-labelledby="mentions-trend-heading">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-base font-medium text-[#101414]">Mentions Over Time</h2>
-            {hasData && (
-              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-                {providerKeys.map((p) => (
-                  <span key={p} className="inline-flex items-center gap-1.5 text-xs text-slate-600">
-                    <ProviderIcon provider={p} size="sm" />
-                    {providerLabel(p)}
-                  </span>
-                ))}
-              </div>
-            )}
+            <h2 id="mentions-trend-heading" className="text-[19px] font-semibold text-[#101414]">
+              Mentions Over Time
+            </h2>
+            <p className="mt-1 text-xs text-[#9a938a]">{periodLabel}</p>
           </div>
           {hasData && (
             <button
               type="button"
               onClick={() => setExpanded(true)}
-              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
+              className="p-1.5 text-[#9a938a] transition-colors hover:text-[#101414]"
               title="Expand chart"
-              aria-label="Expand chart"
+              aria-label="Expand mentions chart"
             >
               <ExpandIcon />
             </button>
           )}
         </div>
 
-        <div className="min-h-0 flex-1 px-2 pb-4 pt-1">
-          {!hasData ? (
-            <div className="flex h-full items-center justify-center px-6 text-sm text-slate-500">
+        <div className="mt-4">
+          {hasData ? (
+            <ChartBody chartRows={chartRows} providerKeys={providerKeys} yMax={yMax} />
+          ) : (
+            <div
+              className="flex items-center justify-center border-b border-[#eae6de] text-sm text-[#9a938a]"
+              style={{ height: MENTIONS_CHART_HEIGHT }}
+            >
               No mention trend data for the selected period.
             </div>
-          ) : (
-            <ChartBody chartRows={chartRows} providerKeys={providerKeys} yMax={yMax} />
           )}
         </div>
-      </div>
+      </section>
 
       {expanded && hasData && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#101414]/35 p-4"
           onClick={() => setExpanded(false)}
         >
-          <div
-            className="flex w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-white shadow-xl"
-            onClick={(e) => e.stopPropagation()}
+          <section
+            className="w-full max-w-5xl border border-[#eae6de] bg-[#faf9f7] p-6 shadow-2xl"
+            aria-modal="true"
+            role="dialog"
+            aria-labelledby="expanded-mentions-heading"
+            onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div className="mb-6 flex items-start justify-between gap-4 border-b border-[#eae6de] pb-4">
               <div>
-                <h2 className="text-lg font-semibold text-[#101414]">Mentions Over Time</h2>
-                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-                  {providerKeys.map((p) => (
-                    <span key={p} className="inline-flex items-center gap-1.5 text-xs text-slate-600">
-                      <span
-                        className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: mentionsProviderColor(p) }}
-                      />
-                      {providerLabel(p)}
-                    </span>
-                  ))}
-                </div>
+                <h2
+                  id="expanded-mentions-heading"
+                  className="font-serif text-2xl font-semibold tracking-tight text-[#101414]"
+                >
+                  Mentions Over Time
+                </h2>
+                <p className="mt-1 text-xs text-[#9a938a]">{periodLabel}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+                className="p-1.5 text-[#9a938a] transition-colors hover:text-[#101414]"
+                aria-label="Close expanded chart"
               >
-                Close
+                <CloseIcon />
               </button>
             </div>
-            <div className="px-4 py-4">
-              <ChartBody
-                chartRows={chartRows}
-                providerKeys={providerKeys}
-                yMax={yMax}
-                expanded
-              />
-            </div>
-          </div>
+            <ChartBody
+              chartRows={chartRows}
+              providerKeys={providerKeys}
+              yMax={yMax}
+              expanded
+            />
+          </section>
         </div>
       )}
     </>

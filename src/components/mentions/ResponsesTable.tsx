@@ -17,10 +17,24 @@ interface ResponsesTableProps {
   rows: ResponseRow[]
   total?: number
   emptyMessage?: string
+  variant?: 'default' | 'editorial'
 }
 
-function SentimentBadge({ score }: { score: number | null }) {
+function SentimentBadge({
+  score,
+  editorial = false,
+}: {
+  score: number | null
+  editorial?: boolean
+}) {
   if (score == null) return <span className="text-slate-400">—</span>
+  if (editorial) {
+    return (
+      <span className="text-[13px] tabular-nums text-[#5c554c]">
+        {formatNumber(score, 0)}
+      </span>
+    )
+  }
   const tone =
     score >= 70 ? 'bg-emerald-500 text-white' : score >= 40 ? 'bg-amber-400 text-white' : 'bg-rose-500 text-white'
   return (
@@ -56,9 +70,15 @@ function BrandAvatar({
   )
 }
 
-export function ResponsesTable({ rows, total, emptyMessage }: ResponsesTableProps) {
+export function ResponsesTable({
+  rows,
+  total,
+  emptyMessage,
+  variant = 'default',
+}: ResponsesTableProps) {
   const { meta } = useGeoMeta()
   const [selectedRow, setSelectedRow] = useState<(ResponseRow & { raw?: unknown }) | null>(null)
+  const editorial = variant === 'editorial'
   const accountLogo = meta?.account?.logo ?? null
   const accountTitle = meta?.account?.title ?? null
   const competitorLogos = new Map(
@@ -66,26 +86,75 @@ export function ResponsesTable({ rows, total, emptyMessage }: ResponsesTableProp
   )
 
   if (rows.length === 0) {
+    if (editorial) {
+      return (
+        <section aria-labelledby="recent-responses-heading">
+          <h2
+            id="recent-responses-heading"
+            className="mb-4 text-[19px] font-semibold text-[#101414]"
+          >
+            Recent Responses
+          </h2>
+          <div className="border-y border-[#eae6de] py-10 text-center">
+            <p className="text-sm font-medium text-[#5c554c]">No responses</p>
+            <p className="mt-1 text-xs text-[#9a938a]">
+              {emptyMessage ?? 'No mention responses match the filters.'}
+            </p>
+          </div>
+        </section>
+      )
+    }
     return (
       <EmptyState title="No responses" message={emptyMessage ?? 'No mention responses match the filters.'} />
     )
   }
 
+  const headers = editorial
+    ? ['Response', 'Model', 'Rank', 'Citations', 'Sentiment']
+    : ['Response', 'Model', 'Rank', 'Brands', 'Citations', 'Sentiment', 'Date']
+
   return (
     <>
-      <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm">
+      <section aria-labelledby={editorial ? 'recent-responses-heading' : undefined}>
+        {editorial && (
+          <h2
+            id="recent-responses-heading"
+            className="mb-4 text-[19px] font-semibold text-[#101414]"
+          >
+            Recent Responses
+          </h2>
+        )}
+        <div
+          className={
+            editorial
+              ? 'overflow-hidden'
+              : 'overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm'
+          }
+        >
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/60">
-                {['Response', 'Model', 'Rank', 'Brands', 'Citations', 'Sentiment', 'Date'].map((header) => (
+              <tr
+                className={
+                  editorial
+                    ? 'border-b-2 border-[#101414]'
+                    : 'border-b border-slate-100 bg-slate-50/60'
+                }
+              >
+                {headers.map((header) => (
                   <th
                     key={header}
-                    className={`px-4 py-3 text-xs font-semibold tracking-wide whitespace-nowrap text-slate-500 uppercase ${
-                      header === 'Response' ? 'min-w-[320px] text-left' : ''
+                    className={`whitespace-nowrap font-semibold uppercase ${
+                      editorial
+                        ? 'px-3 pb-2.5 text-[10px] tracking-[0.08em] text-[#9a938a]'
+                        : 'px-4 py-3 text-xs tracking-wide text-slate-500'
+                    } ${header === 'Response' ? 'min-w-[320px] pl-0 text-left' : ''} ${
+                      editorial && header === 'Sentiment' ? 'pr-0' : ''
                     } ${
                       header === 'Rank' || header === 'Citations' || header === 'Sentiment'
-                        ? 'text-center'
+                        ? editorial
+                          ? 'text-right'
+                          : 'text-center'
                         : header === 'Response'
                           ? ''
                           : 'text-left'
@@ -108,25 +177,48 @@ export function ResponsesTable({ rows, total, emptyMessage }: ResponsesTableProp
                 return (
                   <tr
                     key={row.id}
-                    className="cursor-pointer border-b border-slate-50 transition hover:bg-slate-50/50"
+                    className={
+                      editorial
+                        ? 'cursor-pointer border-b border-[#eae6de] transition-colors hover:bg-[#f5f2ed]/70'
+                        : 'cursor-pointer border-b border-slate-50 transition hover:bg-slate-50/50'
+                    }
                     onClick={() => setSelectedRow(extended)}
                   >
-                    <td className="max-w-xl px-4 py-3">
+                    <td className={`max-w-xl ${editorial ? 'py-3.5 pr-3' : 'px-4 py-3'}`}>
                       {preview ? (
-                        <p className="line-clamp-2 text-sm leading-relaxed text-brand-700" title={preview}>
+                        <p
+                          className={`line-clamp-2 leading-relaxed ${
+                            editorial ? 'text-[13px] text-[#3a352e]' : 'text-sm text-brand-700'
+                          }`}
+                          title={preview}
+                        >
                           {preview.length > 160 ? `${preview.slice(0, 159)}…` : preview}
                         </p>
                       ) : (
-                        <span className="text-sm text-slate-400">Click to view response</span>
+                        <span className={editorial ? 'text-[13px] text-[#9a938a]' : 'text-sm text-slate-400'}>
+                          Click to view response
+                        </span>
                       )}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3">
-                      <ProviderIcon provider={provider} showLabel />
+                    <td className={`whitespace-nowrap ${editorial ? 'px-3 py-3.5' : 'px-4 py-3'}`}>
+                      {editorial ? (
+                        <span className="[&_span]:text-[13px] [&_span]:text-[#5c554c]">
+                          <ProviderIcon provider={provider} size="sm" showLabel />
+                        </span>
+                      ) : (
+                        <ProviderIcon provider={provider} showLabel />
+                      )}
                     </td>
-                    <td className="px-4 py-3 text-center text-sm font-medium text-[#101414]">
+                    <td
+                      className={`tabular-nums ${
+                        editorial
+                          ? 'px-3 py-3.5 text-right text-[13px] text-[#5c554c]'
+                          : 'px-4 py-3 text-center text-sm font-medium text-[#101414]'
+                      }`}
+                    >
                       {row.myRank != null ? formatNumber(row.myRank, 0) : '—'}
                     </td>
-                    <td className="px-4 py-3">
+                    {!editorial && <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
                         {accountLogo && (
                           <BrandAvatar name={accountTitle} logo={accountLogo} fallback="Me" />
@@ -147,10 +239,14 @@ export function ResponsesTable({ rows, total, emptyMessage }: ResponsesTableProp
                           <span className="text-slate-400">—</span>
                         )}
                       </div>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center justify-center gap-1 text-sm text-slate-600">
-                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    </td>}
+                    <td className={editorial ? 'px-3 py-3.5 text-right' : 'px-4 py-3 text-center'}>
+                      <span
+                        className={`inline-flex items-center justify-center gap-1 ${
+                          editorial ? 'text-[13px] text-[#5c554c]' : 'text-sm text-slate-600'
+                        }`}
+                      >
+                        {!editorial && <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -161,16 +257,16 @@ export function ResponsesTable({ rows, total, emptyMessage }: ResponsesTableProp
                             strokeLinejoin="round"
                             d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"
                           />
-                        </svg>
+                        </svg>}
                         {citations > 0 ? citations : '—'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-center">
-                      <SentimentBadge score={sentiment} />
+                    <td className={editorial ? 'py-3.5 pl-3 text-right' : 'px-4 py-3 text-center'}>
+                      <SentimentBadge score={sentiment} editorial={editorial} />
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                    {!editorial && <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
                       {responseDateLabel(row)}
-                    </td>
+                    </td>}
                   </tr>
                 )
               })}
@@ -179,14 +275,15 @@ export function ResponsesTable({ rows, total, emptyMessage }: ResponsesTableProp
         </div>
 
         {total != null && (
-          <div className="border-t border-slate-100 px-4 py-2.5">
-            <span className="text-xs text-slate-400">
+          <div className={editorial ? 'pt-3' : 'border-t border-slate-100 px-4 py-2.5'}>
+            <span className={editorial ? 'text-xs text-[#9a938a]' : 'text-xs text-slate-400'}>
               {rows.length.toLocaleString()}
               {total > rows.length ? ` of ${total.toLocaleString()}` : ''} responses
             </span>
           </div>
         )}
       </div>
+      </section>
 
       {selectedRow && (
         <ResponseDrawer row={selectedRow} onClose={() => setSelectedRow(null)} />

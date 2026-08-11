@@ -16,25 +16,27 @@ export function SourcesCard({ sources }: SourcesCardProps) {
 
   return (
     <DashboardCard
-      title="Sources"
-      subtitle="The domains that are most frequently cited in your responses"
+      title="Citation landscape"
+      subtitle="Domains shaping AI answers in your category"
+      variant="editorial"
+      contentClassName="overflow-x-auto"
     >
       {isEmpty ? (
-        <div className="flex h-full items-center justify-center px-6 text-sm text-slate-500">
-          No source domains for the selected period.
+        <div className="flex min-h-52 items-center justify-center border border-dashed border-[#d8d2c7] px-6 text-xs text-[#8a847b]">
+          No citation data for this period.
         </div>
       ) : (
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[22rem] text-sm">
           <thead>
-            <tr className="border-b border-slate-100 text-xs text-slate-500">
-              <th className="px-5 py-3 text-left font-medium">Source</th>
-              <th className="px-5 py-3 text-center font-medium">Pages</th>
+            <tr className="border-b-2 border-[#101414] text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8a847b]">
+              <th className="pb-2.5 text-left font-semibold">Domain</th>
+              <th className="pb-2.5 text-right font-semibold">Cited pages</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.domain} className="border-b border-slate-50 last:border-0">
-                <td className="px-5 py-3">
+              <tr key={row.domain} className="border-b border-[#e4dfd6]">
+                <td className="py-3">
                   <div className="flex items-center gap-2">
                     <img
                       src={faviconUrl(row.domain)}
@@ -44,10 +46,10 @@ export function SourcesCard({ sources }: SourcesCardProps) {
                         e.currentTarget.style.display = 'none'
                       }}
                     />
-                    <span className="font-medium text-slate-800">{row.domain}</span>
+                    <span className="font-medium text-[#302d29]">{row.domain}</span>
                   </div>
                 </td>
-                <td className="px-5 py-3 text-center font-medium text-slate-700">
+                <td className="py-3 text-right font-medium text-[#6b655e]">
                   {formatNumber(row.pageCount, 0)}
                 </td>
               </tr>

@@ -38,10 +38,12 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
 
   return (
     <>
-      <div className="flex min-w-0 flex-1 flex-col rounded-xl border border-slate-200/60 bg-white p-4 shadow-sm">
+      <div className="flex min-w-[10.5rem] flex-1 flex-col border-r border-[#e4dfd6] px-5 py-5 last:border-r-0">
         <div className="mb-3 flex items-center gap-2">
-          <ProviderIcon provider={mention.provider} size="md" />
-          <span className="truncate text-sm font-medium text-slate-700">{label}</span>
+          <ProviderIcon provider={mention.provider} size="sm" />
+          <span className="truncate text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#8a847b]">
+            {label}
+          </span>
         </div>
 
         <div className="mt-auto flex items-end justify-between gap-2">
@@ -49,7 +51,7 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
             type="button"
             disabled={!clickable}
             onClick={() => clickable && setOpen(true)}
-            className={`text-left text-3xl font-semibold leading-none text-[#101414] transition ${
+            className={`font-serif text-[34px] font-semibold leading-none tracking-[-0.02em] text-[#101414] transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600 ${
               clickable ? 'cursor-pointer hover:text-brand-700' : 'cursor-default opacity-60'
             }`}
           >
@@ -60,8 +62,8 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
           )}
         </div>
 
-        <p className="mt-2 text-sm text-slate-500">
-          Mentions in the{' '}
+        <p className="mt-2 whitespace-nowrap text-[11px] text-[#8a847b]">
+          Answers citing you,{' '}
           {periodLabel(filters.startDate, filters.endDate, presetEndDay ?? filters.endDate, factDays?.min)}
         </p>
       </div>
@@ -78,10 +80,12 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
             <div className="border-b border-slate-100 px-5 py-4">
               <div className="flex items-center gap-2">
                 <ProviderIcon provider={mention.provider} size="md" />
-                <h3 className="text-lg font-semibold text-[#101414]">{label} mentions</h3>
+                <h3 className="text-lg font-semibold text-[#101414]">
+                  Prompts driving {label} visibility
+                </h3>
               </div>
               <p className="mt-1 text-sm text-slate-500">
-                {loading ? 'Loading prompts…' : `${prompts.length} prompts that mentioned your account`}
+                {loading ? 'Loading prompts…' : `${prompts.length} prompts where your brand appeared`}
               </p>
             </div>
 
@@ -113,7 +117,7 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
                   ))}
                 </ul>
               ) : (
-                <p className="py-8 text-center text-sm text-slate-500">No prompts available for this provider.</p>
+                <p className="py-8 text-center text-sm text-slate-500">No visibility-driving prompts for this platform.</p>
               )}
             </div>
 
@@ -136,9 +140,14 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
 interface ProviderMentionCardsRowProps {
   mentions: ProviderMention[]
   availableProviders?: string[]
+  embedded?: boolean
 }
 
-export function ProviderMentionCardsRow({ mentions, availableProviders }: ProviderMentionCardsRowProps) {
+export function ProviderMentionCardsRow({
+  mentions,
+  availableProviders,
+  embedded = false,
+}: ProviderMentionCardsRowProps) {
   const sorted = useMemo(() => {
     const order = availableProviders?.length
       ? PROVIDER_ORDER.filter((p) => availableProviders.includes(p))
@@ -159,10 +168,36 @@ export function ProviderMentionCardsRow({ mentions, availableProviders }: Provid
   if (sorted.length === 0) return null
 
   return (
-    <div className="flex flex-col gap-2 md:flex-row">
-      {sorted.map((mention) => (
-        <ProviderMentionCard key={mention.provider} mention={mention} />
-      ))}
-    </div>
+    <section>
+      <header
+        className={
+          embedded
+            ? 'flex flex-col gap-0.5 border-t border-[#d8d2c7] bg-[#f3efe8] px-5 py-3 sm:flex-row sm:items-baseline sm:gap-3'
+            : 'mb-5'
+        }
+      >
+        <h2
+          className={
+            embedded
+              ? 'text-xs font-semibold uppercase tracking-[0.08em] text-[#302d29]'
+              : 'text-[19px] font-semibold tracking-[-0.01em] text-[#101414]'
+          }
+        >
+          By platform
+        </h2>
+        <p className="text-xs text-[#8a847b]">Where AI models are choosing to surface your brand</p>
+      </header>
+      <div
+        className={`overflow-x-auto border-[#e4dfd6] ${
+          embedded ? 'border-t bg-[#faf9f7]' : 'border-y border-t-[#101414] bg-[#faf9f7]'
+        }`}
+      >
+        <div className="flex min-w-max md:min-w-full">
+          {sorted.map((mention) => (
+            <ProviderMentionCard key={mention.provider} mention={mention} />
+          ))}
+        </div>
+      </div>
+    </section>
   )
 }

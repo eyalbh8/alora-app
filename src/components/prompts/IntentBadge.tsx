@@ -24,7 +24,8 @@ export function IntentBadge({ type }: { type: string | null | undefined }) {
   return (
     <span
       title={cfg.label}
-      className={`inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold ${cfg.bg} ${cfg.text}`}
+      aria-label={cfg.label}
+      className={`inline-flex h-6 w-6 items-center justify-center border border-current/15 text-[10px] font-bold tracking-wide ${cfg.bg} ${cfg.text}`}
     >
       {cfg.letter}
     </span>

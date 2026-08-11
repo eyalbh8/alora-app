@@ -293,27 +293,49 @@ function mergeTrafficHistorical(payloads: AiTrafficPayload[]) {
   }))
 }
 
-function mergeCrawlerTimeSeries(payloads: AiCrawlersPayload[]) {
+function crawlerSeriesValue(row: Record<string, unknown>): number {
+  for (const key of ['entries', 'requests', 'count', 'value', 'hits', 'totalRequests']) {
+    const value = row[key]
+    if (typeof value === 'number' && !Number.isNaN(value)) return value
+  }
+  return 0
+}
+
+function mergeCrawlerTimeSeries(
+  payloads: AiCrawlersPayload[],
+  days: string[] = [],
+): Array<{ date: string; value: number; requests: number; entries: number }> {
   const byDate = new Map<string, number>()
   for (const payload of payloads) {
     for (const row of payload.timeSeriesData ?? []) {
       const rec = row as Record<string, unknown>
       const date = String(rec.date ?? rec.day ?? rec.timestamp ?? '').slice(0, 10)
-      const value =
-        typeof rec.requests === 'number'
-          ? rec.requests
-          : typeof rec.count === 'number'
-            ? rec.count
-            : typeof rec.value === 'number'
-              ? rec.value
-              : 0
       if (!date) continue
-      byDate.set(date, (byDate.get(date) ?? 0) + value)
+      byDate.set(date, (byDate.get(date) ?? 0) + crawlerSeriesValue(rec))
     }
   }
+
+  const seriesTotal = [...byDate.values()].reduce((sum, value) => sum + value, 0)
+
+  // Some crawler snapshots only include byBot totals for the sync day.
+  // Rebuild a usable daily series from those totals when timeSeries is empty/zero.
+  if (seriesTotal === 0 && days.length === payloads.length) {
+    byDate.clear()
+    payloads.forEach((payload, index) => {
+      const day = days[index]?.slice(0, 10)
+      if (!day) return
+      const dayTotal = (payload.byBot ?? []).reduce((sum, row) => {
+        return sum + crawlerSeriesValue(row as Record<string, unknown>)
+      }, 0)
+      if (dayTotal > 0) {
+        byDate.set(day, (byDate.get(day) ?? 0) + dayTotal)
+      }
+    })
+  }
+
   return [...byDate.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([date, value]) => ({ date, value, requests: value }))
+    .map(([date, value]) => ({ date, value, requests: value, entries: value }))
 }
 
 /** Concatenate per-day ai_traffic snapshots across the selected range. */
@@ -395,12 +417,7 @@ export function mergeAiCrawlers(snapshots: ScreenSnapshot[]) {
       const rawBot = String(rec.botName ?? rec.bot ?? rec.name ?? '')
       if (!rawBot) continue
       const bot = normalizeCrawlerBot(rawBot)
-      const count =
-        typeof rec.requests === 'number'
-          ? rec.requests
-          : typeof rec.count === 'number'
-            ? rec.count
-            : 0
+      const count = crawlerSeriesValue(rec)
       const change = typeof rec.changePercent === 'number' ? rec.changePercent : null
       const existing = botMap.get(bot)
       botMap.set(bot, {
@@ -418,7 +435,10 @@ export function mergeAiCrawlers(snapshots: ScreenSnapshot[]) {
           requests: stats.count,
           changePercent: stats.change ?? 0,
         })),
-        timeSeriesData: mergeCrawlerTimeSeries(payloads),
+        timeSeriesData: mergeCrawlerTimeSeries(
+          payloads,
+          snaps.map((snap) => snap.day),
+        ),
         topPaths: latest.payload?.topPaths ?? [],
         changePercents: latest.payload?.changePercents,
       }

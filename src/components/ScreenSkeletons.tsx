@@ -1,45 +1,258 @@
 import { ChartSkeleton, Skeleton } from './LoadingSpinner'
 
-function ChartCardSkeleton({ height = 'h-64' }: { height?: string }) {
+export function DashboardScreenSkeleton() {
   return (
-    <div className="rounded-xl border border-slate-200/60 bg-white p-4 shadow-sm">
-      <Skeleton className="h-4 w-40" />
-      <Skeleton className="mt-1 h-3 w-56" />
-      <div className={`mt-4 ${height}`}>
-        <ChartSkeleton />
+    <div className="flex flex-col gap-14 pb-4">
+      <div className="overflow-hidden border border-[#d8d2c7] border-t-2 border-t-brand-800 bg-[#faf9f7]">
+        <div className="px-5 py-5 sm:px-6">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="mt-2 h-7 w-52" />
+          <Skeleton className="mt-2 h-3 w-80 max-w-full" />
+        </div>
+        <div className="overflow-hidden border-t border-[#e4dfd6]">
+          <div className="flex min-w-max md:min-w-full">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex min-w-[10.5rem] flex-1 flex-col border-r border-[#e4dfd6] px-5 py-5 last:border-r-0"
+              >
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="mt-3 h-9 w-14" />
+                <Skeleton className="mt-2 h-3 w-28" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="border-t border-[#d8d2c7] bg-[#f3efe8] px-5 py-3">
+          <Skeleton className="h-3 w-64" />
+        </div>
+        <div className="overflow-hidden border-t border-[#e4dfd6]">
+          <div className="flex min-w-max md:min-w-full">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex min-w-[10.5rem] flex-1 flex-col border-r border-[#e4dfd6] px-5 py-5 last:border-r-0"
+              >
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="mt-3 h-9 w-14" />
+                <Skeleton className="mt-2 h-3 w-28" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
+        <div>
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="mt-1 h-3 w-48" />
+          <div className="mt-5 border-t-2 border-[#101414]">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex gap-6 border-b border-[#e4dfd6] py-3.5">
+                <Skeleton className="h-3 w-12" />
+                <Skeleton className="h-3 flex-1" />
+                <Skeleton className="h-3 w-14" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="mt-1 h-3 w-52" />
+          <div className="mt-5 h-[300px]">
+            <ChartSkeleton />
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <Skeleton className="h-5 w-36" />
+        <Skeleton className="mt-1 h-3 w-56" />
+        <div className="mt-5 border-t-2 border-[#101414]">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex gap-6 border-b border-[#e4dfd6] py-3">
+              <Skeleton className="h-3 flex-1" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
 }
 
-function TableSkeleton({
-  rows = 6,
-  cols = 4,
-  title,
-}: {
-  rows?: number
-  cols?: number
-  title?: boolean
-}) {
+export function MentionsScreenSkeleton() {
   return (
-    <div className="flex flex-col gap-3">
-      {title && <Skeleton className="h-4 w-44" />}
-      <div className="overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-sm">
-        <div className="flex gap-6 border-b border-slate-100 px-4 py-3">
-          {Array.from({ length: cols }).map((_, i) => (
-            <Skeleton key={i} className="h-3 w-16" />
+    <div className="flex flex-col gap-12">
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
+        <div>
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="mt-5 h-[52px] w-20" />
+          <Skeleton className="mt-2 h-3 w-40" />
+          <div className="mt-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-2.5 border-b border-[#eae6de]/70 py-2 last:border-b-0"
+              >
+                <Skeleton className="h-2 w-2 rounded-none" />
+                <Skeleton className="h-3 flex-1" />
+                <Skeleton className="h-4 w-8" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <Skeleton className="h-5 w-44" />
+          <Skeleton className="mt-1 h-3 w-20" />
+          <div className="mt-4 h-[260px]">
+            <ChartSkeleton />
+          </div>
+        </div>
+      </div>
+      <div>
+        <Skeleton className="mb-4 h-5 w-40" />
+        <div className="border-t-2 border-[#101414]">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div key={i} className="flex gap-6 border-b border-[#eae6de] py-3.5">
+              <Skeleton className="h-3 flex-1" />
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-3 w-10" />
+              <Skeleton className="h-3 w-12" />
+              <Skeleton className="h-3 w-14" />
+            </div>
           ))}
         </div>
-        {Array.from({ length: rows }).map((_, i) => (
-          <div
-            key={i}
-            className="flex gap-6 border-b border-slate-50 px-4 py-3 last:border-0"
-          >
-            {Array.from({ length: cols }).map((_, j) => (
+      </div>
+    </div>
+  )
+}
+
+export function SentimentScreenSkeleton() {
+  return (
+    <div className="flex flex-col gap-12">
+      <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.4fr]">
+        <div>
+          <Skeleton className="mb-5 h-5 w-48" />
+          <Skeleton className="h-[170px] w-[170px] rounded-full" />
+        </div>
+        <div>
+          <Skeleton className="h-5 w-36" />
+          <div className="mt-2 flex items-end gap-6">
+            <Skeleton className="h-10 w-16" />
+            <Skeleton className="h-3 w-28" />
+          </div>
+          <Skeleton className="mt-5 h-[180px] w-full rounded-none" />
+        </div>
+      </div>
+      <div>
+        <Skeleton className="mb-4 h-5 w-44" />
+        <div className="flex gap-6 border-b-2 border-slate-300 pb-2.5">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="ml-auto h-3 w-16" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-6 border-b border-slate-200 py-4">
+            <Skeleton className="h-3 w-2/3" />
+            <Skeleton className="ml-auto h-5 w-28" />
+            <Skeleton className="h-3 w-10" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export function PromptsScreenSkeleton() {
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <div className="border-y border-[#d8d3ca] py-5">
+          <Skeleton className="mb-1 h-2.5 w-14" />
+          <Skeleton className="mb-4 h-6 w-20" />
+          <div className="flex flex-wrap gap-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-9 w-28" />
+            ))}
+          </div>
+        </div>
+        <div className="border-y border-[#d8d3ca] py-5">
+          <Skeleton className="mb-1 h-2.5 w-20" />
+          <Skeleton className="mb-1 h-6 w-44" />
+          <Skeleton className="mb-5 h-3 w-60" />
+          <Skeleton className="h-2 w-full" />
+          <div className="mt-4 flex gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-3 w-24" />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div>
+        <div className="flex items-end justify-between border-b-2 border-[#101414] pb-4">
+          <div>
+            <Skeleton className="mb-1 h-2.5 w-20" />
+            <Skeleton className="h-7 w-40" />
+          </div>
+          <Skeleton className="h-9 w-64" />
+        </div>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-6 border-b border-[#e4e0d9] py-4">
+            <Skeleton className="h-4 flex-1" />
+            <Skeleton className="hidden h-4 w-28 md:block" />
+            <Skeleton className="hidden h-6 w-6 sm:block" />
+            <Skeleton className="h-6 w-12" />
+            <Skeleton className="hidden h-6 w-12 sm:block" />
+            <Skeleton className="h-6 w-10" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export function CompetitorsScreenSkeleton() {
+  return (
+    <div className="flex flex-col gap-12">
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
+        <div>
+          <Skeleton className="h-5 w-32" />
+          <div className="mt-4 flex items-end gap-3">
+            <Skeleton className="h-11 w-24" />
+            <Skeleton className="mb-1 h-3 w-28" />
+          </div>
+          <Skeleton className="mt-[18px] h-2.5 w-full rounded-none" />
+          <div className="mt-3.5 flex flex-wrap gap-x-4 gap-y-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-3 w-16 rounded-none" />
+            ))}
+          </div>
+        </div>
+        <div>
+          <Skeleton className="h-5 w-56" />
+          <Skeleton className="mt-1 h-3 w-64" />
+          <div className="mt-4 h-[180px] border-b border-slate-200">
+            <ChartSkeleton />
+          </div>
+        </div>
+      </div>
+      <div>
+        <Skeleton className="mb-4 h-5 w-36" />
+        <div className="flex gap-6 border-b-2 border-slate-300 pb-2.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-3 flex-1 rounded-none" />
+          ))}
+        </div>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="flex gap-6 border-b border-slate-200 py-4">
+            {Array.from({ length: 5 }).map((_, j) => (
               <Skeleton
                 key={j}
-                className="h-3"
-                style={{ width: j === 0 ? '35%' : j === cols - 1 ? '12%' : '18%' }}
+                className="h-4 rounded-none"
+                style={{ width: j === 0 ? '24%' : j === 1 ? '32%' : '12%' }}
               />
             ))}
           </div>
@@ -49,163 +262,81 @@ function TableSkeleton({
   )
 }
 
-export function DashboardScreenSkeleton() {
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2 md:flex-row">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex min-w-0 flex-1 flex-col rounded-xl border border-slate-200/60 bg-white p-4 shadow-sm"
-          >
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="mt-8 h-9 w-16" />
-            <Skeleton className="mt-3 h-3 w-32" />
-          </div>
-        ))}
-      </div>
-      <div className="grid gap-4 xl:grid-cols-2">
-        <div
-          className="overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-sm"
-          style={{ height: 420 }}
-        >
-          <div className="border-b border-slate-100 px-5 py-4">
-            <Skeleton className="h-4 w-36" />
-            <Skeleton className="mt-1 h-3 w-48" />
-          </div>
-          <TableSkeleton rows={5} cols={5} />
-        </div>
-        <ChartCardSkeleton height="h-[320px]" />
-      </div>
-      <div className="grid gap-4 xl:grid-cols-2">
-        <div
-          className="overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-sm"
-          style={{ height: 420 }}
-        >
-          <div className="border-b border-slate-100 px-5 py-4">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="mt-1 h-3 w-56" />
-          </div>
-          <TableSkeleton rows={5} cols={2} />
-        </div>
-        <div
-          className="overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-sm"
-          style={{ height: 420 }}
-        >
-          <div className="border-b border-slate-100 px-5 py-4">
-            <Skeleton className="h-4 w-40" />
-            <Skeleton className="mt-1 h-3 w-52" />
-          </div>
-          <TableSkeleton rows={5} cols={3} />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export function MentionsScreenSkeleton() {
-  return (
-    <div className="flex flex-col gap-5">
-      <div className="grid gap-4 xl:grid-cols-2">
-        <ChartCardSkeleton height="h-[420px]" />
-        <ChartCardSkeleton height="h-[420px]" />
-      </div>
-      <TableSkeleton rows={8} cols={8} />
-    </div>
-  )
-}
-
-export function SentimentScreenSkeleton() {
-  return (
-    <div className="flex flex-col gap-5">
-      <div className="grid gap-4 xl:grid-cols-2">
-        <ChartCardSkeleton height="h-[420px]" />
-        <ChartCardSkeleton height="h-[420px]" />
-      </div>
-      <TableSkeleton rows={8} cols={8} />
-    </div>
-  )
-}
-
-export function PromptsScreenSkeleton() {
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm">
-          <Skeleton className="mb-3 h-4 w-20" />
-          <div className="flex flex-wrap gap-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-8 w-28 rounded-full" />
-            ))}
-          </div>
-        </div>
-        <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm">
-          <Skeleton className="mb-1 h-4 w-48" />
-          <Skeleton className="mb-4 h-3 w-64" />
-          <Skeleton className="h-3 w-full rounded-full" />
-          <div className="mt-3 flex gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-3 w-24" />
-            ))}
-          </div>
-        </div>
-      </div>
-      <TableSkeleton rows={10} cols={8} title />
-    </div>
-  )
-}
-
-export function CompetitorsScreenSkeleton() {
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="grid gap-4 xl:grid-cols-2">
-        <ChartCardSkeleton height="h-[420px]" />
-        <ChartCardSkeleton height="h-[420px]" />
-      </div>
-      <TableSkeleton rows={10} cols={8} title />
-    </div>
-  )
-}
-
 export function AiTrafficScreenSkeleton() {
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2 xl:flex-row">
+    <div className="flex flex-col gap-10">
+      <div className="grid grid-cols-1 border-t border-t-[#101414] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="flex min-w-0 flex-1 flex-col rounded-xl border border-slate-200/60 bg-white p-4 shadow-sm"
+            className="flex min-w-0 flex-col border-b border-r border-[#eae6de] px-5 py-5"
           >
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="mt-8 h-9 w-16" />
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="mt-5 h-8 w-16" />
             <Skeleton className="mt-3 h-3 w-32" />
           </div>
         ))}
       </div>
-      <ChartCardSkeleton height="h-[420px]" />
+      <div className="min-h-[420px]">
+        <Skeleton className="h-5 w-36" />
+        <Skeleton className="mt-2 h-3 w-64" />
+        <div className="mt-4 flex gap-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-3 w-16" />
+          ))}
+        </div>
+        <div className="mt-4 border-y border-[#eae6de] py-6">
+          <Skeleton className="h-[260px] w-full" />
+        </div>
+      </div>
     </div>
   )
 }
 
 export function AiCrawlersScreenSkeleton() {
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2 xl:flex-row">
+    <div className="flex flex-col gap-12">
+      <div className="grid grid-cols-2 overflow-hidden border-y border-b-[#eae6de] border-t-[#101414] md:grid-cols-3 xl:grid-cols-6">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex min-w-0 flex-1 flex-col rounded-xl border border-slate-200/60 bg-white p-4 shadow-sm"
-          >
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="mt-8 h-9 w-16" />
-            <Skeleton className="mt-3 h-3 w-32" />
+          <div key={i} className="border-b border-r border-[#eae6de] px-4 py-5 xl:border-b-0">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="mt-4 h-8 w-16" />
+            <div className="mt-3 flex justify-between gap-3">
+              <Skeleton className="h-3 w-10" />
+              <Skeleton className="h-3 w-16" />
+            </div>
           </div>
         ))}
       </div>
-      <ChartCardSkeleton height="h-[420px]" />
-      <div className="grid gap-4 xl:grid-cols-2">
-        <ChartCardSkeleton height="h-[420px]" />
-        <ChartCardSkeleton height="h-[420px]" />
+
+      <div>
+        <Skeleton className="h-5 w-36" />
+        <Skeleton className="mt-2 h-3 w-64" />
+        <div className="mt-5 flex h-[260px] items-end gap-3 border-b border-[#eae6de] px-3">
+          {[32, 48, 42, 64, 55, 78, 68].map((height, i) => (
+            <Skeleton key={i} className="flex-1 rounded-none" style={{ height: `${height}%` }} />
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-10 xl:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, sectionIndex) => (
+          <div key={sectionIndex}>
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="mt-2 h-3 w-56" />
+            <div className="mt-[18px] space-y-4">
+              {Array.from({ length: 6 }).map((_, rowIndex) => (
+                <div key={rowIndex}>
+                  <div className="mb-2 flex justify-between">
+                    <Skeleton className="h-3 w-32" />
+                    <Skeleton className="h-3 w-8" />
+                  </div>
+                  <Skeleton className="h-0.5 w-full rounded-none" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

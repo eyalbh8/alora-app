@@ -3,7 +3,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -11,7 +10,6 @@ import {
 } from 'recharts'
 import { daysInRange, shortDateLabel, type DateRange } from '../../lib/dates'
 import { formatNumber } from '../../lib/format'
-import { AI_CRAWLERS_CHART_HEIGHT, CRAWLER_BAR_COLORS } from './constants'
 
 interface CrawlerVolumeChartProps {
   chartRows: Array<{ date: string; rawDate: string; value: number }>
@@ -52,32 +50,40 @@ function ChartBody({
   }))
 
   return (
-    <div className={`relative ${expanded ? 'h-[480px]' : 'h-full min-h-[280px]'}`}>
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <span className="select-none font-serif text-5xl font-semibold tracking-tight text-slate-100">
-          Alora
-        </span>
-      </div>
+    <div className={expanded ? 'h-[480px]' : 'h-[220px] sm:h-[260px]'}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={formattedRows} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-          <XAxis dataKey="date" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
-          <YAxis domain={[0, yMax]} tick={{ fontSize: 11 }} width={40} allowDecimals={false} />
+        <BarChart data={formattedRows} margin={{ top: 8, right: 4, left: -12, bottom: 0 }}>
+          <CartesianGrid vertical={false} stroke="#eae6de" />
+          <XAxis
+            dataKey="date"
+            axisLine={{ stroke: '#d8d2c7' }}
+            tickLine={false}
+            tick={{ fontSize: 11, fill: '#9a938a' }}
+            interval="preserveStartEnd"
+          />
+          <YAxis
+            domain={[0, yMax]}
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 10, fill: '#9a938a' }}
+            width={40}
+            allowDecimals={false}
+          />
           <Tooltip
             formatter={(value) => [formatNumber(Number(value ?? 0), 0), 'Entries']}
             labelFormatter={(_, payload) => {
               const raw = payload?.[0]?.payload?.rawDate
               return typeof raw === 'string' ? raw : ''
             }}
+            contentStyle={{
+              border: '1px solid #eae6de',
+              borderRadius: 0,
+              boxShadow: '0 8px 24px rgba(16, 20, 20, 0.08)',
+              fontSize: 12,
+            }}
+            cursor={{ fill: 'rgba(20, 143, 133, 0.08)' }}
           />
-          <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={48}>
-            {formattedRows.map((_, index) => (
-              <Cell
-                key={index}
-                fill={index % 2 === 0 ? CRAWLER_BAR_COLORS.primary : CRAWLER_BAR_COLORS.alternate}
-              />
-            ))}
-          </Bar>
+          <Bar dataKey="value" fill="#148f85" maxBarSize={56} radius={[2, 2, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -96,20 +102,17 @@ export function CrawlerVolumeChart({ chartRows, range }: CrawlerVolumeChartProps
 
     return {
       yMax: Math.max(tickStep, Math.ceil(computedMax / tickStep) * tickStep),
-      hasData: chartRows.length > 0,
+      hasData: chartRows.some((row) => row.value > 0),
     }
   }, [chartRows])
 
   return (
     <>
-      <div
-        className="flex flex-col overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-sm"
-        style={{ height: AI_CRAWLERS_CHART_HEIGHT, minHeight: AI_CRAWLERS_CHART_HEIGHT }}
-      >
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+      <section>
+        <div className="mb-5 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-medium text-[#101414]">Crawler Volume</h2>
-            <p className="mt-0.5 text-sm text-slate-500">
+            <h2 className="text-[19px] font-semibold text-[#101414]">Crawler Volume</h2>
+            <p className="mt-0.5 text-xs text-[#9a938a]">
               AI crawler entries over time for the selected period.
             </p>
           </div>
@@ -117,7 +120,7 @@ export function CrawlerVolumeChart({ chartRows, range }: CrawlerVolumeChartProps
             <button
               type="button"
               onClick={() => setExpanded(true)}
-              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
+              className="p-1.5 text-[#9a938a] transition hover:text-[#101414]"
               title="Expand chart"
               aria-label="Expand chart"
             >
@@ -126,16 +129,16 @@ export function CrawlerVolumeChart({ chartRows, range }: CrawlerVolumeChartProps
           )}
         </div>
 
-        <div className="min-h-0 flex-1 px-2 pb-4 pt-1">
+        <div>
           {!hasData ? (
-            <div className="flex h-full items-center justify-center px-6 text-sm text-slate-500">
+            <div className="flex h-[220px] items-center justify-center border-y border-dashed border-[#d8d2c7] px-6 text-sm text-[#9a938a] sm:h-[260px]">
               No crawler volume data for the selected period.
             </div>
           ) : (
             <ChartBody chartRows={chartRows} yMax={yMax} days={days} />
           )}
         </div>
-      </div>
+      </section>
 
       {expanded && hasData && (
         <div
@@ -143,20 +146,20 @@ export function CrawlerVolumeChart({ chartRows, range }: CrawlerVolumeChartProps
           onClick={() => setExpanded(false)}
         >
           <div
-            className="flex w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-white shadow-xl"
+            className="flex w-full max-w-5xl flex-col overflow-hidden bg-[#faf9f7] shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-[#eae6de] px-6 py-5">
               <div>
-                <h2 className="text-lg font-semibold text-[#101414]">Crawler Volume</h2>
-                <p className="mt-0.5 text-sm text-slate-500">
+                <h2 className="text-[19px] font-semibold text-[#101414]">Crawler Volume</h2>
+                <p className="mt-0.5 text-xs text-[#9a938a]">
                   AI crawler entries over time for the selected period.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+                className="border border-[#d8d2c7] px-3 py-1.5 text-sm text-[#5c554c] hover:border-[#101414] hover:text-[#101414]"
               >
                 Close
               </button>

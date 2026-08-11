@@ -12,7 +12,7 @@ export function AiTrafficTabs({ active, onChange }: AiTrafficTabsProps) {
   ]
 
   return (
-    <div className="flex gap-6 border-b border-slate-200">
+    <div className="flex gap-7 border-b border-[#eae6de]">
       {tabs.map((tab) => {
         const isActive = active === tab.id
         return (
@@ -20,10 +20,10 @@ export function AiTrafficTabs({ active, onChange }: AiTrafficTabsProps) {
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className={`-mb-px border-b-2 pb-2.5 text-sm font-medium transition ${
+            className={`-mb-px border-b pb-2.5 text-[12px] font-medium transition ${
               isActive
-                ? 'border-brand-600 text-brand-800'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'border-brand-700 text-brand-900'
+                : 'border-transparent text-[#9a938a] hover:text-[#101414]'
             }`}
           >
             {tab.label}

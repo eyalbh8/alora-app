@@ -47,7 +47,7 @@ export function AiTrafficScreen() {
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-10">
       <TrafficEntryCardsRow
         totalEntries={viewModel?.totalEntries ?? 0}
         totalChange={viewModel?.totalChange ?? null}

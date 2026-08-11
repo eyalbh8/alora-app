@@ -3,7 +3,6 @@ import { daysInRange, matchActivePresetDays } from '../../lib/dates'
 import { formatNumber, providerLabel } from '../../lib/format'
 import type { TrafficProviderMetric } from '../../lib/snapshots/aiTraffic'
 import { ProviderIcon } from '../ProviderIcon'
-import { DeltaBadge } from '../dashboard/DeltaBadge'
 import { AI_TRAFFIC_PROVIDER_ORDER } from './constants'
 
 function periodLabel(
@@ -28,24 +27,39 @@ interface EntryCardProps {
 }
 
 function EntryCard({ title, value, change, periodText, provider }: EntryCardProps) {
+  const isNeutral = change === 0
+  const isPositive = change !== null && change > 0
+  const trendTone =
+    change === null || isNeutral ? 'text-[#9a938a]' : isPositive ? 'text-brand-700' : 'text-[#b44336]'
+  const trendArrow = isNeutral ? '→' : isPositive ? '↑' : '↓'
+
   return (
-    <div className="flex min-w-0 flex-1 flex-col rounded-xl border border-slate-200/60 bg-white p-4 shadow-sm">
-      <div className="mb-3 flex items-center gap-2">
+    <div className="flex min-w-0 flex-col border-b border-r border-[#eae6de] px-5 py-5">
+      <div className="mb-3 flex min-h-5 items-center gap-2">
         {provider ? (
-          <ProviderIcon provider={provider} size="sm" showLabel />
+          <>
+            <ProviderIcon provider={provider} size="sm" />
+            <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#6f6961]">
+              {providerLabel(provider)}
+            </span>
+          </>
         ) : (
-          <span className="text-sm font-medium text-slate-700">{title}</span>
+          <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#6f6961]">
+            {title}
+          </span>
         )}
       </div>
 
-      <div className="mt-auto flex items-end justify-between gap-2">
-        <span className="text-3xl font-semibold leading-none text-[#101414]">
+      <div className="mt-auto flex items-end justify-between gap-3">
+        <span className="font-serif text-[30px] font-semibold leading-none tracking-[-0.02em] text-[#101414]">
           {formatNumber(value, 0)}
         </span>
-        <DeltaBadge value={change ?? 0} mode="percent" />
+        <span className={`pb-0.5 text-[11.5px] font-medium ${trendTone}`}>
+          {change === null ? '—' : `${trendArrow} ${Math.round(Math.abs(change))}%`}
+        </span>
       </div>
 
-      <p className="mt-2 text-sm text-slate-500">Entries in the {periodText}</p>
+      <p className="mt-2 text-[11.5px] text-[#9a938a]">Entries in the {periodText}</p>
     </div>
   )
 }
@@ -72,7 +86,7 @@ export function TrafficEntryCardsRow({
   const providerByKey = new Map(providers.map((p) => [p.provider, p]))
 
   return (
-    <div className="flex flex-col gap-2 xl:flex-row">
+    <div className="grid grid-cols-1 border-t border-t-[#101414] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       <EntryCard
         title="Total entries"
         value={totalEntries}

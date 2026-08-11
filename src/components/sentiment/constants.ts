@@ -1,6 +1,4 @@
-/** Shared layout tokens for the Sentiment screen (iGEO-aligned). */
-export const SENTIMENT_CHART_HEIGHT = '420px'
-
-/** Primary sentiment accent — positive score ring and trend fill. */
-export const SENTIMENT_GREEN = '#22c55e'
-export const SENTIMENT_GREEN_LIGHT = '#dcfce7'
+/** Editorial tokens shared by the Sentiment screen. */
+export const SENTIMENT_TEAL = '#148f85'
+export const SENTIMENT_TEAL_LIGHT = '#d8f3f0'
+export const SENTIMENT_DIVIDER = '#eae6de'

@@ -7,6 +7,7 @@ interface DashboardCardProps {
   children: ReactNode
   className?: string
   contentClassName?: string
+  variant?: 'card' | 'editorial'
 }
 
 export function DashboardCard({
@@ -15,7 +16,20 @@ export function DashboardCard({
   children,
   className = '',
   contentClassName = 'overflow-auto',
+  variant = 'card',
 }: DashboardCardProps) {
+  if (variant === 'editorial') {
+    return (
+      <section className={`min-w-0 ${className}`}>
+        <header className="mb-5">
+          <h2 className="text-[19px] font-semibold tracking-[-0.01em] text-[#101414]">{title}</h2>
+          {subtitle && <p className="mt-0.5 text-xs text-[#8a847b]">{subtitle}</p>}
+        </header>
+        <div className={contentClassName}>{children}</div>
+      </section>
+    )
+  }
+
   return (
     <div
       className={`flex flex-col overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-sm ${className}`}

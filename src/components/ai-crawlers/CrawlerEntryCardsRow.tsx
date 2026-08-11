@@ -3,7 +3,6 @@ import { CRAWLER_BOT_ORDER, getCrawlerBotDisplayName } from '../../lib/crawlerBo
 import { daysInRange, matchActivePresetDays } from '../../lib/dates'
 import { formatNumber } from '../../lib/format'
 import type { CrawlerBotMetric } from '../../lib/snapshots/aiCrawlers'
-import { DeltaBadge } from '../dashboard/DeltaBadge'
 import { CrawlerIcon } from './CrawlerIcon'
 
 function periodLabel(
@@ -28,24 +27,43 @@ interface EntryCardProps {
 }
 
 function EntryCard({ title, value, change, periodText, bot }: EntryCardProps) {
+  const trend =
+    change == null
+      ? { arrow: '—', value: 'No comparison', className: 'text-[#9a938a]' }
+      : change > 0
+        ? {
+            arrow: '↑',
+            value: `${formatNumber(Math.abs(change), 0)}%`,
+            className: 'text-brand-600',
+          }
+        : change < 0
+          ? {
+              arrow: '↓',
+              value: `${formatNumber(Math.abs(change), 0)}%`,
+              className: 'text-red-600',
+            }
+          : { arrow: '→', value: '0%', className: 'text-[#9a938a]' }
+
   return (
-    <div className="flex min-w-0 flex-1 flex-col rounded-xl border border-slate-200/60 bg-white p-4 shadow-sm">
-      <div className="mb-3 flex items-center gap-2">
-        {bot ? (
-          <CrawlerIcon bot={bot} size="sm" showLabel />
-        ) : (
-          <span className="text-sm font-medium text-slate-700">{title}</span>
-        )}
-      </div>
-
-      <div className="mt-auto flex items-end justify-between gap-2">
-        <span className="text-3xl font-semibold leading-none text-[#101414]">
-          {formatNumber(value, 0)}
+    <div className="flex min-w-0 flex-col border-b border-r border-[#eae6de] px-4 py-5 last:border-r-0 md:px-5 xl:border-b-0">
+      <div className="mb-3 flex min-h-4 items-center gap-2">
+        {bot && <CrawlerIcon bot={bot} size="sm" />}
+        <span className="truncate text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#9a938a]">
+          {title}
         </span>
-        <DeltaBadge value={change ?? 0} mode="percent" />
       </div>
 
-      <p className="mt-2 text-sm text-slate-500">Entries in the {periodText}</p>
+      <span className="font-serif text-[28px] font-semibold leading-none tracking-tight text-[#101414]">
+        {formatNumber(value, 0)}
+      </span>
+      <div className="mt-2 flex items-center justify-between gap-2 text-[11.5px]">
+        <span className={trend.className}>
+          {trend.arrow} {trend.value}
+        </span>
+        <span className="truncate text-[#9a938a]" title={`Entries in the ${periodText}`}>
+          {periodText}
+        </span>
+      </div>
     </div>
   )
 }
@@ -72,7 +90,7 @@ export function CrawlerEntryCardsRow({
   const botByKey = new Map(bots.map((b) => [b.bot, b]))
 
   return (
-    <div className="flex flex-col gap-2 xl:flex-row">
+    <div className="grid grid-cols-2 overflow-hidden border-y border-b-[#eae6de] border-t-[#101414] md:grid-cols-3 xl:grid-cols-6">
       <EntryCard
         title="Total entries"
         value={totalEntries}

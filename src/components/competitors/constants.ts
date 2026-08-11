@@ -12,22 +12,3 @@ export const SOV_COLORS = [
   '#FFB347',
   '#7C9CFF',
 ] as const
-
-export const SOV_CHART = {
-  width: 400,
-  height: 348,
-  donutSize: 200,
-  /** Fraction of half-width for pie outerRadius. */
-  outerRadiusPct: 0.84,
-  innerRadiusPct: 0.62,
-  logoOrbit: 132,
-  centerHub: 100,
-} as const
-
-export function sovChartCenter() {
-  return { cx: SOV_CHART.width / 2, cy: SOV_CHART.height / 2 }
-}
-
-export function sovDonutOuterRadius() {
-  return (SOV_CHART.donutSize / 2) * SOV_CHART.outerRadiusPct
-}

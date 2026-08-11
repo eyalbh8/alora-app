@@ -12,25 +12,40 @@ import {
 import type { CompetitorPerformance } from '../../api/types'
 import { useCompetitorHover } from '../../context/CompetitorHoverContext'
 import { daysInRange, type DateRange } from '../../lib/dates'
+import { BrandLogo } from '../competitors/BrandLogo'
 import { DashboardCard } from './DashboardCard'
 import { CHART_COLORS } from './constants'
 
 interface BrandVisibilityChartProps {
   competitors: CompetitorPerformance[]
   range: DateRange
+  title?: string
   subtitle?: string
+  variant?: 'card' | 'editorial'
+  emptyMessage?: string
+  valueLabel?: string
+  heightClassName?: string
+  showLegend?: boolean
 }
 
 export function BrandVisibilityChart({
   competitors,
   range,
+  title = 'Brand Visibility Over Time',
   subtitle = 'Mentions trend for top brands',
+  variant = 'card',
+  emptyMessage = 'No visibility trend data for the selected period.',
+  valueLabel,
+  heightClassName,
+  showLegend = false,
 }: BrandVisibilityChartProps) {
   const { hoveredCompetitor } = useCompetitorHover()
   const days = daysInRange(range)
 
-  const referencePoints =
-    competitors.find((c) => (c.historicalData?.length ?? 0) > 0)?.historicalData ?? []
+  const referencePoints = useMemo(
+    () => competitors.find((c) => (c.historicalData?.length ?? 0) > 0)?.historicalData ?? [],
+    [competitors],
+  )
 
   const chartData = useMemo(() => {
     return referencePoints.map((point) => {
@@ -56,39 +71,135 @@ export function BrandVisibilityChart({
     0,
     ...competitors.flatMap((c) => (c.historicalData ?? []).map((d) => d.value)),
   )
-  const yMax = maxValue > 0 ? Math.ceil(maxValue * 1.1) : 100
+  const expandedMax = maxValue > 0 ? Math.ceil(maxValue * 1.1) : 100
+  const tickStep = Math.max(5, Math.ceil(expandedMax / 20) * 5)
+  const yMax = Math.ceil(expandedMax / tickStep) * tickStep
+  const yTicks = Array.from(
+    { length: Math.ceil(yMax / tickStep) },
+    (_, index) => index * tickStep,
+  )
 
   const hasData = chartData.length > 0 && competitors.length > 0
 
   return (
-    <DashboardCard title="Brand Visibility Over Time" subtitle={subtitle}>
+    <DashboardCard
+      title={title}
+      subtitle={subtitle}
+      variant={variant}
+      contentClassName={
+        variant === 'editorial' ? (heightClassName ?? 'h-[180px]') : 'overflow-hidden'
+      }
+    >
       {!hasData ? (
-        <div className="flex h-full items-center justify-center px-6 text-sm text-slate-500">
-          No visibility trend data for the selected period.
+        <div
+          className={`flex h-full items-center justify-center px-6 text-sm ${
+            variant === 'editorial'
+              ? 'border-y border-[#eae6de] text-[#8a847b]'
+              : 'text-slate-500'
+          }`}
+        >
+          {emptyMessage}
         </div>
       ) : (
-        <div className="flex h-full flex-col px-2 pb-4 pt-2">
+        <div className={`flex h-full flex-col ${variant === 'card' ? 'px-2 pb-4 pt-2' : ''}`}>
+          {showLegend && (
+            <div className="flex h-[27px] flex-wrap items-start gap-x-3 gap-y-1 overflow-hidden border-b-2 border-[#101414] pb-2.5">
+              {competitors.map((competitor, index) => (
+                <span
+                  key={competitor.id}
+                  className="inline-flex items-center gap-1.5 whitespace-nowrap text-[10px] text-[#6b655e]"
+                >
+                  <span
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
+                  />
+                  {competitor.name}
+                </span>
+              ))}
+            </div>
+          )}
           <div className="min-h-0 flex-1">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="label" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
-                <YAxis domain={[0, yMax]} tick={{ fontSize: 11 }} width={36} />
+              <LineChart
+                data={chartData}
+                margin={
+                  variant === 'editorial'
+                    ? { top: 8, right: 4, left: -12, bottom: 0 }
+                    : { top: 8, right: 12, left: 0, bottom: 0 }
+                }
+              >
+                <CartesianGrid
+                  strokeDasharray={variant === 'card' ? '3 3' : undefined}
+                  vertical={false}
+                  stroke={variant === 'editorial' ? '#eae6de' : '#e2e8f0'}
+                  syncWithTicks
+                />
+                <XAxis
+                  dataKey="label"
+                  axisLine={{ stroke: variant === 'editorial' ? '#eae6de' : '#cbd5e1' }}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: variant === 'editorial' ? '#9a938a' : undefined }}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  domain={[0, yMax]}
+                  ticks={showLegend ? yTicks.slice(0, -1) : yTicks}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: variant === 'editorial' ? '#9a938a' : undefined }}
+                  width={36}
+                />
                 <Tooltip
-                  formatter={(value) => [`${Math.round(Number(value ?? 0))} mentions`, '']}
-                  labelFormatter={(_, payload) => payload?.[0]?.payload?.date ?? ''}
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null
+                    const date = payload[0]?.payload?.date
+                    return (
+                      <div className="min-w-48 border border-[#d8d2c7] bg-white px-3 py-2.5 text-xs shadow-lg">
+                        <p className="mb-2 font-semibold text-[#302d29]">{date}</p>
+                        <div className="space-y-1.5">
+                          {payload.map((entry) => {
+                            const name = String(entry.name ?? entry.dataKey ?? '')
+                            const competitor = competitors.find((item) => item.name === name)
+                            return (
+                              <div key={name} className="flex items-center gap-2">
+                                {competitor && (
+                                  <BrandLogo
+                                    id={competitor.id}
+                                    name={competitor.name}
+                                    logo={competitor.logo}
+                                    domain={competitor.domain}
+                                    site={competitor.site}
+                                    size="sm"
+                                  />
+                                )}
+                                <span className="min-w-0 flex-1 truncate text-[#6b655e]">{name}</span>
+                                <span className="font-medium" style={{ color: entry.color }}>
+                                  {Math.round(Number(entry.value ?? 0))}{' '}
+                                  {valueLabel ?? (variant === 'editorial' ? '% visibility' : 'mentions')}
+                                </span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )
+                  }}
                 />
-                <Legend
-                  verticalAlign="top"
-                  height={36}
-                  formatter={(value) => (
-                    <span className="text-xs text-slate-600">{value}</span>
-                  )}
-                />
+                {variant === 'card' && (
+                  <Legend
+                    verticalAlign="top"
+                    height={36}
+                    iconType="circle"
+                    iconSize={7}
+                    formatter={(value) => (
+                      <span className="text-xs text-slate-600">{value}</span>
+                    )}
+                  />
+                )}
                 {competitors.map((competitor, index) => {
                   const color = CHART_COLORS[index % CHART_COLORS.length]
                   const faded =
-                    hoveredCompetitor && hoveredCompetitor !== competitor.name ? 0.35 : 1
+                    hoveredCompetitor && hoveredCompetitor !== competitor.name ? 0.24 : 1
                   return (
                     <Line
                       key={competitor.id}
@@ -99,6 +210,7 @@ export function BrandVisibilityChart({
                       strokeOpacity={faded}
                       dot={false}
                       activeDot={{ r: 4 }}
+                      isAnimationActive={false}
                     />
                   )
                 })}

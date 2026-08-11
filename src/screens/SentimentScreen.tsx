@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { ErrorState } from '../components/ErrorState'
-import { ResponsesTable } from '../components/mentions/ResponsesTable'
 import { CurrentSentimentScore } from '../components/sentiment/CurrentSentimentScore'
+import { SentimentResponsesTable } from '../components/sentiment/SentimentResponsesTable'
 import { SentimentTrendChart } from '../components/sentiment/SentimentTrendChart'
 import { SentimentScreenSkeleton } from '../components/ScreenSkeletons'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
@@ -100,8 +100,8 @@ export function SentimentScreen() {
   }
 
   return (
-    <div className={`flex flex-col gap-5${geo.geoMode && geo.loading ? ' opacity-70' : ''}`}>
-      <div className="grid gap-4 xl:grid-cols-2">
+    <div className={`flex flex-col gap-12${geo.geoMode && geo.loading ? ' opacity-70' : ''}`}>
+      <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.4fr]">
         <CurrentSentimentScore score={overall} />
         <SentimentTrendChart
           historical={filteredHistorical}
@@ -111,7 +111,7 @@ export function SentimentScreen() {
         />
       </div>
 
-      <ResponsesTable
+      <SentimentResponsesTable
         rows={filteredResponses}
         total={responsesTotal}
         emptyMessage="No sentiment responses match the filters."

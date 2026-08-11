@@ -9,23 +9,25 @@ interface AiTrafficSettingsProps {
 
 function SettingsSection({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="rounded-xl border border-slate-200/60 bg-white p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-[#101414]">{title}</h3>
-      <div className="mt-3">{children}</div>
-    </div>
+    <section className="border-t border-[#101414] py-5">
+      <h3 className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#6f6961]">
+        {title}
+      </h3>
+      <div className="mt-4">{children}</div>
+    </section>
   )
 }
 
 function ChipList({ items, emptyLabel }: { items: string[]; emptyLabel: string }) {
   if (items.length === 0) {
-    return <p className="text-sm text-slate-500">{emptyLabel}</p>
+    return <p className="text-sm text-[#9a938a]">{emptyLabel}</p>
   }
   return (
     <div className="flex flex-wrap gap-2">
       {items.map((item) => (
         <span
           key={item}
-          className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-700"
+          className="rounded-full border border-[#d8d2c9] px-3 py-1 text-sm text-[#5c554c]"
         >
           {item}
         </span>
@@ -36,14 +38,14 @@ function ChipList({ items, emptyLabel }: { items: string[]; emptyLabel: string }
 
 function ProviderChipList({ providers, emptyLabel }: { providers: string[]; emptyLabel: string }) {
   if (providers.length === 0) {
-    return <p className="text-sm text-slate-500">{emptyLabel}</p>
+    return <p className="text-sm text-[#9a938a]">{emptyLabel}</p>
   }
   return (
     <div className="flex flex-wrap gap-2">
       {providers.map((provider) => (
         <span
           key={provider}
-          className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-700"
+          className="inline-flex items-center gap-1.5 rounded-full border border-[#d8d2c9] px-3 py-1 text-sm text-[#5c554c]"
         >
           <ProviderIcon provider={provider} size="sm" />
           {providerLabel(provider)}
@@ -61,7 +63,7 @@ export function AiTrafficSettings({ preferences }: AiTrafficSettingsProps) {
   const countries = ((prefs.countries as string[] | undefined) ?? []).map(regionLabel)
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-x-10 gap-y-4 lg:grid-cols-2">
       <SettingsSection title="AI engines">
         <ProviderChipList providers={aiEngines} emptyLabel="No AI engines configured." />
       </SettingsSection>

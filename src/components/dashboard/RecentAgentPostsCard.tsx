@@ -25,28 +25,33 @@ export function RecentAgentPostsCard({ posts }: RecentAgentPostsCardProps) {
   const isEmpty = rows.length === 0
 
   return (
-    <DashboardCard title="Recent Agent Posts" subtitle="Latest content published by your agents">
+    <DashboardCard
+      title="Work shipped"
+      subtitle="Recent deliverables from your AI agents"
+      variant="editorial"
+      contentClassName="overflow-x-auto"
+    >
       {isEmpty ? (
-        <div className="flex h-full items-center justify-center px-6 text-sm text-slate-500">
-          No recent agent posts.
+        <div className="flex min-h-52 items-center justify-center border border-dashed border-[#d8d2c7] px-6 text-xs text-[#8a847b]">
+          No agent deliverables in this period.
         </div>
       ) : (
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[32rem] text-sm">
           <thead>
-            <tr className="border-b border-slate-100 text-xs text-slate-500">
-              <th className="px-5 py-3 text-left font-medium">Agents</th>
-              <th className="px-5 py-3 text-left font-medium">Date And Time</th>
-              <th className="px-5 py-3 text-left font-medium">Topic</th>
+            <tr className="border-b-2 border-[#101414] text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8a847b]">
+              <th className="pb-2.5 text-left font-semibold">Channel</th>
+              <th className="px-4 pb-2.5 text-left font-semibold">Published</th>
+              <th className="pb-2.5 text-left font-semibold">Topic / prompt</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((post, i) => (
-              <tr key={post.generationId ?? i} className="border-b border-slate-50 last:border-0">
-                <td className="px-5 py-3 text-slate-700">
+              <tr key={post.generationId ?? i} className="border-b border-[#e4dfd6]">
+                <td className="py-3 text-[#302d29]">
                   {post.socialMediaProvider ?? 'Agent'}
                 </td>
-                <td className="px-5 py-3 text-slate-600">{formatDateTime(post.createdAt)}</td>
-                <td className="max-w-[180px] truncate px-5 py-3 font-medium text-slate-800">
+                <td className="px-4 py-3 text-[#6b655e]">{formatDateTime(post.createdAt)}</td>
+                <td className="max-w-[180px] truncate py-3 font-medium text-[#302d29]">
                   {post.topic ?? post.prompt ?? '—'}
                 </td>
               </tr>

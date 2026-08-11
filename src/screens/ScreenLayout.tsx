@@ -27,11 +27,18 @@ function ScreenChrome({
     ? geoMetaLoading || (!geoMode && snapshotsLoading)
     : snapshotsLoading
   const blockOnSnapshotError = !isGeoVariant && Boolean(error) && !snapshotsLoading
+  const isCrawlerVariant = variant === 'crawlers'
 
   return (
     <ScreenSubheaderProvider setSubheader={setSubheader}>
-      <div className="flex flex-col gap-4">
-        <h1 className="font-serif text-2xl font-semibold tracking-tight text-[#101414]">{title}</h1>
+      <div className={`flex flex-col ${isCrawlerVariant ? 'gap-7' : 'gap-4'}`}>
+        <h1
+          className={`font-serif font-semibold tracking-tight text-[#101414] ${
+            isCrawlerVariant ? 'text-[32px] leading-none' : 'text-2xl'
+          }`}
+        >
+          {title}
+        </h1>
         {subheader}
         <FilterBar variant={variant} />
         {blockOnSnapshotError ? (

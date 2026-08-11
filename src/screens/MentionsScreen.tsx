@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { ErrorState } from '../components/ErrorState'
-import { LlmMentionsDonut } from '../components/mentions/LlmMentionsDonut'
+import { MentionsSummary } from '../components/mentions/MentionsSummary'
 import { MentionsOverTimeChart } from '../components/mentions/MentionsOverTimeChart'
 import { ResponsesTable } from '../components/mentions/ResponsesTable'
 import { MentionsScreenSkeleton } from '../components/ScreenSkeletons'
@@ -82,16 +82,19 @@ export function MentionsScreen() {
   }
 
   return (
-    <div className={`flex flex-col gap-5${geo.geoMode && geo.loading ? ' opacity-70' : ''}`}>
-      <div className="grid gap-4 xl:grid-cols-2">
-        <LlmMentionsDonut providers={filteredProviders} />
+    <div className={`flex flex-col gap-12${geo.geoMode && geo.loading ? ' opacity-70' : ''}`}>
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
+        <MentionsSummary
+          providers={filteredProviders}
+          range={{ startDate: filters.startDate, endDate: filters.endDate }}
+        />
         <MentionsOverTimeChart
           providers={filteredProviders}
           range={{ startDate: filters.startDate, endDate: filters.endDate }}
         />
       </div>
 
-      <ResponsesTable rows={filteredResponses} total={responsesTotal} />
+      <ResponsesTable rows={filteredResponses} total={responsesTotal} variant="editorial" />
     </div>
   )
 }

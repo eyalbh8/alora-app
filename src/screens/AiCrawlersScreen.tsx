@@ -54,7 +54,7 @@ export function AiCrawlersScreen() {
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-12">
       <CrawlerEntryCardsRow
         totalEntries={viewModel?.totalEntries ?? 0}
         totalChange={viewModel?.totalChange ?? null}
@@ -64,11 +64,12 @@ export function AiCrawlersScreen() {
         chartRows={viewModel?.chartRows ?? []}
         range={{ startDate: filters.startDate, endDate: filters.endDate }}
       />
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-10 xl:grid-cols-2">
         <DistributionCard
           title="Path Distribution"
           subtitle="Most crawled URL paths in the selected period"
           rows={viewModel?.pathDistribution ?? []}
+          accent="light"
         />
         <DistributionCard
           title="Crawler Distribution"

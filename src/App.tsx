@@ -29,7 +29,7 @@ export default function App() {
             <Routes>
               <Route element={<Layout />}>
                 <Route element={<GeoFiltersShell />}>
-                  <Route element={<GeoScreenLayout title="Dashboard" />}>
+                  <Route element={<GeoScreenLayout title="Account Brief" />}>
                     <Route path="/" element={<DashboardScreen />} />
                   </Route>
                   <Route element={<GeoScreenLayout title="Prompts" />}>

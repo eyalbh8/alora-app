@@ -7,19 +7,19 @@ export const AI_TRAFFIC_PROVIDER_ORDER = [
   'BD_COPILOT',
 ] as const
 
-/** iGEO-aligned colors for the AI Traffic chart legend. */
+/** Editorial provider palette used by the AI Traffic trend chart. */
 export const AI_TRAFFIC_PROVIDER_COLORS: Record<string, string> = {
-  OPENAI: '#1a1a1a',
-  CHATGPT: '#1a1a1a',
-  CHAT_GPT: '#1a1a1a',
-  GPT: '#1a1a1a',
-  ANTHROPIC: '#d97706',
-  CLAUDE: '#d97706',
-  PERPLEXITY: '#3b82f6',
-  GEMINI: '#eab308',
-  BD_COPILOT: '#ec4899',
-  COPILOT: '#ec4899',
-  MICROSOFT_COPILOT: '#ec4899',
+  OPENAI: '#101414',
+  CHATGPT: '#101414',
+  CHAT_GPT: '#101414',
+  GPT: '#101414',
+  ANTHROPIC: '#d9793d',
+  CLAUDE: '#d9793d',
+  PERPLEXITY: '#2fc9bc',
+  GEMINI: '#7a5fb0',
+  BD_COPILOT: '#2f6fb0',
+  COPILOT: '#2f6fb0',
+  MICROSOFT_COPILOT: '#2f6fb0',
 }
 
 export function trafficProviderColor(provider: string): string {

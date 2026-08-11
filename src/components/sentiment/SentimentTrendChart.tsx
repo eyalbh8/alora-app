@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react'
 import {
-  Area,
-  AreaChart,
-  CartesianGrid,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -10,7 +9,7 @@ import {
 } from 'recharts'
 import { daysInRange, shortDateLabel, type DateRange } from '../../lib/dates'
 import { formatNumber } from '../../lib/format'
-import { SENTIMENT_CHART_HEIGHT, SENTIMENT_GREEN } from './constants'
+import { SENTIMENT_DIVIDER, SENTIMENT_TEAL } from './constants'
 
 interface HistoricalPoint {
   date: string
@@ -70,19 +69,19 @@ function PeriodStat({
   return (
     <div>
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-semibold text-[#101414]">
+        <span className="font-serif text-[34px] font-semibold tracking-tight text-[#101414]">
           {value != null ? formatNumber(value, 0) : '—'}
         </span>
         {delta != null && (
           <span
-            className={`text-sm font-medium ${delta >= 0 ? 'text-emerald-600' : 'text-red-600'}`}
+            className={`text-xs font-medium ${delta >= 0 ? 'text-brand-700' : 'text-red-600'}`}
           >
             {delta >= 0 ? '+' : ''}
             {delta}% This period
           </span>
         )}
       </div>
-      <p className="mt-0.5 text-xs text-slate-500">{label}</p>
+      {label && <p className="mt-0.5 text-xs text-[#9a938a]">{label}</p>}
     </div>
   )
 }
@@ -95,40 +94,40 @@ function ChartBody({
   expanded?: boolean
 }) {
   return (
-    <div className={`relative ${expanded ? 'h-[480px]' : 'h-full min-h-[240px]'}`}>
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <span className="select-none font-serif text-5xl font-semibold tracking-tight text-slate-100">
-          Alora
-        </span>
-      </div>
+    <div className={expanded ? 'h-[480px]' : 'h-[180px] w-full'}>
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartRows} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-          <defs>
-            <linearGradient id="sentiment-area-fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={SENTIMENT_GREEN} stopOpacity={0.35} />
-              <stop offset="100%" stopColor={SENTIMENT_GREEN} stopOpacity={0.05} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-          <XAxis dataKey="date" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
-          <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} width={32} allowDecimals={false} />
+        <LineChart data={chartRows} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+          <XAxis
+            dataKey="date"
+            axisLine={{ stroke: SENTIMENT_DIVIDER }}
+            tickLine={false}
+            tick={{ fontSize: 10, fill: '#9a938a' }}
+            interval="preserveStartEnd"
+            dy={8}
+          />
+          <YAxis domain={[0, 100]} hide />
           <Tooltip
             formatter={(value) => [value ?? 0, 'Sentiment']}
             labelFormatter={(_, payload) => {
               const raw = payload?.[0]?.payload?.rawDate
               return typeof raw === 'string' ? raw : ''
             }}
+            contentStyle={{
+              border: `1px solid ${SENTIMENT_DIVIDER}`,
+              borderRadius: 0,
+              boxShadow: 'none',
+              fontSize: 12,
+            }}
           />
-          <Area
+          <Line
             type="monotone"
             dataKey="score"
-            stroke={SENTIMENT_GREEN}
-            strokeWidth={2}
-            fill="url(#sentiment-area-fill)"
+            stroke={SENTIMENT_TEAL}
+            strokeWidth={2.5}
             dot={false}
-            activeDot={{ r: 3 }}
+            activeDot={{ r: 3, fill: SENTIMENT_TEAL, strokeWidth: 0 }}
           />
-        </AreaChart>
+        </LineChart>
       </ResponsiveContainer>
     </div>
   )
@@ -160,14 +159,13 @@ export function SentimentTrendChart({
 
   return (
     <>
-      <div
-        className="flex flex-col overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-sm"
-        style={{ height: SENTIMENT_CHART_HEIGHT, minHeight: SENTIMENT_CHART_HEIGHT }}
-      >
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+      <section aria-labelledby="sentiment-trend-title">
+        <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-medium text-[#101414]">Sentiment Trend</h2>
-            <div className="mt-3 flex flex-wrap gap-x-8 gap-y-2">
+            <h2 id="sentiment-trend-title" className="text-[19px] font-semibold text-[#101414]">
+              Sentiment Trend
+            </h2>
+            <div className="mt-0.5 flex flex-wrap items-end gap-x-8 gap-y-2">
               <PeriodStat
                 value={currentScore != null ? Math.round(currentScore) : null}
                 label=""
@@ -183,7 +181,7 @@ export function SentimentTrendChart({
             <button
               type="button"
               onClick={() => setExpanded(true)}
-              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
+              className="p-1.5 text-[#9a938a] transition hover:text-[#101414]"
               title="Expand chart"
               aria-label="Expand chart"
             >
@@ -192,16 +190,16 @@ export function SentimentTrendChart({
           )}
         </div>
 
-        <div className="min-h-0 flex-1 px-2 pb-4 pt-1">
+        <div className="mt-3">
           {!hasData ? (
-            <div className="flex h-full items-center justify-center px-6 text-sm text-slate-500">
+            <div className="flex h-[180px] items-center justify-center border-b border-[#eae6de] px-6 text-sm text-[#9a938a]">
               No sentiment trend data for the selected period.
             </div>
           ) : (
             <ChartBody chartRows={chartRows} />
           )}
         </div>
-      </div>
+      </section>
 
       {expanded && hasData && (
         <div
