@@ -1,4 +1,6 @@
 import type {
+  AiCrawlersPayload,
+  AiTrafficPayload,
   CompetitorPerformance,
   ProviderMention,
   ResponseRow,
@@ -8,6 +10,8 @@ import type {
 } from '../../api/types'
 import {
   latestSnap,
+  mapAiCrawlers,
+  mapAiTraffic,
   mapCompetitors,
   mapDashboard,
   mapMentionsChart,
@@ -18,6 +22,8 @@ import {
   mapTopics,
   normalizeSnapshot,
 } from './normalize'
+import { normalizeTrafficProvider } from './aiTraffic'
+import { normalizeCrawlerBot } from '../crawlerBots'
 
 /**
  * Range composition rules:
@@ -253,4 +259,178 @@ export function pickLatestRanking(
   ranking: CompetitorPerformance[] | undefined,
 ): CompetitorPerformance[] {
   return ranking ?? []
+}
+
+function mergeTrafficHistorical(payloads: AiTrafficPayload[]) {
+  const byProvider = new Map<string, Map<string, number>>()
+
+  for (const payload of payloads) {
+    for (const row of payload.historicalData ?? []) {
+      const rec = row as Record<string, unknown>
+      const providerRaw = String(rec.provider ?? rec.name ?? '')
+      if (!providerRaw || providerRaw.toUpperCase() === 'TOTAL') continue
+      const provider = normalizeTrafficProvider(providerRaw)
+      const nested = rec.historicalData
+      if (!Array.isArray(nested)) continue
+      if (!byProvider.has(provider)) byProvider.set(provider, new Map())
+      const dateMap = byProvider.get(provider)!
+      for (const point of nested) {
+        const p = point as Record<string, unknown>
+        const date = String(p.date ?? p.day ?? '').slice(0, 10)
+        const value = typeof p.value === 'number' ? p.value : 0
+        if (!date) continue
+        dateMap.set(date, (dateMap.get(date) ?? 0) + value)
+      }
+    }
+  }
+
+  return [...byProvider.entries()].map(([provider, dateMap]) => ({
+    domain: provider,
+    provider,
+    historicalData: [...dateMap.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, value]) => ({ date, value })),
+  }))
+}
+
+function mergeCrawlerTimeSeries(payloads: AiCrawlersPayload[]) {
+  const byDate = new Map<string, number>()
+  for (const payload of payloads) {
+    for (const row of payload.timeSeriesData ?? []) {
+      const rec = row as Record<string, unknown>
+      const date = String(rec.date ?? rec.day ?? rec.timestamp ?? '').slice(0, 10)
+      const value =
+        typeof rec.requests === 'number'
+          ? rec.requests
+          : typeof rec.count === 'number'
+            ? rec.count
+            : typeof rec.value === 'number'
+              ? rec.value
+              : 0
+      if (!date) continue
+      byDate.set(date, (byDate.get(date) ?? 0) + value)
+    }
+  }
+  return [...byDate.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, value]) => ({ date, value, requests: value }))
+}
+
+/** Concatenate per-day ai_traffic snapshots across the selected range. */
+export function mergeAiTraffic(snapshots: ScreenSnapshot[]) {
+  const snaps = snapshots
+    .filter((s) => s.screen === 'ai_traffic')
+    .sort((a, b) => a.day.localeCompare(b.day))
+
+  if (!snaps.length) {
+    return {
+      day: '',
+      pulledAt: null,
+      source: null,
+      error: 'Snapshot not found for this day',
+      empty: true,
+      payload: null,
+      freshness: { day: '', pulledAt: null },
+    }
+  }
+
+  const normalized = snaps.map((s) => normalizeSnapshot(s, mapAiTraffic))
+  const payloads = normalized.map((n) => n.payload).filter(Boolean) as AiTrafficPayload[]
+  const latest = normalized.at(-1)!
+  const error = payloads.length ? null : normalized.find((n) => n.error)?.error ?? null
+
+  const merged: AiTrafficPayload | null = payloads.length
+    ? {
+        hasEvents: payloads.some((p) => p.hasEvents),
+        preferences: latest.payload?.preferences,
+        llmProviders: [],
+        historicalData: mergeTrafficHistorical(payloads),
+        topSources: latest.payload?.topSources ?? [],
+        topPages: latest.payload?.topPages ?? [],
+        topLocations: latest.payload?.topLocations ?? [],
+        topDevices: latest.payload?.topDevices ?? [],
+        topBrowsers: latest.payload?.topBrowsers ?? [],
+        availableCountries: latest.payload?.availableCountries ?? [],
+      }
+    : null
+
+  return {
+    day: latest.day,
+    pulledAt: latest.pulledAt,
+    source: latest.source,
+    error: merged ? null : error,
+    empty: !merged,
+    payload: merged,
+    freshness: { day: latest.day, pulledAt: latest.pulledAt },
+  }
+}
+
+/** Concatenate per-day ai_crawlers snapshots across the selected range. */
+export function mergeAiCrawlers(snapshots: ScreenSnapshot[]) {
+  const snaps = snapshots
+    .filter((s) => s.screen === 'ai_crawlers')
+    .sort((a, b) => a.day.localeCompare(b.day))
+
+  if (!snaps.length) {
+    return {
+      day: '',
+      pulledAt: null,
+      source: null,
+      error: 'Snapshot not found for this day',
+      empty: true,
+      payload: null,
+      freshness: { day: '', pulledAt: null },
+    }
+  }
+
+  const normalized = snaps.map((s) => normalizeSnapshot(s, mapAiCrawlers))
+  const payloads = normalized.map((n) => n.payload).filter(Boolean) as AiCrawlersPayload[]
+  const latest = normalized.at(-1)!
+  const error = payloads.length ? null : normalized.find((n) => n.error)?.error ?? null
+
+  const botMap = new Map<string, { count: number; change: number | null }>()
+  for (const payload of payloads) {
+    for (const row of payload.byBot ?? []) {
+      const rec = row as Record<string, unknown>
+      const rawBot = String(rec.botName ?? rec.bot ?? rec.name ?? '')
+      if (!rawBot) continue
+      const bot = normalizeCrawlerBot(rawBot)
+      const count =
+        typeof rec.requests === 'number'
+          ? rec.requests
+          : typeof rec.count === 'number'
+            ? rec.count
+            : 0
+      const change = typeof rec.changePercent === 'number' ? rec.changePercent : null
+      const existing = botMap.get(bot)
+      botMap.set(bot, {
+        count: (existing?.count ?? 0) + count,
+        change: existing?.change ?? change,
+      })
+    }
+  }
+
+  const merged: AiCrawlersPayload | null = payloads.length
+    ? {
+        totalRequests: [...botMap.values()].reduce((sum, b) => sum + b.count, 0),
+        byBot: [...botMap.entries()].map(([botName, stats]) => ({
+          botName,
+          requests: stats.count,
+          changePercent: stats.change ?? 0,
+        })),
+        timeSeriesData: mergeCrawlerTimeSeries(payloads),
+        topPaths: latest.payload?.topPaths ?? [],
+        changePercents: latest.payload?.changePercents,
+      }
+    : null
+
+  return {
+    day: latest.day,
+    pulledAt: latest.pulledAt,
+    source: latest.source,
+    error: merged ? null : error,
+    empty: !merged,
+    payload: merged,
+    freshness: { day: latest.day, pulledAt: latest.pulledAt },
+  }
 }

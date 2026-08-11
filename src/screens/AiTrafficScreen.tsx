@@ -10,7 +10,7 @@ import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
 import { useScreenSubheader } from '../context/ScreenSubheaderContext'
 import { useSnapshots } from '../context/SnapshotContext'
 import { buildAiTrafficViewModel } from '../lib/snapshots/aiTraffic'
-import { latestSnap, mapAiTraffic, normalizeSnapshot } from '../lib/snapshots/normalize'
+import { mergeAiTraffic } from '../lib/snapshots/merge'
 
 export function AiTrafficScreen() {
   const { snapshots, loading } = useSnapshots()
@@ -23,10 +23,7 @@ export function AiTrafficScreen() {
   )
   useScreenSubheader(tabBar)
 
-  const snap = useMemo(() => {
-    const latest = latestSnap(snapshots, 'ai_traffic')
-    return normalizeSnapshot(latest, mapAiTraffic)
-  }, [snapshots])
+  const snap = useMemo(() => mergeAiTraffic(snapshots), [snapshots])
 
   const payload = snap.payload
 

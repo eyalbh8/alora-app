@@ -50,7 +50,7 @@ function ChartBody({
       days <= 7
         ? new Date(`${String(row.rawDate ?? row.date).slice(0, 10)}T00:00:00`).toLocaleDateString(
             'en',
-            { weekday: 'short' },
+            { weekday: 'short', month: 'short', day: 'numeric' },
           )
         : shortDateLabel(String(row.rawDate ?? row.date).slice(0, 10)),
   }))
@@ -73,7 +73,7 @@ function ChartBody({
             ))}
           </defs>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-          <XAxis dataKey="date" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
+          <XAxis dataKey="date" tick={{ fontSize: 11 }} interval={days <= 7 ? 0 : 'preserveStartEnd'} />
           <YAxis domain={[0, yMax]} tick={{ fontSize: 11 }} width={32} allowDecimals={false} />
           <Tooltip
             formatter={(value, name) => [value ?? 0, providerLabel(String(name ?? ''))]}

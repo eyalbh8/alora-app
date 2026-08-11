@@ -184,7 +184,9 @@ export function buildAiTrafficViewModel(
         : (globalHistory.get(provider) ?? [])
 
     const countFromHistory = history.reduce((sum, h) => sum + h.value, 0)
-    const count = existing?.count ?? countFromHistory
+    // Prefer daily history summed for the selected range — llmProviders[].visits is the
+    // full snapshot window (typically 90d), not the UI date filter.
+    const count = history.length > 0 ? countFromHistory : (existing?.count ?? 0)
 
     return {
       provider,
@@ -205,14 +207,18 @@ export function buildAiTrafficViewModel(
     (row) => pickString(row as Record<string, unknown>, ['provider']).toUpperCase() === 'TOTAL',
   ) as Record<string, unknown> | undefined
 
+  const summedProviderCounts = filteredProviders.reduce((sum, p) => sum + p.count, 0)
+  const hasRangeHistory = filteredProviders.some((p) => p.historicalData.length > 0)
+
   const totalEntries =
-    typeof payload.totalEntries === 'number'
+    typeof payload.totalEntries === 'number' && !hasRangeHistory
       ? payload.totalEntries
-      : (pickNumber(totalRow ?? {}, ['visits', 'entries', 'count']) ??
-        filteredProviders.reduce((sum, p) => sum + p.count, 0))
+      : hasRangeHistory
+        ? summedProviderCounts
+        : (pickNumber(totalRow ?? {}, ['visits', 'entries', 'count']) ?? summedProviderCounts)
 
   const totalChange =
-    typeof payload.totalChange === 'number'
+    typeof payload.totalChange === 'number' && !hasRangeHistory
       ? payload.totalChange
       : (pickNumber(totalRow ?? {}, ['changePercent', 'percentChange', 'change']) ??
         (typeof payload.changePercents?.total === 'number'

@@ -8,7 +8,7 @@ import { AiCrawlersScreenSkeleton } from '../components/ScreenSkeletons'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
 import { useSnapshots } from '../context/SnapshotContext'
 import { buildAiCrawlersViewModel } from '../lib/snapshots/aiCrawlers'
-import { latestSnap, mapAiCrawlers, normalizeSnapshot } from '../lib/snapshots/normalize'
+import { mergeAiCrawlers } from '../lib/snapshots/merge'
 
 function botName(row: Record<string, unknown>): string {
   for (const k of ['bot', 'botName', 'name', 'crawler', 'aiCrawler']) {
@@ -22,10 +22,7 @@ export function AiCrawlersScreen() {
   const { snapshots, loading } = useSnapshots()
   const { filters, setFilterMeta } = useAnalyticsFilters()
 
-  const snap = useMemo(() => {
-    const latest = latestSnap(snapshots, 'ai_crawlers')
-    return normalizeSnapshot(latest, mapAiCrawlers)
-  }, [snapshots])
+  const snap = useMemo(() => mergeAiCrawlers(snapshots), [snapshots])
 
   const payload = snap.payload
 

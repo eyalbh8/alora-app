@@ -12,7 +12,7 @@
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
-import { aiDashboardPath } from './trafficApi.mjs'
+import { aiDashboardPath, crawlerAnalyticsPath } from './trafficApi.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const require = createRequire(path.join(here, '..', 'functions', 'snapshots-api', 'index.mjs'))
@@ -284,21 +284,27 @@ async function main() {
     if (skip >= page.total || rows.length === 0) break
   }
 
-  // ------------------------------------------------- traffic JSON snapshots
-  const today = new Date().toISOString().slice(0, 10)
-  for (const [screen, p] of [
-    ['ai_traffic', aiDashboardPath(ACCOUNT_ID, DAYS)],
-    ['ai_crawlers', `/traffic/${ACCOUNT_ID}/cloudflare/crawler-analytics?range=${DAYS}`],
-  ]) {
-    const payload = await apiGet(p, { tolerate: [403, 404, 500] })
-    const failed = payload?.__error
-    await pool.query(
-      `INSERT INTO whitelabel_screen_snapshots (tenant_id, day, screen, payload, source, schema_version, pulled_at, error)
-       VALUES ($1,$2,$3,$4::jsonb,'backfill',2,now(),$5)
-       ON CONFLICT (tenant_id, day, screen) DO UPDATE SET payload=$4::jsonb, pulled_at=now(), error=$5`,
-      [TENANT, today, screen, failed ? null : js(payload), failed ? `HTTP ${failed}` : null],
-    )
-    counts[screen] = failed ? `HTTP ${failed}` : 'ok'
+  // ------------------------------------------------- traffic JSON snapshots (one row per day)
+  counts.ai_traffic = 0
+  counts.ai_crawlers = 0
+  for (let offset = 0; offset < DAYS; offset++) {
+    const d = new Date()
+    d.setUTCDate(d.getUTCDate() - offset)
+    const day = d.toISOString().slice(0, 10)
+    for (const [screen, buildPath] of [
+      ['ai_traffic', () => aiDashboardPath(ACCOUNT_ID, day)],
+      ['ai_crawlers', () => crawlerAnalyticsPath(ACCOUNT_ID, day)],
+    ]) {
+      const payload = await apiGet(buildPath(), { tolerate: [403, 404, 500] })
+      const failed = payload?.__error
+      await pool.query(
+        `INSERT INTO whitelabel_screen_snapshots (tenant_id, day, screen, payload, source, schema_version, pulled_at, error)
+         VALUES ($1,$2,$3,$4::jsonb,'backfill',2,now(),$5)
+         ON CONFLICT (tenant_id, day, screen) DO UPDATE SET payload=$4::jsonb, pulled_at=now(), error=$5`,
+        [TENANT, day, screen, failed ? null : js(payload), failed ? `HTTP ${failed}` : null],
+      )
+      if (!failed) counts[screen] = (counts[screen] ?? 0) + 1
+    }
   }
 
   // ------------------------------------------- export_runs rows per fact day

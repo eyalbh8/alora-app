@@ -1,10 +1,10 @@
 /**
- * Refresh ai_traffic (and optionally ai_crawlers) JSON snapshots from iGEO.
+ * Refresh ai_traffic JSON snapshot for a single day from iGEO.
  *
  * Usage:
  *   IGEO_API_KEY=... DATABASE_URL=postgresql://... node db/sync_traffic_snapshots.mjs
  *
- * Optional: ACCOUNT_ID, DAYS (default 90), SYNC_DAY (default today UTC)
+ * Optional: ACCOUNT_ID, SYNC_DAY (default yesterday UTC)
  */
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
@@ -18,9 +18,10 @@ const pg = require('pg')
 const API_BASE = (process.env.API_BASE || 'https://api.igeo.ai').replace(/\/$/, '')
 const API_KEY = process.env.IGEO_API_KEY
 const ACCOUNT_ID = process.env.ACCOUNT_ID || '44ff27db-fd23-45fe-a37f-2fb13e548314'
-const DAYS = Number(process.env.DAYS || 90)
 const DATABASE_URL = process.env.DATABASE_URL
-const SYNC_DAY = process.env.SYNC_DAY || new Date().toISOString().slice(0, 10)
+const SYNC_DAY =
+  process.env.SYNC_DAY ||
+  new Date(Date.now() - 86400000).toISOString().slice(0, 10)
 
 if (!API_KEY) {
   console.error('FATAL: IGEO_API_KEY is required')
@@ -64,8 +65,7 @@ async function main() {
   }
   const TENANT = tenants[0].id
 
-  const end = new Date(`${SYNC_DAY}T23:59:59.999Z`)
-  const aiPath = aiDashboardPath(ACCOUNT_ID, DAYS, end)
+  const aiPath = aiDashboardPath(ACCOUNT_ID, SYNC_DAY)
   console.log(`Fetching ${aiPath}`)
   const payload = await apiGet(aiPath, { tolerate: [403, 404, 500] })
   const failed = payload?.__error
@@ -84,7 +84,10 @@ async function main() {
   }
 
   const llmCount = Array.isArray(payload.llmProviders) ? payload.llmProviders.length : 0
-  const histCount = Array.isArray(payload.historicalData) ? payload.historicalData.length : 0
+  const histPoints = (payload.historicalData ?? []).reduce(
+    (n, row) => n + (Array.isArray(row.historicalData) ? row.historicalData.length : 0),
+    0,
+  )
   const total = payload.llmProviders?.find((r) => r.provider === 'TOTAL')
   console.log(
     JSON.stringify(
@@ -92,7 +95,7 @@ async function main() {
         day: SYNC_DAY,
         hasEvents: payload.hasEvents,
         llmProviders: llmCount,
-        historicalSeries: histCount,
+        historicalPoints: histPoints,
         totalVisits: total?.visits ?? null,
         totalChange: total?.changePercent ?? null,
       },
@@ -100,10 +103,6 @@ async function main() {
       2,
     ),
   )
-
-  if (llmCount === 0 && histCount === 0) {
-    console.warn('WARNING: snapshot saved but llmProviders/historicalData are empty — check analytics events in iGEO')
-  }
 
   await pool.end()
 }

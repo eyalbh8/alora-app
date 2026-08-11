@@ -122,14 +122,14 @@ export function buildAiCrawlersViewModel(
 
   const totalFromChart = chartRows.reduce((sum, row) => sum + row.value, 0)
   const totalFromBots = [...botMap.values()].reduce((sum, b) => sum + b.count, 0)
-  const totalEntries =
-    typeof payload.totalRequests === 'number'
+  const hasRangeSeries = chartRows.length > 0
+  const totalEntries = hasRangeSeries
+    ? totalFromChart
+    : typeof payload.totalRequests === 'number'
       ? payload.totalRequests
       : typeof (payload as Record<string, unknown>).totalEntries === 'number'
         ? ((payload as Record<string, unknown>).totalEntries as number)
-        : totalFromChart > 0
-          ? totalFromChart
-          : totalFromBots
+        : totalFromBots
 
   const changePercents = payload.changePercents ?? {}
   const totalChange =

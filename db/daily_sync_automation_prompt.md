@@ -68,13 +68,15 @@ Record the row count for each entity. If account, topics, or prompts return empt
 Detect if SYNC_DAY was a scan day: results total > 0 OR responses total > 0. If it clearly was a scan day (responses exist) but zero rows were written to Postgres → FAIL.
 If both totals are 0, that is acceptable (no scan that day) — note it in `entity_counts`.
 
-## Step 3 — Snapshot traffic screens (JSON, range=90)
+## Step 3 — Snapshot traffic screens (JSON, SYNC_DAY only)
 
-Store these two as JSON snapshots (they are external time-series, not derivable from results):
+Store one JSON snapshot row per screen for **SYNC_DAY only** — same as other daily snapshots. Do not pull retro multi-day windows.
 
-1. `api_get` path `/traffic/{accountId}/ai-dashboard-data?startDate={ISO}&endDate={ISO}&prevStartDate={ISO}&prevEndDate={ISO}` → screen `ai_traffic`
-   Use a 90-day window ending SYNC_DAY (same logic as `db/trafficApi.mjs`). **All four date params are required** — without them the API returns empty aggregates.
-2. `api_get` path `/traffic/{accountId}/cloudflare/crawler-analytics?range=90` → screen `ai_crawlers`
+1. `api_get` path `/traffic/{accountId}/ai-dashboard-data?startDate={SYNC_DAY}T00:00:00.000Z&endDate={SYNC_DAY}T23:59:59.999Z&prevStartDate={PREV_DAY}T00:00:00.000Z&prevEndDate={PREV_DAY}T23:59:59.999Z` → screen `ai_traffic`
+   PREV_DAY = calendar day before SYNC_DAY (UTC). All four date params are required.
+2. `api_get` path `/traffic/{accountId}/cloudflare/crawler-analytics?startDate={SYNC_DAY}T00:00:00.000Z&endDate={SYNC_DAY}T23:59:59.999Z` → screen `ai_crawlers`
+
+See `db/trafficApi.mjs` for the exact date math (`syncDayDateRange`).
 
 ```sql
 INSERT INTO whitelabel_screen_snapshots (tenant_id, day, screen, payload, source, schema_version, pulled_at)
@@ -114,4 +116,4 @@ SELECT (SELECT count(*) FROM wl_results          WHERE ("timestamp" AT TIME ZONE
 Same instructions, with these changes:
 - Instead of SYNC_DAY, use `startDate = today - 90 days`, `endDate = today` for Step 2 (results + responses). Keep paginating until exhausted; this may be tens of thousands of rows — keep batching.
 - Skip Step 0/4 per-day bookkeeping; instead insert one `whitelabel_export_runs` row per distinct day found in the pulled data (status `SUCCEEDED`, entity_counts with that day's row counts), so the Alora app's "available days" list is populated.
-- Step 1 and Step 3 unchanged.
+- Step 3: for each distinct day D in the pulled facts, fetch ai_traffic and ai_crawlers for **day D only** (see `db/trafficApi.mjs`) and store with `day = D`.

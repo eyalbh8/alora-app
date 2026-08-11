@@ -1,24 +1,19 @@
 /**
- * iGEO traffic API helpers — date ranges and snapshot fetch paths.
+ * iGEO traffic API helpers — per-day snapshot fetch paths.
  *
- * The ai-dashboard-data endpoint requires all four date params; without them
- * it returns empty llmProviders / historicalData (only hasEvents + preferences).
+ * Daily sync stores one snapshot row per SYNC_DAY. Each call covers that day
+ * only (previous calendar day is used for changePercent on ai-dashboard-data).
  */
 
-/** @param {number} days inclusive window ending today UTC */
-export function trafficDateRange(days = 90, end = new Date()) {
-  const endDate = new Date(end)
-  endDate.setUTCHours(23, 59, 59, 999)
-
-  const startDate = new Date(endDate)
-  startDate.setUTCDate(startDate.getUTCDate() - days + 1)
-  startDate.setUTCHours(0, 0, 0, 0)
+/** @param {string} day YYYY-MM-DD (UTC) */
+export function syncDayDateRange(day) {
+  const startDate = new Date(`${day}T00:00:00.000Z`)
+  const endDate = new Date(`${day}T23:59:59.999Z`)
 
   const prevEndDate = new Date(startDate.getTime() - 1)
   prevEndDate.setUTCHours(23, 59, 59, 999)
 
   const prevStartDate = new Date(prevEndDate)
-  prevStartDate.setUTCDate(prevStartDate.getUTCDate() - days + 1)
   prevStartDate.setUTCHours(0, 0, 0, 0)
 
   return {
@@ -29,12 +24,14 @@ export function trafficDateRange(days = 90, end = new Date()) {
   }
 }
 
-export function aiDashboardPath(accountId, days = 90, end = new Date()) {
-  const q = new URLSearchParams(trafficDateRange(days, end))
+/** @param {string} accountId @param {string} syncDay YYYY-MM-DD */
+export function aiDashboardPath(accountId, syncDay) {
+  const q = new URLSearchParams(syncDayDateRange(syncDay))
   return `/traffic/${accountId}/ai-dashboard-data?${q.toString()}`
 }
 
-export function crawlerAnalyticsPath(accountId, days = 90, end = new Date()) {
-  const q = new URLSearchParams({ ...trafficDateRange(days, end), range: String(days) })
+/** @param {string} accountId @param {string} syncDay YYYY-MM-DD */
+export function crawlerAnalyticsPath(accountId, syncDay) {
+  const q = new URLSearchParams(syncDayDateRange(syncDay))
   return `/traffic/${accountId}/cloudflare/crawler-analytics?${q.toString()}`
 }
