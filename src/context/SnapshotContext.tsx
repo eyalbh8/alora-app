@@ -19,6 +19,7 @@ import type {
 import { ErrorState } from '../components/ErrorState'
 import { Skeleton } from '../components/LoadingSpinner'
 import { lastNDaysEnding, type DateRange } from '../lib/dates'
+import { useAccountStore } from '../store/useAccountStore'
 
 interface SnapshotContextValue {
   tenant: TenantInfo
@@ -39,10 +40,12 @@ const SnapshotContext = createContext<SnapshotContextValue | null>(null)
 
 export function SnapshotProvider({ children }: { children: ReactNode }) {
   const [range, setRange] = useState<DateRange | null>(null)
+  const { selectedAccount } = useAccountStore()
 
   const tenantQuery = useQuery({
-    queryKey: queryKeys.tenant,
+    queryKey: queryKeys.tenant(selectedAccount?.id),
     queryFn: getTenant,
+    enabled: Boolean(selectedAccount),
   })
 
   useEffect(() => {
@@ -55,10 +58,10 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
 
   const snapshotsQuery = useQuery({
     queryKey: range
-      ? queryKeys.snapshots(range.startDate, range.endDate)
+      ? queryKeys.snapshots(selectedAccount?.id, range.startDate, range.endDate)
       : ['snapshots', 'pending'],
     queryFn: () => getSnapshots({ startDate: range!.startDate, endDate: range!.endDate }),
-    enabled: Boolean(range),
+    enabled: Boolean(range) && Boolean(selectedAccount),
   })
 
   const retry = useCallback(() => {

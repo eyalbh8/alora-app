@@ -1,0 +1,252 @@
+{
+  "contentTypeMapping": {
+    "concept": {
+      "preferredStyles": ["abstract-flows", "topographic", "gradient-atmosphere"],
+      "avoidStyles": ["editorial-photography"],
+      "rationale": "Abstract visuals better represent intangible ideas and concepts"
+    },
+    "product": {
+      "preferredStyles": ["editorial-photography", "geometric-minimal", "bold-shapes"],
+      "avoidStyles": ["abstract-flows", "topographic"],
+      "rationale": "Products need to be shown in context or with clean, structured backgrounds"
+    },
+    "service": {
+      "preferredStyles": ["editorial-photography", "geometric-minimal", "textured-minimal"],
+      "avoidStyles": ["liquid-chrome"],
+      "rationale": "Services benefit from human context or clean professional aesthetics"
+    },
+    "lifestyle": {
+      "preferredStyles": ["editorial-photography", "collage-cutout", "gradient-atmosphere"],
+      "avoidStyles": ["topographic", "duotone-abstract"],
+      "rationale": "Lifestyle content needs relatable, aspirational visuals"
+    },
+    "data": {
+      "preferredStyles": ["topographic", "geometric-minimal", "duotone-abstract"],
+      "avoidStyles": ["abstract-flows", "collage-cutout"],
+      "rationale": "Data and statistics benefit from structured, analytical visual language"
+    },
+    "wellness": {
+      "preferredStyles": ["gradient-atmosphere", "abstract-flows", "textured-minimal"],
+      "avoidStyles": ["bold-shapes", "liquid-chrome"],
+      "rationale": "Wellness content needs calming, serene visual treatment"
+    },
+    "tech": {
+      "preferredStyles": ["liquid-chrome", "geometric-minimal", "topographic"],
+      "avoidStyles": ["textured-minimal", "gradient-atmosphere"],
+      "rationale": "Tech content benefits from modern, cutting-edge visual language"
+    },
+    "real-estate": {
+      "preferredStyles": ["editorial-photography", "abstract-flows", "geometric-minimal", "gradient-atmosphere"],
+      "avoidStyles": ["collage-cutout", "liquid-chrome"],
+      "rationale": "Real estate uses one aspirational hero image plus abstract architectural compositions for designed supporting slides"
+    },
+    "transformation": {
+      "preferredStyles": ["abstract-flows", "topographic", "duotone-abstract"],
+      "avoidStyles": ["editorial-photography", "textured-minimal"],
+      "rationale": "Transformation stories benefit from flowing, progressive visual metaphors"
+    },
+    "quote": {
+      "preferredStyles": ["gradient-atmosphere", "textured-minimal", "geometric-minimal"],
+      "avoidStyles": ["editorial-photography", "collage-cutout"],
+      "rationale": "Quotes need clean, minimal backgrounds that don't compete with text"
+    }
+  },
+  "brandPersonalityMapping": {
+    "playful": {
+      "preferredStyles": ["bold-shapes", "collage-cutout", "abstract-flows"],
+      "boostStyles": ["collage-cutout"],
+      "avoidStyles": ["textured-minimal"],
+      "rationale": "Playful brands need energetic, fun visual language"
+    },
+    "professional": {
+      "preferredStyles": ["geometric-minimal", "textured-minimal", "editorial-photography"],
+      "boostStyles": ["textured-minimal", "geometric-minimal"],
+      "avoidStyles": ["collage-cutout", "bold-shapes"],
+      "rationale": "Professional brands need clean, sophisticated visual treatment"
+    },
+    "bold": {
+      "preferredStyles": ["bold-shapes", "duotone-abstract", "liquid-chrome"],
+      "boostStyles": ["bold-shapes", "duotone-abstract"],
+      "avoidStyles": ["gradient-atmosphere", "textured-minimal"],
+      "rationale": "Bold brands need strong, impactful visual statements"
+    },
+    "sophisticated": {
+      "preferredStyles": ["textured-minimal", "gradient-atmosphere", "editorial-photography"],
+      "boostStyles": ["textured-minimal"],
+      "avoidStyles": ["bold-shapes", "collage-cutout"],
+      "rationale": "Sophisticated brands need elegant, refined visual language"
+    },
+    "modern": {
+      "preferredStyles": ["liquid-chrome", "geometric-minimal", "abstract-flows"],
+      "boostStyles": ["liquid-chrome"],
+      "avoidStyles": ["textured-minimal"],
+      "rationale": "Modern brands need contemporary, cutting-edge visuals"
+    },
+    "authentic": {
+      "preferredStyles": ["editorial-photography", "textured-minimal", "gradient-atmosphere"],
+      "boostStyles": ["editorial-photography"],
+      "avoidStyles": ["liquid-chrome", "bold-shapes"],
+      "rationale": "Authentic brands need relatable, genuine visual treatment"
+    },
+    "creative": {
+      "preferredStyles": ["collage-cutout", "abstract-flows", "bold-shapes"],
+      "boostStyles": ["collage-cutout", "abstract-flows"],
+      "avoidStyles": ["geometric-minimal"],
+      "rationale": "Creative brands need expressive, artistic visual language"
+    },
+    "minimal": {
+      "preferredStyles": ["geometric-minimal", "gradient-atmosphere", "textured-minimal"],
+      "boostStyles": ["geometric-minimal"],
+      "avoidStyles": ["collage-cutout", "bold-shapes"],
+      "rationale": "Minimal brands need clean, simple visual treatment"
+    }
+  },
+  "slideRoleMapping": {
+    "hook": {
+      "preferredVisualRoles": ["hero", "impactful"],
+      "preferredStyles": ["editorial-photography", "bold-shapes", "duotone-abstract"],
+      "rationale": "Hook slides need strong visual impact to stop the scroll",
+      "allowRealistic": true
+    },
+    "insight": {
+      "preferredVisualRoles": ["supporting", "minimal"],
+      "preferredStyles": ["abstract-flows", "topographic", "gradient-atmosphere", "geometric-minimal"],
+      "rationale": "Insight slides benefit from abstract, conceptual visuals",
+      "allowRealistic": false
+    },
+    "proof": {
+      "preferredVisualRoles": ["supporting"],
+      "preferredStyles": ["editorial-photography", "topographic", "geometric-minimal"],
+      "rationale": "Proof slides can use structured visuals or real imagery",
+      "allowRealistic": true
+    },
+    "tip": {
+      "preferredVisualRoles": ["supporting", "minimal"],
+      "preferredStyles": ["geometric-minimal", "gradient-atmosphere", "collage-cutout"],
+      "rationale": "Tip slides benefit from clean, organized visual backgrounds",
+      "allowRealistic": false
+    },
+    "cta": {
+      "preferredVisualRoles": ["minimal"],
+      "preferredStyles": ["gradient-atmosphere", "geometric-minimal", "textured-minimal"],
+      "rationale": "CTA slides need clean backgrounds that don't compete with the call-to-action",
+      "allowRealistic": false
+    }
+  },
+  "industryCategoryDefaults": {
+    "Real Estate": {
+      "defaultStyles": ["editorial-photography", "abstract-flows", "geometric-minimal", "gradient-atmosphere"],
+      "avoidStyles": ["liquid-chrome", "collage-cutout", "bold-shapes"]
+    },
+    "Technology": {
+      "defaultStyles": ["liquid-chrome", "geometric-minimal", "topographic"],
+      "avoidStyles": ["textured-minimal", "editorial-photography"]
+    },
+    "Health & Wellness": {
+      "defaultStyles": ["gradient-atmosphere", "abstract-flows", "textured-minimal"],
+      "avoidStyles": ["bold-shapes", "liquid-chrome", "duotone-abstract"]
+    },
+    "Food & Beverage": {
+      "defaultStyles": ["editorial-photography", "collage-cutout", "gradient-atmosphere"],
+      "avoidStyles": ["topographic", "liquid-chrome"]
+    },
+    "Fashion & Beauty": {
+      "defaultStyles": ["editorial-photography", "collage-cutout", "gradient-atmosphere"],
+      "avoidStyles": ["topographic", "geometric-minimal"]
+    },
+    "Finance": {
+      "defaultStyles": ["geometric-minimal", "topographic", "textured-minimal"],
+      "avoidStyles": ["collage-cutout", "bold-shapes"]
+    },
+    "Education": {
+      "defaultStyles": ["geometric-minimal", "editorial-photography", "gradient-atmosphere"],
+      "avoidStyles": ["liquid-chrome", "duotone-abstract"]
+    },
+    "Creative Services": {
+      "defaultStyles": ["collage-cutout", "abstract-flows", "bold-shapes"],
+      "avoidStyles": ["textured-minimal", "geometric-minimal"]
+    },
+    "Consulting": {
+      "defaultStyles": ["geometric-minimal", "textured-minimal", "topographic"],
+      "avoidStyles": ["collage-cutout", "bold-shapes"]
+    },
+    "E-commerce": {
+      "defaultStyles": ["editorial-photography", "collage-cutout", "bold-shapes"],
+      "avoidStyles": ["gradient-atmosphere", "textured-minimal"]
+    }
+  },
+  "visualComplexityMapping": {
+    "simple": {
+      "preferredStyles": ["geometric-minimal", "gradient-atmosphere", "textured-minimal"],
+      "maxStylesPerCarousel": 1,
+      "rationale": "Simple carousels work best with one consistent, minimal visual style"
+    },
+    "medium": {
+      "preferredStyles": ["abstract-flows", "topographic", "editorial-photography", "collage-cutout"],
+      "maxStylesPerCarousel": 2,
+      "rationale": "Medium complexity allows for hero slide + consistent supporting style"
+    },
+    "complex": {
+      "preferredStyles": ["editorial-photography", "bold-shapes", "topographic", "abstract-flows"],
+      "maxStylesPerCarousel": 3,
+      "rationale": "Complex carousels can mix styles strategically across slide roles"
+    }
+  },
+  "selectionPriority": [
+    "brandPersonalityMapping",
+    "industryCategoryDefaults",
+    "contentTypeMapping",
+    "slideRoleMapping",
+    "visualComplexityMapping"
+  ],
+  "defaultFallbacks": {
+    "whenNoMatch": ["geometric-minimal", "gradient-atmosphere"],
+    "safeForAllBrands": ["geometric-minimal", "gradient-atmosphere", "textured-minimal"],
+    "highImpactOptions": ["editorial-photography", "bold-shapes", "duotone-abstract"]
+  },
+  "compositionRules": {
+    "negativeSpaceRequirement": {
+      "minimum": "40%",
+      "ideal": "50-60%",
+      "maximum": "80%",
+      "rationale": "Text needs space to breathe without competing with visuals"
+    },
+    "textZonePlacement": {
+      "hookSlides": ["top-third", "center", "asymmetric"],
+      "insightSlides": ["top-or-bottom", "center", "side-panels"],
+      "ctaSlides": ["center", "bottom-third"],
+      "rationale": "Different slide roles benefit from different text positioning"
+    },
+    "visualContinuity": {
+      "colorConsistency": "Use same brand colors across all slides",
+      "styleConsistency": "Use 1-2 styles max per carousel, transition intentionally",
+      "lightingConsistency": "Maintain consistent lighting treatment if using photography",
+      "rationale": "Cohesive visual flow creates professional, branded appearance"
+    }
+  },
+  "mayvenPrinciples": {
+    "description": "Core principles extracted from @mayven_____ Instagram aesthetic",
+    "principles": [
+      "Human-centered lifestyle photography over generic stock imagery",
+      "Bold, oversized typography as primary design element (in Figma, not in generated images)",
+      "Playful collage effects and contemporary UI references",
+      "Bright/pastel accents with controlled color palettes",
+      "Clean negative space and intentional breathing room",
+      "Cohesive art direction with intentional variety per slide",
+      "Social-native aesthetic: relatable, aspirational, modern"
+    ],
+    "avoidFailureModes": [
+      "Neon line icons or dark wireframe grids",
+      "Black/gold luxury corporate aesthetics",
+      "Blueprint UI or technical diagrams",
+      "Clip-art documents or generic stock scenes",
+      "Full AI-generated scene on every slide",
+      "Unrelated subject matter per slide"
+    ],
+    "applicationStrategy": {
+      "image-led-slides": "1-2 slides with editorial photography or bold abstract visuals",
+      "typography-led-slides": "Remaining slides with minimal backgrounds (gradients, textures, clean shapes)",
+      "balance": "Mix impactful visuals with clean typography-focused slides"
+    }
+  }
+}

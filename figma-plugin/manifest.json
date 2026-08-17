@@ -1,0 +1,12 @@
+{
+  "name": "Alora Carousel Importer",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma", "dev"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["https://d8af2d46554d.ngrok.app"],
+    "reasoning": "The plugin fetches carousel JSON and slide images from the Alora API via the ngrok tunnel."
+  }
+}

@@ -2,6 +2,7 @@ import { createContext, useContext, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getGeoMeta, type GeoMeta } from '../api/geo'
 import { queryKeys } from '../api/queryKeys'
+import { useAccountStore } from '../store/useAccountStore'
 
 interface GeoMetaContextValue {
   /** null while loading or when the endpoint is unavailable */
@@ -20,11 +21,14 @@ const GeoMetaContext = createContext<GeoMetaContextValue>({
 })
 
 export function GeoMetaProvider({ children }: { children: ReactNode }) {
+  const { selectedAccount } = useAccountStore()
+  
   const { data, isLoading, error } = useQuery({
-    queryKey: queryKeys.geo.meta,
+    queryKey: queryKeys.geo.meta(selectedAccount?.id),
     queryFn: getGeoMeta,
     staleTime: 30 * 60 * 1000,
     retry: false,
+    enabled: Boolean(selectedAccount),
   })
 
   const errorMessage =

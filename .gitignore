@@ -17,6 +17,9 @@ dist-ssr
 .env.*
 !.env.example
 
+# Generated carousel slide PNGs
+functions/data/carousel-assets/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

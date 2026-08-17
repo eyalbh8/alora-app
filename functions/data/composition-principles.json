@@ -1,0 +1,247 @@
+{
+  "negativeSpacePhilosophy": {
+    "coreprinciple": "40-60% of each frame should be intentionally open for text overlay. Visuals should support, not compete with, typography.",
+    "requirements": {
+      "minimum": "40% open space per slide",
+      "ideal": "50-60% open space per slide",
+      "maximum": "80% open space per slide (for quote/statement slides)"
+    },
+    "implementation": {
+      "abstract-visuals": "Use gradient density, line spacing, or shape placement to create clear text zones",
+      "photographic-visuals": "Use depth of field, composition, and subject placement to create negative space",
+      "geometric-visuals": "Place shapes intentionally to leave large open zones for text"
+    },
+    "textZoneStrategy": {
+      "top-third": "Best for headlines with supporting visuals below",
+      "bottom-third": "Best for body text with hero visuals above",
+      "center": "Best for bold statements with frame-edge visuals",
+      "side-panels": "Best for asymmetric layouts with vertical text",
+      "split": "Best for comparison or contrasting content"
+    },
+    "mayvenInspiration": "Sophisticated Instagram accounts like @mayven_____ use intentional negative space as a design element, not an afterthought. Space = elegance."
+  },
+  "hierarchyZones": {
+    "description": "How to structure visual hierarchy to support text hierarchy",
+    "headlineZone": {
+      "location": "Largest negative space area (typically top-third or center)",
+      "visualTreatment": "Minimal visual distraction, clean background",
+      "colorContrast": "Ensure 4.5:1 contrast ratio minimum for accessibility",
+      "spacing": "Minimum 80px from frame edges, 60px from other text layers"
+    },
+    "bodyZone": {
+      "location": "Secondary negative space area (typically middle or bottom-third)",
+      "visualTreatment": "Supporting visual elements OK, but keep readable",
+      "colorContrast": "4.5:1 contrast ratio minimum",
+      "spacing": "Minimum 60px from edges, 40px from headline"
+    },
+    "accentZone": {
+      "location": "Small areas for micro-labels, numbers, or icons",
+      "visualTreatment": "Can overlap with visual elements if contrast maintained",
+      "colorContrast": "3:1 contrast ratio minimum for accent text",
+      "spacing": "Minimum 40px from edges"
+    },
+    "logoZone": {
+      "location": "Consistent position across slides (typically bottom-right or top-left corner)",
+      "visualTreatment": "Always on clean background, never obscured",
+      "spacing": "Minimum 60px from edges, 40px from other elements"
+    },
+    "integration": "Visuals should create natural zones for each hierarchy level through composition, color, and depth"
+  },
+  "colorFlow": {
+    "description": "How to create visual continuity through color across carousel slides",
+    "brandColorUsage": {
+      "primary": "Use as dominant color in 60-70% of slides",
+      "secondary": "Use as supporting color in 30-40% of slides",
+      "accent": "Use sparingly for emphasis and CTA slides",
+      "strategy": "Maintain brand color presence while allowing variation in treatment"
+    },
+    "transitionStrategy": {
+      "consistent-palette": "All slides use same color palette with different compositions",
+      "progressive-shift": "Gradually shift color emphasis across slides (light to dark, cool to warm)",
+      "contrasting-punctuation": "Most slides consistent, 1-2 slides use contrasting colors for impact",
+      "recommendation": "Choose based on carousel narrative and visual complexity"
+    },
+    "socialNativePalette": {
+      "description": "Contemporary Instagram color trends",
+      "brightPastels": ["#FFE5E5", "#E5F5FF", "#F0FFE5", "#FFF5E5"],
+      "mutedTones": ["#B8A99A", "#D4C5B9", "#A4B8C4", "#C9B8A8"],
+      "boldAccents": ["#FF6B6B", "#4ECDC4", "#FFD93D", "#6BCB77"],
+      "usage": "Mix with brand colors for contemporary, social-native feel"
+    },
+    "gradientStrategy": {
+      "twoColor": "Simple, bold, high contrast (duotone aesthetic)",
+      "threeColor": "Balanced, sophisticated, depth through color",
+      "fourColor": "Complex, atmospheric, requires careful balance",
+      "direction": "Vertical for calm/sophisticated, diagonal for dynamic, radial for focus",
+      "recommendation": "Match complexity to brand personality and content type"
+    }
+  },
+  "typographyIntegration": {
+    "description": "How visuals should support (not compete with) text overlay",
+    "visualRoles": {
+      "minimal-background": {
+        "description": "Visual serves purely as background canvas for text",
+        "visualComplexity": "Very low - gradients, subtle textures, simple shapes",
+        "textDominance": "High - text is the primary design element",
+        "bestFor": ["quotes", "statements", "CTAs", "key statistics"]
+      },
+      "supporting-visual": {
+        "description": "Visual adds context and interest without dominating",
+        "visualComplexity": "Medium - icons, simple compositions, abstract forms",
+        "textDominance": "Balanced - text and visual share importance",
+        "bestFor": ["insights", "tips", "explanations", "list items"]
+      },
+      "hero-visual": {
+        "description": "Strong visual impact with strategic text placement",
+        "visualComplexity": "High - photography, complex compositions, bold imagery",
+        "textDominance": "Low to medium - visual leads, text supports",
+        "bestFor": ["hook slides", "emotional content", "product showcase"]
+      }
+    },
+    "textPlacementGuidelines": {
+      "onSimpleBackgrounds": "Center or asymmetric placement, large bold typography",
+      "onComplexBackgrounds": "Use negative space zones identified in visual, add text shadows for readability",
+      "onPhotography": "Place text in blur zones, sky, clean walls, or use overlay for contrast",
+      "onAbstractVisuals": "Align text with visual flow direction, use color contrast from composition"
+    },
+    "readabilityRequirements": {
+      "fontSize": {
+        "headlines": "56-96px for impact and readability",
+        "body": "24-36px for comfortable reading on mobile",
+        "labels": "14-20px for subtle micro-copy"
+      },
+      "fontWeight": {
+        "headlines": "700-800 (bold to extra-bold)",
+        "body": "400-600 (regular to semi-bold)",
+        "labels": "400-500 (regular to medium)"
+      },
+      "lineHeight": {
+        "headlines": "1.1-1.3 for tight, impactful",
+        "body": "1.4-1.6 for readable",
+        "labels": "1.2-1.4 for compact"
+      },
+      "letterSpacing": {
+        "headlines": "-1 to -2 for tight, modern",
+        "body": "0 for natural reading",
+        "labels": "0 to +1 for subtle emphasis"
+      },
+      "textEffects": {
+        "shadows": "Use for text on complex backgrounds (20-40px blur, 40-60% opacity)",
+        "overlays": "Semi-transparent color overlay behind text (40-80% opacity)",
+        "strokes": "Avoid - looks dated and artificial"
+      }
+    },
+    "mayvenApproach": "Bold, oversized typography is a primary design element. Text doesn't just sit on the visual - it's integrated into the composition as a graphic element."
+  },
+  "slideToSlideTransitions": {
+    "description": "How visuals create narrative flow across carousel slides",
+    "visualNarrative": {
+      "consistent-theme": {
+        "description": "All slides use same visual style with minor variations",
+        "implementation": "Same style from library, different compositions or color emphasis",
+        "bestFor": "Simple carousels (3-4 slides), single-concept content",
+        "example": "All slides use gradient-atmosphere with different color combinations"
+      },
+      "evolving-story": {
+        "description": "Visual style evolves to support narrative progression",
+        "implementation": "Start with hero visual, transition to cleaner typography-led slides",
+        "bestFor": "Medium carousels (4-5 slides), story-driven content",
+        "example": "Slide 1: editorial-photography, Slides 2-4: geometric-minimal, Slide 5: gradient-atmosphere"
+      },
+      "contrasting-punctuation": {
+        "description": "Mostly consistent with strategic visual contrast for emphasis",
+        "implementation": "3-4 slides consistent, 1 slide bold contrast for key message",
+        "bestFor": "Any carousel with a key slide that needs emphasis",
+        "example": "Slides 1-3: abstract-flows in muted tones, Slide 4: duotone-abstract in bold contrast for CTA"
+      }
+    },
+    "continuityElements": {
+      "colorThread": "Consistent brand color appears in every slide (even if minimal)",
+      "visualMotif": "Repeated shape, line style, or graphic element across slides",
+      "lightingTreatment": "If using photography, maintain consistent lighting mood",
+      "compositionalRhythm": "Alternate between dense and sparse compositions for visual rhythm",
+      "textZoneConsistency": "Keep text zones in similar positions for cohesive feel"
+    },
+    "transitionTiming": {
+      "slide1": "Hook - strongest visual impact (hero-visual or bold abstract)",
+      "slide2-3": "Build - supporting visuals that explain or develop (supporting-visual)",
+      "slide4": "Peak - key insight or proof (can be hero-visual or impactful abstract)",
+      "slide5": "Close - clean, clear CTA (minimal-background)",
+      "rationale": "Visual intensity should follow narrative arc: impact → support → impact → resolution"
+    },
+    "avoidPatterns": {
+      "randomStyleMixing": "Don't use 5 different styles with no connection",
+      "monotonicRepetition": "Don't use identical visuals on every slide",
+      "competingFocalPoints": "Don't have multiple strong visuals fighting for attention",
+      "inconsistentColorStory": "Don't jump between unrelated color palettes"
+    }
+  },
+  "mayvenEditorialPrinciples": {
+    "description": "Core design philosophy extracted from sophisticated Instagram editorial accounts",
+    "principles": {
+      "humanCentered": "Prefer lifestyle photography showing real contexts over abstract scenes or stock imagery when appropriate",
+      "typographyAsDesign": "Bold, oversized typography is a design element, not just information delivery",
+      "playfulReferences": "Contemporary UI elements, collage effects, and social-native motifs are welcome",
+      "controlledPalette": "Bright or pastel accents used strategically, never chaotic or overwhelming",
+      "intentionalSpace": "Negative space is a deliberate design choice, creating elegance and breathing room",
+      "cohesiveVariety": "Each slide feels unique but part of a cohesive art direction",
+      "socialNativeAesthetic": "Relatable, aspirational, modern - designed for Instagram, not transplanted from print"
+    },
+    "bannedElements": {
+      "neonWireframes": "No neon line icons, dark grid overlays, or technical wireframes",
+      "corporateCliche": "No black-and-gold luxury aesthetic or generic corporate stock imagery",
+      "blueprintUI": "No technical diagrams, app UI mockups, or blueprint grids",
+      "clipArtDocuments": "No floating document icons, generic paper stacks, or office clip art",
+      "unrelatedScenes": "Each slide should connect to the content, not be randomly generated",
+      "busyPatterns": "Avoid complex repeating patterns that compete with text"
+    },
+    "slideTypeBalance": {
+      "recommendation": "For 3-5 slide carousels: 1-2 IMAGE-LED slides (hero visuals) + remaining TYPOGRAPHY-LED slides (clean backgrounds)",
+      "imageLed": {
+        "count": "1-2 per carousel",
+        "purpose": "Hook, emotional impact, product showcase, scene setting",
+        "treatment": "Lifestyle photography or bold abstract with strong composition",
+        "textOverlay": "Minimal text, large headlines, strategic placement"
+      },
+      "typographyLed": {
+        "count": "2-4 per carousel",
+        "purpose": "Insights, tips, quotes, statistics, CTAs",
+        "treatment": "Minimal backgrounds (gradients, textures, simple shapes)",
+        "textOverlay": "Text is the hero, visual supports without distraction"
+      },
+      "rationale": "Balance visual impact with content delivery. Not every slide needs a complex visual."
+    }
+  },
+  "implementationChecklist": {
+    "beforeGeneration": [
+      "Identify content type and select appropriate style from library",
+      "Determine if slide is IMAGE-LED or TYPOGRAPHY-LED",
+      "Plan negative space zones based on text hierarchy",
+      "Choose brand colors and accent palette",
+      "Define visual continuity elements across slides"
+    ],
+    "duringGeneration": [
+      "Verify prompt includes NO TEXT instruction",
+      "Specify exact negative space zones and percentages",
+      "Include brand colors in prompt",
+      "Reference continuity elements (lighting, style, palette)",
+      "Add technical quality requirements (high resolution, 1:1 aspect ratio)"
+    ],
+    "afterGeneration": [
+      "Validate negative space zones are clear and usable",
+      "Verify no text, logos, or readable characters in image",
+      "Check contrast for text overlay zones (4.5:1 minimum)",
+      "Confirm visual continuity across carousel",
+      "Ensure visuals support (not compete with) intended text"
+    ]
+  },
+  "successMetrics": {
+    "negativeSpaceAdequacy": "50%+ of frame available for text overlay",
+    "visualContinuity": "Carousel feels cohesive, branded, intentionally designed",
+    "textReadability": "All text meets 4.5:1 contrast ratio on visual backgrounds",
+    "brandAlignment": "Visuals reflect brand personality and industry appropriately",
+    "socialNativeAesthetic": "Carousel looks Instagram-native, not AI-generated or corporate",
+    "contentSupport": "Visuals enhance understanding, don't distract from message",
+    "noTextInImages": "Zero generated images contain text, logos, or readable characters"
+  }
+}

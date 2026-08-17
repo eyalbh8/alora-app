@@ -1,0 +1,354 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        font-size: 12px;
+        margin: 16px;
+        color: #000;
+      }
+      h2 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 0 0 12px 0;
+      }
+      input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 12px;
+        font-family: inherit;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background: #18a0fb;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 12px;
+      }
+      button:hover {
+        background: #0d8ce8;
+      }
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+      .status {
+        margin-top: 12px;
+        padding: 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        word-break: break-word;
+      }
+      .status.success {
+        background: #d4edda;
+        color: #155724;
+      }
+      .status.error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .status.info {
+        background: #d1ecf1;
+        color: #0c5460;
+      }
+      .loading {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #18a0fb;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Alora Carousel Importer</h2>
+    <p style="margin: 0 0 12px 0; font-size: 11px; color: #666">
+      Paste your import code from Alora to create carousel frames in this file.
+    </p>
+    <input
+      type="text"
+      id="importCode"
+      placeholder="Enter 8-character import code"
+      maxlength="8"
+    />
+    <button id="importBtn">Import Carousel</button>
+    <div id="status"></div>
+
+    <script>
+      const API_ORIGIN = "https://d8af2d46554d.ngrok.app";
+      const API_BASE = API_ORIGIN + "/api/carousel";
+
+      const importCodeInput = document.getElementById("importCode");
+      const importBtn = document.getElementById("importBtn");
+      const statusDiv = document.getElementById("status");
+
+      let builtResolver = null;
+      let qaResolver = null;
+
+      function showStatus(message, type) {
+        statusDiv.innerHTML = message;
+        statusDiv.className = "status " + type;
+      }
+
+      function withNgrokBypass(url) {
+        return (
+          url +
+          (url.indexOf("?") >= 0 ? "&" : "?") +
+          "ngrok-skip-browser-warning=true"
+        );
+      }
+
+      function toPlugin(payload) {
+        parent.postMessage({ pluginMessage: payload }, "*");
+      }
+
+      async function postJson(path, body) {
+        const url = withNgrokBypass(API_BASE + path);
+        showStatus('<span class="loading"></span>POST ' + path, "info");
+        let response;
+        try {
+          response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify(body || {}),
+          });
+        } catch (err) {
+          throw new Error(
+            "Failed to reach Alora at " +
+              url +
+              " — " +
+              (err && err.message ? err.message : String(err)),
+          );
+        }
+        const text = await response.text();
+        let data = null;
+        try {
+          data = text ? JSON.parse(text) : null;
+        } catch (err) {
+          throw new Error(
+            "Alora returned non-JSON (" +
+              response.status +
+              "): " +
+              text.slice(0, 180),
+          );
+        }
+        if (!response.ok) {
+          throw new Error((data && data.error) || "HTTP " + response.status);
+        }
+        return data;
+      }
+
+      async function getImageBase64(assetRef) {
+        if (!assetRef) return null;
+        if (assetRef.indexOf("data:image/") === 0) {
+          return assetRef.split(",")[1] || null;
+        }
+        const absolute =
+          assetRef.indexOf("http") === 0 ? assetRef : API_ORIGIN + assetRef;
+        const url = withNgrokBypass(absolute);
+        const response = await fetch(url);
+        if (!response.ok)
+          throw new Error("Image fetch failed: " + response.status);
+        const buffer = await response.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        let binary = "";
+        const chunk = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunk) {
+          binary += String.fromCharCode.apply(
+            null,
+            bytes.subarray(i, i + chunk),
+          );
+        }
+        return btoa(binary);
+      }
+
+      importBtn.addEventListener("click", async function () {
+        const code = importCodeInput.value.trim();
+        if (code.length !== 8) {
+          showStatus("Please enter a valid 8-character import code", "error");
+          return;
+        }
+
+        importBtn.disabled = true;
+        try {
+          showStatus(
+            '<span class="loading"></span>Claiming import job…',
+            "info",
+          );
+          const job = await postJson("/figma/claim", { importCode: code });
+
+          await postJson("/figma/status", {
+            importCode: code,
+            status: "importing",
+          }).catch(function () {});
+
+          const images = {};
+          const assets = {};
+          const step6Images =
+            (((job.generation || {}).stepOutputs || {}).step6 || {}).images ||
+            [];
+          for (let i = 0; i < step6Images.length; i++) {
+            const img = step6Images[i];
+            if (!img || img.status !== "generated" || !img.assetRef) continue;
+            showStatus(
+              '<span class="loading"></span>Downloading slide ' +
+                img.slideIndex +
+                "…",
+              "info",
+            );
+            try {
+              const b64 = await getImageBase64(img.assetRef);
+              if (b64) images[String(img.slideIndex)] = b64;
+            } catch (err) {
+              showStatus(
+                "Slide " + img.slideIndex + " image skipped: " + err.message,
+                "info",
+              );
+            }
+          }
+
+          const step7Slides =
+            (((job.generation || {}).stepOutputs || {}).step7 || {}).slides ||
+            [];
+          const logoRef = step7Slides
+            .map(function (slide) {
+              return slide && slide.logoLayer && slide.logoLayer.assetRef;
+            })
+            .find(Boolean);
+          if (logoRef) {
+            showStatus(
+              '<span class="loading"></span>Downloading brand logo…',
+              "info",
+            );
+            try {
+              assets.logo = await getImageBase64(logoRef);
+            } catch (err) {
+              showStatus("Brand logo skipped: " + err.message, "info");
+            }
+          }
+
+          showStatus(
+            '<span class="loading"></span>Creating Figma frames…',
+            "info",
+          );
+          const built = await new Promise(function (resolve, reject) {
+            builtResolver = { resolve: resolve, reject: reject };
+            toPlugin({
+              type: "build",
+              importCode: code,
+              job: job,
+              images: images,
+              assets: assets,
+            });
+            setTimeout(function () {
+              if (builtResolver) {
+                builtResolver = null;
+                reject(new Error("Figma timed out while creating frames"));
+              }
+            }, 60000);
+          });
+
+          if (built.previewPngs && built.previewPngs.length) {
+            showStatus(
+              '<span class="loading"></span>Checking final typography…',
+              "info",
+            );
+            const qa = await postJson("/figma/qa", {
+              importCode: code,
+              previews: built.previewPngs,
+            });
+            await new Promise(function (resolve, reject) {
+              qaResolver = { resolve: resolve, reject: reject };
+              toPlugin({ type: "apply-qa", results: qa.results || [] });
+              setTimeout(function () {
+                if (qaResolver) {
+                  qaResolver = null;
+                  reject(new Error("Figma QA correction timed out"));
+                }
+              }, 20000);
+            });
+          }
+
+          showStatus('<span class="loading"></span>Saving Figma job…', "info");
+          await postJson("/figma/complete", built.completePayload);
+
+          showStatus(
+            "Imported " + built.framesCreated + " frames onto a new page.",
+            "success",
+          );
+          importCodeInput.value = "";
+        } catch (err) {
+          const message = err && err.message ? err.message : String(err);
+          await postJson("/figma/status", {
+            importCode: code,
+            status: "failed",
+            error: message,
+          }).catch(function () {});
+          showStatus(
+            "Import failed: " +
+              message +
+              ". The code is preserved so you can retry.",
+            "error",
+          );
+        }
+        importBtn.disabled = false;
+      });
+
+      onmessage = function (event) {
+        const msg = event.data && event.data.pluginMessage;
+        if (!msg) return;
+        if (msg.type === "built" && builtResolver) {
+          const done = builtResolver;
+          builtResolver = null;
+          done.resolve(msg);
+          return;
+        }
+        if (msg.type === "qa-applied" && qaResolver) {
+          const done = qaResolver;
+          qaResolver = null;
+          done.resolve(msg);
+          return;
+        }
+        if (msg.type === "import-error") {
+          if (builtResolver) {
+            const done = builtResolver;
+            builtResolver = null;
+            done.reject(new Error(msg.error || "Figma build failed"));
+          } else if (qaResolver) {
+            const done = qaResolver;
+            qaResolver = null;
+            done.reject(new Error(msg.error || "Figma QA correction failed"));
+          } else {
+            showStatus("Import failed: " + msg.error, "error");
+            importBtn.disabled = false;
+          }
+        }
+      };
+    </script>
+  </body>
+</html>

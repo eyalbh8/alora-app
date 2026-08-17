@@ -1,6 +1,6 @@
-# Alora (white-label snapshots)
+# Alora (white-label analytics)
 
-React + Vite + TypeScript app that renders **Alora analytics screens from a Postgres snapshot DB** — not live upstream APIs.
+React + Vite + TypeScript app that renders **Alora analytics screens from a Postgres snapshot DB** with **Descope authentication** and **multi-tenant account switching**.
 
 ## Screens
 
@@ -20,33 +20,89 @@ Filters are applied **client-side** on payload JSON. Unavailable dimensions are 
 
 ```bash
 npm install
-cp .env.example .env   # fill DATABASE_URL + WHITELABEL_TENANT_ID
+cp .env.example .env   # fill DATABASE_URL, DESCOPE_PROJECT_ID, VITE_DESCOPE_PROJECT_ID
 npm run dev
 ```
 
-Open http://localhost:5173.
+Open http://localhost:5173. You'll be redirected to the Descope login flow.
+
+### Environment Variables
 
 | Variable | Purpose |
 | --- | --- |
 | `DATABASE_URL` | **Server-only.** Postgres connection to `whitelabel_*` tables. |
-| `WHITELABEL_TENANT_ID` | **Server-only.** Fixed tenant UUID (`whitelabel_tenants.id`). |
+| `DESCOPE_PROJECT_ID` | **Server-only.** Your Descope project ID for JWT verification. |
+| `VITE_DESCOPE_PROJECT_ID` | **Client.** Same Descope project ID, exposed to the browser for auth. |
+| `VITE_DESCOPE_FLOW_ID` | **Client.** Optional Descope flow ID (defaults to `sign-up-or-in`). |
+| `WHITELABEL_TENANT_ID` | **Server-only.** Used by sync/backfill scripts only (not browser requests). |
 | `ALLOWED_ORIGIN` | Lambda only — CORS allowlist (optional). |
 
-Never prefix `DATABASE_URL` or `WHITELABEL_TENANT_ID` with `VITE_`.
+Never prefix `DATABASE_URL` or `DESCOPE_PROJECT_ID` with `VITE_`.
+
+### Database Schema
+
+Apply the schemas in order:
+
+1. **Core snapshot schema** (if not already applied):
+   ```bash
+   psql "$DATABASE_URL" -f db/schema_relational_mirror.sql
+   ```
+
+2. **Auth & membership schema**:
+   ```bash
+   psql "$DATABASE_URL" -f db/schema_auth.sql
+   ```
+
+### Seeding Users & Memberships
+
+After a user logs in for the first time via Descope, their record is automatically created in `wl_users`. To grant access:
+
+**Grant admin access** (can see all enabled tenants):
+```sql
+UPDATE wl_users SET is_admin = true WHERE email = 'admin@example.com';
+```
+
+**Grant specific tenant membership** (non-admins):
+```sql
+INSERT INTO wl_user_tenants (user_id, tenant_id, role)
+VALUES ('descope-user-id', 'tenant-uuid-here', 'member');
+```
+
+To find the Descope user ID after first login:
+```sql
+SELECT id, email, name, is_admin FROM wl_users WHERE email = 'user@example.com';
+```
 
 ## Architecture
 
 ```
-Browser → /api/snapshots/* → [Vite middleware (dev) | Lambda (prod)] → Postgres
+Browser → Descope JWT + X-Alora-Tenant-Id → [Vite middleware (dev) | Lambda (prod)] → Postgres
 ```
 
-The browser never receives credentials and cannot choose a tenant. Endpoints:
+All data endpoints require:
+- **Authentication**: `Authorization: Bearer <Descope JWT>` header
+- **Tenant selection**: `X-Alora-Tenant-Id: <tenant-uuid>` header
 
-- `GET /api/snapshots/health`
-- `GET /api/snapshots/tenant`
-- `GET /api/snapshots/snapshots?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&screens=a,b`
+The API verifies JWT, checks user membership for the requested tenant, then returns tenant-scoped data.
+
+Endpoints:
+
+- `GET /api/snapshots/health` — no auth required
+- `GET /api/snapshots/accounts` — list accessible tenants
+- `GET /api/snapshots/tenant` — tenant metadata (requires auth + tenant header)
+- `GET /api/snapshots/snapshots?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&screens=a,b` — snapshots (requires auth + tenant header)
+- `GET /api/snapshots/geo/*` — GEO endpoints (requires auth + tenant header)
 
 Date ranges are capped at **90 days**.
+
+### Account Switching
+
+Users with access to multiple tenants can switch via the sidebar account switcher (under the Alora logo). On switch:
+- `selectedAccount` is updated in localStorage (`alora-selected-account`)
+- All React Query caches are invalidated
+- Data re-fetches for the new tenant
+
+Admins see all enabled tenants; non-admins see only their explicit memberships.
 
 ## Deploy to Amplify
 

@@ -57,6 +57,39 @@ export async function loadTenant(db, tenantId) {
   return rows[0] ?? null
 }
 
+/**
+ * Load the iGEO MCP API key stored on this tenant.
+ * Do not include this column in tenant list / public JSON.
+ * @param {import('pg').Pool | import('pg').Client} db
+ * @param {string} tenantId
+ * @returns {Promise<string | null>}
+ */
+export async function getTenantMcpKey(db, tenantId) {
+  const { rows } = await db.query(
+    `SELECT igeo_mcp_api_key
+     FROM whitelabel_tenants
+     WHERE id = $1`,
+    [tenantId],
+  )
+  return rows[0]?.igeo_mcp_api_key || null
+}
+
+/**
+ * Save or clear the iGEO MCP API key for this tenant.
+ * Pass null to disconnect.
+ * @param {import('pg').Pool | import('pg').Client} db
+ * @param {string} tenantId
+ * @param {string | null} key
+ */
+export async function setTenantMcpKey(db, tenantId, key) {
+  await db.query(
+    `UPDATE whitelabel_tenants
+     SET igeo_mcp_api_key = $2
+     WHERE id = $1`,
+    [tenantId, key],
+  )
+}
+
 export async function listAvailableDays(db, tenantId) {
   const { rows } = await db.query(
     `SELECT er.day::text AS day,

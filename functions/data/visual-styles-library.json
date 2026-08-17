@@ -1,0 +1,460 @@
+[
+  {
+    "id": "abstract-flows",
+    "name": "Abstract Flows",
+    "category": "abstract",
+    "description": "Flowing, organic shapes with liquid gradients. Inspired by @mayven_____ aesthetic with smooth color transitions and sophisticated spacing.",
+    "visualCharacteristics": {
+      "elements": [
+        "flowing curves",
+        "gradient transitions",
+        "layered depth",
+        "organic shapes",
+        "translucent overlays"
+      ],
+      "colors": "smooth gradients between 2-4 brand colors",
+      "texture": "smooth, liquid, contemporary",
+      "style": "modern, fluid, sophisticated"
+    },
+    "composition": {
+      "negativeSpace": "50-60% open for text, usually top or bottom thirds",
+      "textZones": ["top-third", "bottom-third", "side-panels"],
+      "visualFocus": "center-weighted or diagonal flow",
+      "density": "balanced with intentional breathing room"
+    },
+    "bestFor": [
+      "concepts",
+      "feelings",
+      "transformation",
+      "flow",
+      "connection",
+      "wellness",
+      "lifestyle",
+      "abstract ideas"
+    ],
+    "avoidFor": [
+      "specific products",
+      "technical data",
+      "literal product catalogs",
+      "literal property renderings"
+    ],
+    "promptTemplate": "Art-directed abstract editorial composition with smooth flowing bands in {colors}, layered translucent forms, subtle paper grain, and one restrained contour-line motif. Build 2-4 substantial overlapping shapes with consistent rounded geometry, not random decoration. {composition} composition with a deliberately designed solid or softly textured panel in {textZone} for later text overlay. Sophisticated contemporary Instagram design with visual rhythm and depth. NO TEXT, no words, no letters, no readable characters. 1:1 aspect ratio, Instagram-ready, high resolution.",
+    "technicalNotes": {
+      "imageQuality": "high",
+      "style": "natural",
+      "colorGradients": true,
+      "avoidElements": ["neon lines", "wireframes", "clip art", "stock imagery"]
+    }
+  },
+  {
+    "id": "topographic",
+    "name": "Topographic Abstract",
+    "category": "abstract",
+    "description": "Contour lines creating abstract landscape patterns. Sophisticated, data-inspired aesthetic with layered depth.",
+    "visualCharacteristics": {
+      "elements": [
+        "contour lines",
+        "elevation patterns",
+        "layered depth",
+        "line work",
+        "topographic maps"
+      ],
+      "colors": "2-3 color duotone or gradient overlay on line work",
+      "texture": "linear, technical yet elegant",
+      "style": "sophisticated, data-inspired"
+    },
+    "composition": {
+      "negativeSpace": "40-50% through line density variation",
+      "textZones": ["center", "asymmetric-thirds", "top-heavy"],
+      "visualFocus": "layered depth through line variation",
+      "density": "variable - dense in some areas, sparse in others"
+    },
+    "bestFor": [
+      "growth",
+      "journey",
+      "layers",
+      "depth",
+      "exploration",
+      "data visualization",
+      "progress",
+      "mapping"
+    ],
+    "avoidFor": [
+      "emotional content",
+      "lifestyle",
+      "products",
+      "portraits"
+    ],
+    "promptTemplate": "Topographic contour line pattern creating abstract landscape. Layered elevation lines in {colors} with varying line density. Technical yet elegant aesthetic. Lines create depth and negative space zones perfect for text overlay. {composition} with clear {textZone} for typography. NO TEXT, no labels, no words. Sophisticated, data-inspired visual design. 1:1 aspect ratio, high resolution.",
+    "technicalNotes": {
+      "imageQuality": "high",
+      "style": "natural",
+      "colorGradients": true,
+      "avoidElements": ["actual maps", "real locations", "text labels"]
+    }
+  },
+  {
+    "id": "geometric-minimal",
+    "name": "Geometric Minimal",
+    "category": "minimal",
+    "description": "Clean geometric shapes with bold colors and intentional whitespace. Modern, minimalist aesthetic.",
+    "visualCharacteristics": {
+      "elements": [
+        "simple geometric shapes",
+        "circles, squares, triangles",
+        "clean lines",
+        "minimal forms",
+        "bold color blocks"
+      ],
+      "colors": "2-3 brand colors in bold, separated blocks",
+      "texture": "clean, flat, modern",
+      "style": "minimalist, bold, contemporary"
+    },
+    "composition": {
+      "negativeSpace": "35-50% structured text-safe space inside or beside bold shapes",
+      "textZones": ["opposite-to-shapes", "center-when-shapes-edge", "top-or-bottom"],
+      "visualFocus": "three to five large rounded geometric elements or image windows",
+      "density": "balanced editorial density, never sparse or empty"
+    },
+    "bestFor": [
+      "statements",
+      "quotes",
+      "bold messages",
+      "modern brands",
+      "tech",
+      "design services",
+      "clean aesthetic"
+    ],
+    "avoidFor": [
+      "complex stories",
+      "emotional depth",
+      "nature themes",
+      "organic content"
+    ],
+    "promptTemplate": "Designed editorial grid using 3-5 large rounded rectangles, circles, cropped architectural photo windows, and bold {colors} color fields. Repeat one corner radius and one fine-line accent for coherence. Use controlled overlap, varied scale, and clear hierarchy. {composition} with a substantial contrasting panel in {textZone} reserved for later text. Rich but disciplined, like a thoughtfully assembled magazine infographic. NO TEXT, no words, no letters, no generic icons. 1:1 aspect ratio, high resolution.",
+    "technicalNotes": {
+      "imageQuality": "high",
+      "style": "natural",
+      "colorGradients": false,
+      "avoidElements": ["complex patterns", "multiple small shapes", "texture"]
+    }
+  },
+  {
+    "id": "gradient-atmosphere",
+    "name": "Gradient Atmosphere",
+    "category": "abstract",
+    "description": "Atmospheric editorial compositions combining gradients, flowing fields, contour details, and structured text panels.",
+    "visualCharacteristics": {
+      "elements": [
+        "soft color gradients",
+        "atmospheric depth",
+        "subtle transitions",
+        "flowing color fields",
+        "fine contour accents",
+        "structured text-safe panels"
+      ],
+      "colors": "smooth 2-4 color gradients, vertical or diagonal",
+      "texture": "soft, atmospheric, ethereal",
+      "style": "serene, elegant, spacious"
+    },
+    "composition": {
+      "negativeSpace": "40-55% designed text-safe panels integrated into the composition",
+      "textZones": ["anywhere", "center", "top-third", "bottom-third"],
+      "visualFocus": "layered atmospheric flow with one clear focal curve or framed window",
+      "density": "balanced, elegant, and visibly art-directed"
+    },
+    "bestFor": [
+      "quotes",
+      "statements",
+      "calm content",
+      "wellness",
+      "mindfulness",
+      "luxury",
+      "elegant messaging"
+    ],
+    "avoidFor": [
+      "energetic content",
+      "product shots",
+      "technical content",
+      "complex information"
+    ],
+    "promptTemplate": "Sophisticated atmospheric editorial composition transitioning between {colors}, with layered flowing color fields, a translucent rounded panel, subtle paper grain, and restrained contour-line or architectural-line details. Use {composition} direction and integrate a clearly designed contrasting text-safe zone rather than empty whitespace. Serene but visually substantial, cohesive magazine-art-direction quality. NO TEXT, no words, no letters, no logos. 1:1 aspect ratio, high resolution.",
+    "technicalNotes": {
+      "imageQuality": "high",
+      "style": "natural",
+      "colorGradients": true,
+      "avoidElements": ["harsh transitions", "plain gradient-only backgrounds", "empty white fields", "tiny isolated decoration"]
+    }
+  },
+  {
+    "id": "duotone-abstract",
+    "name": "Duotone Abstract",
+    "category": "abstract",
+    "description": "Two-color abstract compositions with high contrast. Bold, modern aesthetic with strong visual impact.",
+    "visualCharacteristics": {
+      "elements": [
+        "two dominant colors",
+        "abstract forms",
+        "high contrast",
+        "bold shapes",
+        "dramatic composition"
+      ],
+      "colors": "strictly two brand colors with high contrast",
+      "texture": "bold, dramatic, impactful",
+      "style": "modern, striking, memorable"
+    },
+    "composition": {
+      "negativeSpace": "40-50% in one of the two colors",
+      "textZones": ["lighter-color-zone", "split-horizontal", "asymmetric"],
+      "visualFocus": "strong contrast between two color zones",
+      "density": "medium, bold presence"
+    },
+    "bestFor": [
+      "bold statements",
+      "impact",
+      "contrast",
+      "modern brands",
+      "memorable content",
+      "strong messaging"
+    ],
+    "avoidFor": [
+      "subtle messaging",
+      "luxury brands",
+      "calming content",
+      "multi-faceted stories"
+    ],
+    "promptTemplate": "Bold duotone abstract composition using only {color1} and {color2}. High contrast abstract forms creating dramatic visual impact. {composition} with clear {textZone} for text in the lighter color zone. Modern, striking aesthetic with strong color blocking. NO TEXT, no gradients beyond the two colors. Bold contemporary Instagram design. 1:1 aspect ratio, high resolution.",
+    "technicalNotes": {
+      "imageQuality": "high",
+      "style": "vivid",
+      "colorGradients": false,
+      "avoidElements": ["multiple colors", "soft transitions", "detailed imagery"]
+    }
+  },
+  {
+    "id": "textured-minimal",
+    "name": "Textured Minimalism",
+    "category": "minimal",
+    "description": "Subtle textures like paper grain or fabric with minimal color palette. Sophisticated, understated elegance.",
+    "visualCharacteristics": {
+      "elements": [
+        "paper texture",
+        "fabric grain",
+        "subtle patterns",
+        "organic textures",
+        "minimal forms"
+      ],
+      "colors": "1-2 muted brand colors with texture overlay",
+      "texture": "subtle, tactile, organic",
+      "style": "sophisticated, understated, elegant"
+    },
+    "composition": {
+      "negativeSpace": "70-80% textured background as canvas",
+      "textZones": ["center", "anywhere", "top-or-bottom"],
+      "visualFocus": "subtle texture, no strong focal point",
+      "density": "very light, texture provides interest"
+    },
+    "bestFor": [
+      "luxury brands",
+      "elegant messaging",
+      "sophisticated content",
+      "craftsmanship",
+      "quality focus",
+      "timeless aesthetic"
+    ],
+    "avoidFor": [
+      "energetic content",
+      "tech brands",
+      "bold statements",
+      "youth-focused content"
+    ],
+    "promptTemplate": "Subtle textured background with paper grain or organic fabric texture in {colors}. Minimal, sophisticated aesthetic with elegant tactile quality. {composition} with open {textZone} for text overlay. Understated luxury feel, no harsh patterns. NO TEXT, no logos, no imagery. Pure textured minimalist background. 1:1 aspect ratio, high resolution.",
+    "technicalNotes": {
+      "imageQuality": "high",
+      "style": "natural",
+      "colorGradients": false,
+      "avoidElements": ["busy patterns", "multiple textures", "strong imagery"]
+    }
+  },
+  {
+    "id": "bold-shapes",
+    "name": "Bold Color Shapes",
+    "category": "bold",
+    "description": "Large geometric forms with dramatic color blocking. High energy, contemporary aesthetic.",
+    "visualCharacteristics": {
+      "elements": [
+        "large geometric forms",
+        "dramatic color blocks",
+        "overlapping shapes",
+        "bold composition",
+        "contemporary forms"
+      ],
+      "colors": "3-4 brand colors in bold, separated zones",
+      "texture": "flat, bold, contemporary",
+      "style": "energetic, modern, playful"
+    },
+    "composition": {
+      "negativeSpace": "30-40% in clear zones between shapes",
+      "textZones": ["shape-intersection", "largest-shape", "edge-zones"],
+      "visualFocus": "intersecting large shapes",
+      "density": "medium-high, bold presence"
+    },
+    "bestFor": [
+      "energetic brands",
+      "playful content",
+      "creative services",
+      "modern brands",
+      "bold messaging",
+      "youth audience"
+    ],
+    "avoidFor": [
+      "luxury brands",
+      "calm content",
+      "professional services",
+      "sophisticated messaging"
+    ],
+    "promptTemplate": "Bold geometric composition with large overlapping shapes in {colors}. Dramatic color blocking with contemporary forms creating energetic visual. {composition} with clear negative space in {textZone} for text. Playful, modern Instagram aesthetic. NO TEXT, no small details, no patterns. Bold contemporary shapes only. 1:1 aspect ratio, high resolution.",
+    "technicalNotes": {
+      "imageQuality": "high",
+      "style": "vivid",
+      "colorGradients": false,
+      "avoidElements": ["small shapes", "complex patterns", "realistic imagery"]
+    }
+  },
+  {
+    "id": "liquid-chrome",
+    "name": "Liquid Chrome",
+    "category": "contemporary",
+    "description": "Modern reflective surfaces, glass morphism, metallic gradients. Ultra-contemporary digital aesthetic.",
+    "visualCharacteristics": {
+      "elements": [
+        "reflective surfaces",
+        "glass morphism",
+        "metallic gradients",
+        "liquid metal",
+        "contemporary 3D forms"
+      ],
+      "colors": "brand colors with metallic/chrome overlay effects",
+      "texture": "smooth, reflective, futuristic",
+      "style": "ultra-modern, digital, cutting-edge"
+    },
+    "composition": {
+      "negativeSpace": "40-50% through reflective negative zones",
+      "textZones": ["matte-zones", "edges", "asymmetric"],
+      "visualFocus": "reflective liquid forms",
+      "density": "medium, balanced between chrome and space"
+    },
+    "bestFor": [
+      "tech brands",
+      "innovation",
+      "future-focused content",
+      "digital products",
+      "cutting-edge brands",
+      "premium tech"
+    ],
+    "avoidFor": [
+      "traditional brands",
+      "organic content",
+      "wellness",
+      "nature themes"
+    ],
+    "promptTemplate": "Liquid chrome composition with reflective metallic surfaces in {colors}. Glass morphism effects with smooth gradients and contemporary 3D forms. {composition} with clear {textZone} for text overlay. Ultra-modern, digital aesthetic. NO TEXT, no logos, no UI elements. Pure liquid chrome abstract design. 1:1 aspect ratio, high resolution.",
+    "technicalNotes": {
+      "imageQuality": "high",
+      "style": "vivid",
+      "colorGradients": true,
+      "avoidElements": ["flat design", "organic textures", "traditional imagery"]
+    }
+  },
+  {
+    "id": "editorial-photography",
+    "name": "Editorial Photography",
+    "category": "realistic",
+    "description": "Professional lifestyle or product photography with editorial treatment. Human-centered, aspirational aesthetic.",
+    "visualCharacteristics": {
+      "elements": [
+        "lifestyle photography",
+        "product in context",
+        "human element",
+        "natural setting",
+        "editorial composition"
+      ],
+      "colors": "natural with brand color accents or filters",
+      "texture": "photographic, professional, authentic",
+      "style": "editorial, aspirational, social-native"
+    },
+    "composition": {
+      "negativeSpace": "30-50% through composition and depth of field",
+      "textZones": ["background-blur", "sky", "negative-space", "edges"],
+      "visualFocus": "subject with intentional negative space",
+      "density": "medium, professional composition"
+    },
+    "bestFor": [
+      "products",
+      "lifestyle content",
+      "real estate",
+      "food and beverage",
+      "fashion",
+      "tangible services",
+      "human stories"
+    ],
+    "avoidFor": [
+      "abstract concepts",
+      "tech products",
+      "data content",
+      "purely conceptual messaging"
+    ],
+    "promptTemplate": "Professional lifestyle photography showing {subject} in natural setting. Editorial composition with {colors} color treatment. Bright natural daylight, shallow depth of field creating negative space in {textZone}. Instagram-native aesthetic, aspirational yet authentic. {composition} with intentional space for text overlay. NO TEXT, no logos, no clip art, no stock imagery feel. Contemporary editorial photography. 1:1 aspect ratio, high resolution.",
+    "technicalNotes": {
+      "imageQuality": "high",
+      "style": "natural",
+      "colorGradients": false,
+      "avoidElements": ["stock photo aesthetic", "generic scenes", "artificial lighting", "posed shots"]
+    }
+  },
+  {
+    "id": "collage-cutout",
+    "name": "Collage & Cutout",
+    "category": "contemporary",
+    "description": "Playful collage effects with cutout details and contemporary UI references. Social-native, creative aesthetic.",
+    "visualCharacteristics": {
+      "elements": [
+        "cutout shapes",
+        "collage composition",
+        "layered elements",
+        "contemporary motifs",
+        "playful arrangement"
+      ],
+      "colors": "brand colors with bright/pastel accents",
+      "texture": "layered, playful, contemporary",
+      "style": "social-native, creative, modern"
+    },
+    "composition": {
+      "negativeSpace": "40-60% through strategic element placement",
+      "textZones": ["between-elements", "largest-open-zone", "asymmetric"],
+      "visualFocus": "arranged elements with breathing room",
+      "density": "medium, playful but not cluttered"
+    },
+    "bestFor": [
+      "creative brands",
+      "social content",
+      "playful messaging",
+      "modern brands",
+      "youth audience",
+      "community focus"
+    ],
+    "avoidFor": [
+      "luxury brands",
+      "professional services",
+      "serious topics",
+      "corporate content"
+    ],
+    "promptTemplate": "Contemporary collage composition with cutout shapes and layered elements in {colors} with bright accents. Playful arrangement creating visual interest while maintaining {textZone} for text. Social-native aesthetic with clean negative space. {composition} with intentional breathing room. NO TEXT, no logos, no busy patterns. Clean playful collage design. 1:1 aspect ratio, high resolution.",
+    "technicalNotes": {
+      "imageQuality": "high",
+      "style": "vivid",
+      "colorGradients": false,
+      "avoidElements": ["cluttered composition", "too many elements", "traditional collage feel"]
+    }
+  }
+]

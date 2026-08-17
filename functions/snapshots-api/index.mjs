@@ -2,9 +2,9 @@
  * Read-only whitelabel snapshot API for AWS Amplify / Lambda Function URL.
  *
  * Browser → Amplify rewrite `/api/snapshots/*` → this function → Postgres
- * Tenant is fixed via WHITELABEL_TENANT_ID (never accepted from the client).
+ * Requires Descope JWT auth; tenant selected via X-Alora-Tenant-Id header.
  */
-import { getPool, getTenantId, loadSnapshots, loadTenant, listAvailableDays, SCREEN_KEYS } from './db.mjs'
+import { getPool, loadSnapshots, loadTenant, listAvailableDays, SCREEN_KEYS } from './db.mjs'
 import {
   geoCompetitors,
   geoDashboard,
@@ -16,6 +16,8 @@ import {
   geoResponses,
   geoSentiment,
 } from './geo.mjs'
+import { verifyToken, upsertUser, canAccessTenant } from './auth.mjs'
+import { listAccessibleTenants } from './accounts.mjs'
 
 function corsHeaders(requestHeaders = {}) {
   const allowed = process.env.ALLOWED_ORIGIN || '*'
@@ -25,7 +27,7 @@ function corsHeaders(requestHeaders = {}) {
     'Access-Control-Allow-Origin': allowOrigin,
     'Access-Control-Allow-Methods': 'GET,OPTIONS',
     'Access-Control-Allow-Headers':
-      requestHeaders['access-control-request-headers'] || 'Content-Type',
+      requestHeaders['access-control-request-headers'] || 'Content-Type, Authorization, X-Alora-Tenant-Id',
     'Access-Control-Max-Age': '86400',
   }
 }
@@ -75,12 +77,41 @@ export const handler = async (event) => {
 
   try {
     const db = getPool()
-    const tenantId = getTenantId()
     const path = parsePath(event)
     const q = queryParams(event)
 
     if (path === '/' || path === '/health') {
       return json(200, { ok: true, screens: SCREEN_KEYS }, requestHeaders)
+    }
+
+    // All other routes require authentication
+    const authHeader = getHeader(requestHeaders, 'authorization')
+    let authUser
+    try {
+      authUser = await verifyToken(authHeader)
+    } catch (err) {
+      return json(401, { error: 'Unauthorized: ' + err.message }, requestHeaders)
+    }
+
+    // Upsert user record
+    const user = await upsertUser(db, authUser)
+
+    // /accounts endpoint: list accessible tenants
+    if (path === '/accounts') {
+      const accounts = await listAccessibleTenants(db, user.id, user.isAdmin)
+      return json(200, { accounts }, requestHeaders)
+    }
+
+    // All data routes require X-Alora-Tenant-Id header
+    const tenantId = getHeader(requestHeaders, 'x-alora-tenant-id')
+    if (!tenantId) {
+      return json(400, { error: 'Missing X-Alora-Tenant-Id header' }, requestHeaders)
+    }
+
+    // Check membership/access
+    const hasAccess = await canAccessTenant(db, user.id, tenantId, user.isAdmin)
+    if (!hasAccess) {
+      return json(403, { error: 'Forbidden: no access to this tenant' }, requestHeaders)
     }
 
     if (path === '/tenant') {
@@ -149,6 +180,3 @@ export const handler = async (event) => {
     return json(status, { error: message }, requestHeaders)
   }
 }
-
-// unused but keeps bundlers from tree-shaking getHeader if reused later
-void getHeader

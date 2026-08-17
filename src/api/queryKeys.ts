@@ -1,19 +1,30 @@
 import type { GeoFilters } from './types'
 
 export const queryKeys = {
-  tenant: ['tenant'] as const,
-  snapshots: (start: string, end: string) => ['snapshots', start, end] as const,
+  accounts: ['accounts'] as const,
+  tenant: (accountId?: string) => ['tenant', accountId] as const,
+  snapshots: (accountId: string | undefined, start: string, end: string) =>
+    ['snapshots', accountId, start, end] as const,
   geo: {
-    meta: ['geo', 'meta'] as const,
-    dashboard: (filters: GeoFilters) => ['geo', 'dashboard', filters] as const,
-    prompts: (filters: GeoFilters) => ['geo', 'prompts', filters] as const,
-    mentionsAndResponses: (filters: GeoFilters) => ['geo', 'mentionsAndResponses', filters] as const,
-    sentimentAndResponses: (filters: GeoFilters) => ['geo', 'sentimentAndResponses', filters] as const,
-    competitors: (filters: GeoFilters) => ['geo', 'competitors', filters] as const,
-    responses: (filters: GeoFilters, pagination?: { skip?: number; take?: number }) =>
-      ['geo', 'responses', filters, pagination] as const,
-    responseDetail: (id: string) => ['geo', 'response', id] as const,
-    providerPrompts: (provider: string, filters: GeoFilters) =>
-      ['geo', 'providerPrompts', provider, filters] as const,
+    meta: (accountId?: string) => ['geo', 'meta', accountId] as const,
+    dashboard: (accountId: string | undefined, filters: GeoFilters) =>
+      ['geo', 'dashboard', accountId, filters] as const,
+    prompts: (accountId: string | undefined, filters: GeoFilters) =>
+      ['geo', 'prompts', accountId, filters] as const,
+    mentionsAndResponses: (accountId: string | undefined, filters: GeoFilters) =>
+      ['geo', 'mentionsAndResponses', accountId, filters] as const,
+    sentimentAndResponses: (accountId: string | undefined, filters: GeoFilters) =>
+      ['geo', 'sentimentAndResponses', accountId, filters] as const,
+    competitors: (accountId: string | undefined, filters: GeoFilters) =>
+      ['geo', 'competitors', accountId, filters] as const,
+    responses: (
+      accountId: string | undefined,
+      filters: GeoFilters,
+      pagination?: { skip?: number; take?: number }
+    ) => ['geo', 'responses', accountId, filters, pagination] as const,
+    responseDetail: (accountId: string | undefined, id: string) =>
+      ['geo', 'response', accountId, id] as const,
+    providerPrompts: (accountId: string | undefined, provider: string, filters: GeoFilters) =>
+      ['geo', 'providerPrompts', accountId, provider, filters] as const,
   },
 }

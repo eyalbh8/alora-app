@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useGeoMeta } from '../context/GeoMetaContext'
 import { useSnapshots } from '../context/SnapshotContext'
+import { AccountSwitcher } from './AccountSwitcher'
 
 const NAV = [
   {
@@ -32,6 +33,10 @@ const NAV = [
     to: '/ai-crawlers',
     label: 'AI Crawlers',
   },
+  {
+    to: '/carousel',
+    label: 'Carousel',
+  },
 ]
 
 export function Layout() {
@@ -51,6 +56,10 @@ export function Layout() {
           <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-300">
             AI Favorite
           </span>
+        </div>
+
+        <div className="mb-4 px-4">
+          <AccountSwitcher />
         </div>
 
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-4">

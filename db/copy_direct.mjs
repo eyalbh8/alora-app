@@ -100,7 +100,15 @@ async function main() {
      VALUES ($1, $2, $3, $4, $5, $6, $7)
      ON CONFLICT (id) DO UPDATE SET tenant_id = $2, title = $3, names = $4,
        domains = $5, logo = $6, raw = $7, synced_at = now()`,
-    [account.id, tenantId, account.title, account.names, account.domains, account.logo, account.raw],
+    [
+      account.id,
+      tenantId,
+      account.title,
+      account.names ?? [],
+      account.domains ?? [],
+      account.logo,
+      account.raw,
+    ],
   )
   counts.accounts = 1
   console.log(`account: ${account.title}`)
@@ -251,35 +259,53 @@ async function main() {
     sources jsonb, status text, response_preview text, response_text text, raw jsonb`
 
   counts.prompt_responses = 0
-  for (let offset = 0; ; offset += PAGE) {
+  // Full response bodies can be large; keep each jsonb_agg well below PostgreSQL's
+  // 256 MB limit instead of sharing the much larger results page size.
+  const RESP_PAGE = 100
+  for (let offset = 0; ; offset += RESP_PAGE) {
     const page = (
       await src.query(
-        `SELECT jsonb_agg(j) AS rows FROM (
-           SELECT jsonb_build_object(
-             'id', pr.id, 'account_id', pr.account_id, 'prompt_id', pr.prompt_id,
-             'topic_id', pr.topic_id, 'scan_id', pr.scan_id, 'purpose', pr.purpose,
-             'provider', pr.provider, 'model', pr.model, 'timestamp', pr.timestamp,
-             'region', pr.region, 'country', pr.country, 'state', pr.state,
-             'city', pr.city, 'visibility', pr.visibility,
-             'response_rank', pr.response_rank, 'sources', to_jsonb(pr.sources),
-             'status', pr.status,
-             'response_preview', left(pr.response, 400),
-             'response_text', pr.response,
-             'raw', to_jsonb(pr) - 'response' - 'json_response' - 'usage') AS j
-           FROM prompt_responses pr
-           WHERE pr.account_id = $1 AND pr.timestamp >= $2
-           ORDER BY pr.timestamp, pr.id
-           OFFSET $3 LIMIT $4
-         ) q`,
-        [ACCOUNT_ID, startDate, offset, PAGE],
+        `SELECT pr.id,
+                pr.account_id,
+                pr.prompt_id,
+                pr.topic_id,
+                pr.scan_id,
+                pr.purpose,
+                pr.provider,
+                pr.model,
+                pr.timestamp,
+                pr.region,
+                pr.country,
+                pr.state,
+                pr.city,
+                pr.visibility,
+                pr.response_rank,
+                to_jsonb(pr.sources) AS sources,
+                pr.status,
+                left(pr.response, 400) AS response_preview,
+                pr.response AS response_text,
+                jsonb_strip_nulls(jsonb_build_object(
+                  'companies', pr.json_response->'companies',
+                  'mentionedCompanies', pr.json_response->'mentionedCompanies',
+                  'brands', pr.json_response->'brands',
+                  'entities', pr.json_response->'entities',
+                  'sentimentScore', pr.json_response->'sentimentScore',
+                  'sentinemtScore', pr.json_response->'sentinemtScore',
+                  'avgSentimentScore', pr.json_response->'avgSentimentScore'
+                )) AS raw
+         FROM prompt_responses pr
+         WHERE pr.account_id = $1 AND pr.timestamp >= $2
+         ORDER BY pr.timestamp, pr.id
+         OFFSET $3 LIMIT $4`,
+        [ACCOUNT_ID, startDate, offset, RESP_PAGE],
       )
-    ).rows[0].rows ?? []
+    ).rows
     if (!page.length) break
     counts.prompt_responses += await upsertJson(
       'wl_prompt_responses', RESP_COLS, RESP_DEFS, 'id', page, tenantId,
     )
     console.log(`prompt_responses: ${counts.prompt_responses}...`)
-    if (page.length < PAGE) break
+    if (page.length < RESP_PAGE) break
   }
   console.log(`prompt_responses total: ${counts.prompt_responses}`)
 

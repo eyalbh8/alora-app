@@ -1,0 +1,13 @@
+{
+  "name": "alora-figma-plugin",
+  "version": "1.0.0",
+  "description": "Alora Carousel Importer Figma Plugin",
+  "scripts": {
+    "build": "tsc && cp dist/code.js code.js && cp ui.html dist/ui.html && cp manifest.json dist/manifest.json",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.99.0",
+    "typescript": "^5.3.3"
+  }
+}

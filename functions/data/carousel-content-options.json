@@ -1,0 +1,92 @@
+[
+  {
+    "id": "hook-insight-cta-3",
+    "name": "3-Slide Hook + Insight",
+    "slideCount": 3,
+    "structure": "Hook → Insight → CTA",
+    "narrative": "hook,insight,cta",
+    "useCases": ["quick answers", "explainers", "FAQs"],
+    "description": "Shortest useful carousel: grab attention, deliver one insight, close with a CTA."
+  },
+  {
+    "id": "problem-solution-3",
+    "name": "3-Slide Problem-Solution",
+    "slideCount": 3,
+    "structure": "Hook → Solution → CTA",
+    "narrative": "hook,insight,cta",
+    "useCases": ["pain points", "fixes", "product value"],
+    "description": "Name the problem in the hook, show the fix, then ask for the next step."
+  },
+  {
+    "id": "proof-cta-3",
+    "name": "3-Slide Proof",
+    "slideCount": 3,
+    "structure": "Hook → Proof → CTA",
+    "narrative": "hook,proof,cta",
+    "useCases": ["trust", "results", "credentials"],
+    "description": "Open with a claim, back it with one proof point, then CTA."
+  },
+  {
+    "id": "how-to-4",
+    "name": "4-Slide How-To",
+    "slideCount": 4,
+    "structure": "Hook → Step 1 → Step 2 → CTA",
+    "narrative": "hook,tip,tip,cta",
+    "useCases": ["tutorials", "guides", "how-to"],
+    "description": "Two clear steps between hook and CTA. Best for simple processes."
+  },
+  {
+    "id": "problem-solution-4",
+    "name": "4-Slide Problem-Solution",
+    "slideCount": 4,
+    "structure": "Hook → Problem → Solution → CTA",
+    "narrative": "hook,proof,insight,cta",
+    "useCases": ["pain points", "fixes", "solutions"],
+    "description": "Frame the problem, present the solution, then CTA."
+  },
+  {
+    "id": "story-lesson-4",
+    "name": "4-Slide Story + Lesson",
+    "slideCount": 4,
+    "structure": "Hook → Story → Lesson → CTA",
+    "narrative": "hook,insight,insight,cta",
+    "useCases": ["case studies", "success stories"],
+    "description": "A short story, one takeaway, then CTA."
+  },
+  {
+    "id": "comparison-5",
+    "name": "5-Slide Comparison",
+    "slideCount": 5,
+    "structure": "Hook → Option A → Option B → Winner → CTA",
+    "narrative": "hook,insight,insight,insight,cta",
+    "useCases": ["product comparisons", "alternatives", "vs posts"],
+    "description": "Compare two options and declare a winner. Great for decision-making content."
+  },
+  {
+    "id": "story-insight-5",
+    "name": "5-Slide Story + Insight",
+    "slideCount": 5,
+    "structure": "Hook → Story → Outcome → Lesson → CTA",
+    "narrative": "hook,insight,proof,insight,cta",
+    "useCases": ["case studies", "success stories", "testimonials"],
+    "description": "Share a compelling story and extract the key lesson."
+  },
+  {
+    "id": "quick-wins-5",
+    "name": "5-Slide Quick Wins",
+    "slideCount": 5,
+    "structure": "Hook → Win 1-3 → CTA",
+    "narrative": "hook,tip,tip,tip,cta",
+    "useCases": ["quick tips", "fast results", "easy wins"],
+    "description": "Deliver 3 quick, actionable wins that can be implemented immediately."
+  },
+  {
+    "id": "problem-solution-5",
+    "name": "5-Slide Problem-Solution",
+    "slideCount": 5,
+    "structure": "Hook → Problem → Solution → Proof → CTA",
+    "narrative": "hook,proof,insight,proof,cta",
+    "useCases": ["pain points", "fixes", "solutions"],
+    "description": "Identify a specific problem and present a clear solution with proof."
+  }
+]
