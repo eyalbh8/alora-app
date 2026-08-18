@@ -279,10 +279,21 @@ export interface AiTrafficPayload {
   preferences?: unknown
   llmProviders?: Array<Record<string, unknown>>
   topSources?: Array<Record<string, unknown>>
+  sources?: Array<Record<string, unknown>>
+  topSourceDomains?: Array<Record<string, unknown>>
+  referrers?: Array<Record<string, unknown>>
   topPages?: Array<Record<string, unknown>>
+  pages?: Array<Record<string, unknown>>
+  topPaths?: Array<Record<string, unknown>>
+  paths?: Array<Record<string, unknown>>
   topLocations?: Array<Record<string, unknown>>
+  locations?: Array<Record<string, unknown>>
+  countries?: Array<Record<string, unknown>>
+  topCountries?: Array<Record<string, unknown>>
   topDevices?: Array<Record<string, unknown>>
+  devices?: Array<Record<string, unknown>>
   topBrowsers?: Array<Record<string, unknown>>
+  browsers?: Array<Record<string, unknown>>
   historicalData?: Array<Record<string, unknown>>
   availableCountries?: string[]
   // error-shaped snapshots
