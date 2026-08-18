@@ -9,7 +9,14 @@ import {
   type ReactNode,
 } from 'react'
 import type { BrandedFilter, GeoFilters } from '../api/types'
-import { lastNDaysEnding, presetRange, yesterdayISO, DEFAULT_TIME_PRESET_DAYS, type DateRange } from '../lib/dates'
+import {
+  lastNDaysEnding,
+  matchActivePresetDays,
+  presetRange,
+  yesterdayISO,
+  DEFAULT_TIME_PRESET_DAYS,
+  type DateRange,
+} from '../lib/dates'
 import { useGeoMeta } from './GeoMetaContext'
 import { useSnapshots } from './SnapshotContext'
 
@@ -194,10 +201,16 @@ export function AnalyticsFiltersProvider({ children }: { children: ReactNode }) 
     [providers, topics, prompts, regions, tags, branded, promptTypes, crawlers],
   )
 
+  const rangeDays = useMemo(
+    () => matchActivePresetDays(range, presetEndDay, factDays?.min),
+    [range, presetEndDay, factDays?.min],
+  )
+
   const filters: GeoFilters = useMemo(
     () => ({
       startDate: range.startDate,
       endDate: range.endDate,
+      rangeDays,
       providers,
       topics,
       prompts,
@@ -207,7 +220,7 @@ export function AnalyticsFiltersProvider({ children }: { children: ReactNode }) 
       promptTypes,
       crawlers,
     }),
-    [range, providers, topics, prompts, regions, tags, branded, promptTypes, crawlers],
+    [range, rangeDays, providers, topics, prompts, regions, tags, branded, promptTypes, crawlers],
   )
 
   const setFilterMeta = useCallback(

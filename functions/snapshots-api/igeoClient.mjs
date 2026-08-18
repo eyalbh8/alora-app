@@ -115,6 +115,14 @@ function appendList(params, key, values) {
   }
 }
 
+const IGEO_RANGE_PRESETS = new Set([1, 7, 14, 30, 90])
+
+/** @param {unknown} value */
+export function parseIgeoRangeDays(value) {
+  const n = Number(value)
+  return IGEO_RANGE_PRESETS.has(n) ? n : null
+}
+
 /**
  * Map Alora comma-list filters to iGEO repeat-array query params.
  * @param {object} filters parseGeoFilters result
@@ -123,8 +131,15 @@ function appendList(params, key, values) {
  */
 export function toIgeoQuery(filters, extra = {}, options = {}) {
   const params = new URLSearchParams()
-  if (filters?.startDate) params.set('startDate', toStartIso(filters.startDate))
-  if (filters?.endDate) params.set('endDate', toEndIso(filters.endDate))
+  // iGEO's web app uses range=N for Last N days. Sending UTC start/end for the
+  // same label selects a different window (often including today).
+  const rangeDays = parseIgeoRangeDays(filters?.rangeDays)
+  if (rangeDays != null) {
+    params.set('range', String(rangeDays))
+  } else {
+    if (filters?.startDate) params.set('startDate', toStartIso(filters.startDate))
+    if (filters?.endDate) params.set('endDate', toEndIso(filters.endDate))
+  }
 
   const engines = options.engines ?? 'both'
   if (engines === 'aiEngines' || engines === 'both') {

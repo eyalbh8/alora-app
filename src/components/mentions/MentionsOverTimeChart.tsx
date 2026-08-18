@@ -52,10 +52,11 @@ function ChartBody({
   chartRows: Record<string, string | number>[]
   providerKeys: string[]
   yMax: number
-  pinsByDay: Map<string, TrackedRecommendation[]>
+  pinsByDay?: Map<string, TrackedRecommendation[]>
   expanded?: boolean
 }) {
-  const hasPins = pinsByDay.size > 0
+  const pinMap = pinsByDay ?? new Map<string, TrackedRecommendation[]>()
+  const hasPins = pinMap.size > 0
   const dates = chartRows.map((row) => String(row.rawDate ?? ''))
 
   return (
@@ -116,7 +117,7 @@ function ChartBody({
       </div>
       {hasPins && (
         <div className="relative mt-1 h-8 overflow-visible">
-          <TrackedRecommendationAxis dates={dates} pinsByDay={pinsByDay} />
+          <TrackedRecommendationAxis dates={dates} pinsByDay={pinMap} />
         </div>
       )}
     </div>

@@ -155,6 +155,7 @@ export interface GeoProviderMentionPrompts {
 
 function filtersToQuery(filters: GeoFilters, extra: Record<string, string | number> = {}): string {
   const q = new URLSearchParams({ startDate: filters.startDate, endDate: filters.endDate })
+  if (filters.rangeDays) q.set('range', String(filters.rangeDays))
   if (filters.providers.length) q.set('providers', filters.providers.join(','))
   if (filters.topics.length) q.set('topics', filters.topics.join(','))
   if (filters.prompts.length) q.set('prompts', filters.prompts.join(','))

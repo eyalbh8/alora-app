@@ -313,6 +313,8 @@ export type BrandedFilter = 'AccountIncluded' | 'AccountNotIncluded' | null
 export interface GeoFilters {
   startDate: string
   endDate: string
+  /** iGEO native last-N-days preset. Omit for a custom calendar span. */
+  rangeDays?: number | null
   providers: string[]
   topics: string[]
   prompts: string[]

@@ -14,6 +14,26 @@ import {
   toStartIso,
 } from './igeoClient.mjs'
 
+const IGEO_RANGE_PRESETS = new Set([1, 7, 14, 30, 90])
+
+function parseIgeoRangeDays(value) {
+  const n = Number(value)
+  return IGEO_RANGE_PRESETS.has(n) ? n : null
+}
+
+/** Prefer iGEO's native range=N over UTC start/end (matches the iGEO web app). */
+function toIgeoQueryWithRange(filters, extra = {}, options = {}) {
+  const q = toIgeoQuery(filters, extra, options)
+  const rangeDays = parseIgeoRangeDays(filters?.rangeDays)
+  if (rangeDays == null) return q
+  const params = new URLSearchParams(q.startsWith('?') ? q.slice(1) : q)
+  params.delete('startDate')
+  params.delete('endDate')
+  params.set('range', String(rangeDays))
+  const qs = params.toString()
+  return qs ? `?${qs}` : ''
+}
+
 /** Peel iGEO `{ data, computedAt, isLive }` envelopes (sometimes nested). */
 function unwrapPayload(value) {
   let current = value
@@ -62,6 +82,7 @@ export function parseGeoFilters(q) {
   return {
     startDate,
     endDate,
+    rangeDays: parseIgeoRangeDays(q.range),
     providers: csv(q.providers),
     topics: csv(q.topics),
     prompts: csv(q.prompts),
@@ -347,7 +368,7 @@ function mapCompetitorRow(row, accountId) {
 export async function geoDashboard(db, tenantId, rawQuery) {
   const f = parseGeoFilters(rawQuery)
   const { accountId, apiKey } = await creds(db, tenantId)
-  const q = toIgeoQuery(f, {}, { engines: 'aiEngines' })
+  const q = toIgeoQueryWithRange(f, {}, { engines: 'aiEngines' })
 
   console.info('[geo/dashboard] start', {
     tenantId,
@@ -459,7 +480,7 @@ export async function geoDashboard(db, tenantId, rawQuery) {
 export async function geoMentions(db, tenantId, rawQuery) {
   const f = parseGeoFilters(rawQuery)
   const { accountId, apiKey } = await creds(db, tenantId)
-  const q = toIgeoQuery(f, { granularity: 'daily' }, { engines: 'providers' })
+  const q = toIgeoQueryWithRange(f, { granularity: 'daily' }, { engines: 'providers' })
   const chart = await igeoGet(
     accountId,
     apiKey,
@@ -482,11 +503,12 @@ export async function geoMentions(db, tenantId, rawQuery) {
 export async function geoSentiment(db, tenantId, rawQuery) {
   const f = parseGeoFilters(rawQuery)
   const { accountId, apiKey } = await creds(db, tenantId)
-  const listQ = toIgeoQuery(f, { take: 200, skip: 0, listOnly: 'true' }, { engines: 'providers' })
-  const histQ = toIgeoQuery(f, { granularity: 'daily' }, { engines: 'providers' })
+  // iGEO GetAccountPromptResponsesDto: take max is 100. 200 returns 400 Validation Error.
+  const listQ = toIgeoQueryWithRange(f, { take: 100, skip: 0, listOnly: 'true' }, { engines: 'providers' })
+  const histQ = toIgeoQueryWithRange(f, { granularity: 'daily' }, { engines: 'providers' })
 
   const [list, historicalRaw] = await Promise.all([
-    igeoGet(accountId, apiKey, accountPath(accountId, '/prompts/responses/sentiment', listQ)),
+    optionalIgeo(accountId, apiKey, accountPath(accountId, '/prompts/responses/sentiment', listQ)),
     igeoGet(accountId, apiKey, accountPath(accountId, '/prompts/responses/sentiment/historical', histQ)),
   ])
 
@@ -513,20 +535,21 @@ export async function geoSentiment(db, tenantId, rawQuery) {
     score: sentimentScore(g.breakdown),
   }))
 
-  const overallScore = scores.length
-    ? Math.round(scores.reduce((sum, value) => sum + value, 0) / scores.length)
-    : null
   const historical = (Array.isArray(historicalRaw) ? historicalRaw : []).map((row) => ({
     date: toIsoDay(row.date) || String(row.date),
     provider: row.provider || 'ALL',
     sentimentScore: Number(row.sentimentScore) || 0,
   }))
-  const previousScores = historical
+  const historicalScores = historical
     .map((row) => row.sentimentScore)
     .filter((value) => Number.isFinite(value))
-  const previousOverallScore = previousScores.length
-    ? Math.round(previousScores.reduce((sum, value) => sum + value, 0) / previousScores.length)
+  const historicalAverage = historicalScores.length
+    ? Math.round(historicalScores.reduce((sum, value) => sum + value, 0) / historicalScores.length)
     : null
+  const overallScore = scores.length
+    ? Math.round(scores.reduce((sum, value) => sum + value, 0) / scores.length)
+    : historicalAverage
+  const previousOverallScore = historicalAverage
 
   return {
     data: {
@@ -548,7 +571,7 @@ export async function geoPrompts(db, tenantId, rawQuery) {
   const { accountId, apiKey } = await creds(db, tenantId)
   const skip = Math.max(0, Number(rawQuery.skip) || 0)
   const take = Math.min(200, Math.max(1, Number(rawQuery.take) || 200))
-  const q = toIgeoQuery(f, { skip, take }, { engines: 'aiEngines' })
+  const q = toIgeoQueryWithRange(f, { skip, take }, { engines: 'aiEngines' })
   const result = await igeoGet(accountId, apiKey, accountPath(accountId, '/prompts', q))
   const prompts = asArray(result).map(mapPromptRow)
   return {
@@ -564,7 +587,7 @@ export async function geoProviderMentionPrompts(db, tenantId, rawQuery, provider
   const f = parseGeoFilters(rawQuery)
   const { accountId, apiKey } = await creds(db, tenantId)
   if (!provider) return { prompts: [] }
-  const q = toIgeoQuery(f, {}, { engines: 'aiEngines' })
+  const q = toIgeoQueryWithRange(f, {}, { engines: 'aiEngines' })
   const rows = await igeoGet(
     accountId,
     apiKey,
@@ -586,7 +609,7 @@ export async function geoProviderMentionPrompts(db, tenantId, rawQuery, provider
 export async function geoCompetitors(db, tenantId, rawQuery) {
   const f = parseGeoFilters(rawQuery)
   const { accountId, apiKey } = await creds(db, tenantId)
-  const q = toIgeoQuery(f, {}, { engines: 'aiEngines' })
+  const q = toIgeoQueryWithRange(f, {}, { engines: 'aiEngines' })
   const page = await igeoGet(accountId, apiKey, accountPath(accountId, '/market-players/page-data', q))
   const ranking = page?.ranking ?? page?.competitors ?? (Array.isArray(page) ? page : [])
   return {
@@ -604,7 +627,7 @@ export async function geoResponses(db, tenantId, rawQuery) {
   const { accountId, apiKey } = await creds(db, tenantId)
   const skip = Math.max(0, Number(rawQuery.skip) || 0)
   const take = Math.min(100, Math.max(1, Number(rawQuery.take) || 50))
-  const q = toIgeoQuery(f, { skip, take }, { engines: 'providers' })
+  const q = toIgeoQueryWithRange(f, { skip, take }, { engines: 'providers' })
   const result = await igeoGet(accountId, apiKey, accountPath(accountId, '/prompts/responses', q))
   const responses = (result?.responses ?? asArray(result)).map((row) =>
     mapResponseRow(row, { list: true }),
