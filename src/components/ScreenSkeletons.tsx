@@ -296,17 +296,22 @@ export function AiTrafficScreenSkeleton() {
 export function AiCrawlersScreenSkeleton() {
   return (
     <div className="flex flex-col gap-8 md:gap-10 lg:gap-14">
-      <div className="grid grid-cols-2 overflow-hidden border-y border-b-[#eae6de] border-t-[#101414] md:grid-cols-3 xl:grid-cols-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="border-b border-r border-[#eae6de] px-4 py-5 xl:border-b-0">
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="mt-4 h-8 w-16" />
-            <div className="mt-3 flex justify-between gap-3">
-              <Skeleton className="h-3 w-10" />
-              <Skeleton className="h-3 w-16" />
+      <div className="overflow-x-auto border-y border-b-[#eae6de] border-t-[#101414]">
+        <div className="flex min-w-max">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="w-[13.5rem] shrink-0 border-r border-[#eae6de] px-4 py-5 last:border-r-0"
+            >
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="mt-4 h-8 w-16" />
+              <div className="mt-3 flex justify-between gap-3">
+                <Skeleton className="h-3 w-10" />
+                <Skeleton className="h-3 w-16" />
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       <div>

@@ -30,5 +30,5 @@ export const queryKeys = {
   traffic: (accountId: string | undefined, filters: GeoFilters) =>
     ['traffic', accountId, filters] as const,
   crawlers: (accountId: string | undefined, filters: GeoFilters) =>
-    ['crawlers', accountId, filters] as const,
+    ['crawlers', 'igeo-range', accountId, filters] as const,
 }

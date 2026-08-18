@@ -3,6 +3,7 @@ import type { AiCrawlersPayload, AiTrafficPayload, GeoFilters } from './types'
 
 function filtersToQuery(filters: GeoFilters): string {
   const q = new URLSearchParams({ startDate: filters.startDate, endDate: filters.endDate })
+  if (filters.rangeDays) q.set('range', String(filters.rangeDays))
   if (filters.providers.length) q.set('providers', filters.providers.join(','))
   if (filters.regions.length) q.set('regions', filters.regions.join(','))
   return q.toString()

@@ -296,6 +296,8 @@ export interface AiTrafficPayload {
 export interface AiCrawlersPayload {
   totalRequests?: number
   totalBytes?: number
+  totalRequestsChangePercent?: number
+  totalBytesChangePercent?: number
   changePercents?: Record<string, number>
   byBot?: Array<Record<string, unknown>>
   topPaths?: Array<Record<string, unknown>>

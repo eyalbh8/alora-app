@@ -1,5 +1,5 @@
 import { useAnalyticsFilters } from '../../context/AnalyticsFiltersContext'
-import { CRAWLER_BOT_ORDER, getCrawlerBotDisplayName } from '../../lib/crawlerBots'
+import { getCrawlerBotDisplayName } from '../../lib/crawlerBots'
 import { daysInRange, matchActivePresetDays } from '../../lib/dates'
 import { formatNumber } from '../../lib/format'
 import type { CrawlerBotMetric } from '../../lib/snapshots/aiCrawlers'
@@ -33,19 +33,19 @@ function EntryCard({ title, value, change, periodText, bot }: EntryCardProps) {
       : change > 0
         ? {
             arrow: '↑',
-            value: `${formatNumber(Math.abs(change), 0)}%`,
+            value: `${formatNumber(Math.abs(change), 1)}%`,
             className: 'text-brand-600',
           }
         : change < 0
           ? {
               arrow: '↓',
-              value: `${formatNumber(Math.abs(change), 0)}%`,
+              value: `${formatNumber(Math.abs(change), 1)}%`,
               className: 'text-red-600',
             }
           : { arrow: '→', value: '0%', className: 'text-[#9a938a]' }
 
   return (
-    <div className="flex min-w-0 flex-col border-b border-r border-[#eae6de] px-4 py-5 last:border-r-0 md:px-5 xl:border-b-0">
+    <div className="flex w-[13.5rem] shrink-0 flex-col border-r border-[#eae6de] px-4 py-5 last:border-r-0 md:px-5">
       <div className="mb-3 flex min-h-4 items-center gap-2">
         {bot && <CrawlerIcon bot={bot} size="sm" />}
         <span className="truncate text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#9a938a]">
@@ -87,29 +87,26 @@ export function CrawlerEntryCardsRow({
     factDays?.min,
   )
 
-  const botByKey = new Map(bots.map((b) => [b.bot, b]))
-
   return (
-    <div className="grid grid-cols-2 overflow-hidden border-y border-b-[#eae6de] border-t-[#101414] md:grid-cols-3 xl:grid-cols-6">
-      <EntryCard
-        title="Total entries"
-        value={totalEntries}
-        change={totalChange}
-        periodText={periodText}
-      />
-      {CRAWLER_BOT_ORDER.map((bot) => {
-        const metric = botByKey.get(bot) ?? { bot, count: 0, change: 0 }
-        return (
+    <div className="overflow-x-auto border-y border-b-[#eae6de] border-t-[#101414]">
+      <div className="flex min-w-max">
+        <EntryCard
+          title="Total entries"
+          value={totalEntries}
+          change={totalChange}
+          periodText={periodText}
+        />
+        {bots.map((metric) => (
           <EntryCard
-            key={bot}
-            title={getCrawlerBotDisplayName(bot)}
+            key={metric.bot}
+            title={getCrawlerBotDisplayName(metric.bot)}
             value={metric.count}
             change={metric.change}
             periodText={periodText}
-            bot={bot}
+            bot={metric.bot}
           />
-        )
-      })}
+        ))}
+      </div>
     </div>
   )
 }

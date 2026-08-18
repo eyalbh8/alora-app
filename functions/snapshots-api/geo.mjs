@@ -21,6 +21,28 @@ function parseIgeoRangeDays(value) {
   return IGEO_RANGE_PRESETS.has(n) ? n : null
 }
 
+function addUtcDays(day, delta) {
+  const d = new Date(`${day}T00:00:00.000Z`)
+  d.setUTCDate(d.getUTCDate() + delta)
+  return d.toISOString().slice(0, 10)
+}
+
+/** Last-N-days presets must use iGEO `range=N` — UTC start/end misses the first day. */
+function resolveCrawlerRangeDays(filters) {
+  const explicit = parseIgeoRangeDays(filters?.rangeDays)
+  if (explicit != null) return explicit
+  if (!filters?.startDate || !filters?.endDate) return null
+  const today = new Date().toISOString().slice(0, 10)
+  const yesterday = addUtcDays(today, -1)
+  for (const end of [today, yesterday]) {
+    for (const days of IGEO_RANGE_PRESETS) {
+      const start = addUtcDays(end, -(days - 1))
+      if (filters.startDate === start && filters.endDate === end) return days
+    }
+  }
+  return null
+}
+
 /** Prefer iGEO's native range=N over UTC start/end (matches the iGEO web app). */
 function toIgeoQueryWithRange(filters, extra = {}, options = {}) {
   const q = toIgeoQuery(filters, extra, options)
@@ -640,9 +662,19 @@ export async function geoTraffic(db, tenantId, rawQuery) {
 export async function geoCrawlers(db, tenantId, rawQuery) {
   const f = parseGeoFilters(rawQuery)
   const { accountId, apiKey } = await creds(db, tenantId)
-  const params = new URLSearchParams({
-    startDate: toStartIso(f.startDate),
-    endDate: toEndIso(f.endDate),
+  const params = new URLSearchParams()
+  const rangeDays = resolveCrawlerRangeDays(f)
+  if (rangeDays != null) {
+    params.set('range', String(rangeDays))
+  } else {
+    params.set('startDate', toStartIso(f.startDate))
+    params.set('endDate', toEndIso(f.endDate))
+  }
+  console.info('[geo/crawlers]', {
+    startDate: f.startDate,
+    endDate: f.endDate,
+    rangeDays: f.rangeDays,
+    igeoQuery: params.toString(),
   })
   return igeoGet(
     accountId,

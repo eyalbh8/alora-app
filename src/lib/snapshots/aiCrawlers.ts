@@ -1,5 +1,5 @@
 import type { AiCrawlersPayload } from '../../api/types'
-import { CRAWLER_BOT_ORDER, normalizeCrawlerBot } from '../crawlerBots'
+import { normalizeCrawlerBot } from '../crawlerBots'
 import type { DateRange } from '../dates'
 import { filterByBot } from './filter'
 
@@ -45,11 +45,6 @@ function botName(row: Record<string, unknown>): string {
   return pickString(row, ['bot', 'botName', 'name', 'crawler', 'aiCrawler'])
 }
 
-function inDateRange(date: string, range: DateRange): boolean {
-  const day = date.slice(0, 10)
-  return day >= range.startDate && day <= range.endDate
-}
-
 function parseBotRows(
   payload: AiCrawlersPayload,
   selectedCrawlers: string[],
@@ -63,13 +58,18 @@ function parseBotRows(
     if (!rawBot) continue
     const bot = normalizeCrawlerBot(rawBot)
     const count =
-      pickNumber(row, ['entries', 'requests', 'count', 'totalRequests', 'hits', 'value']) ?? 0
+      pickNumber(row, ['requests', 'totalRequests', 'entries', 'count', 'hits', 'value']) ?? 0
     const change =
       pickNumber(row, ['changePercent', 'percentChange', 'change', 'delta']) ??
       (typeof changePercents[bot] === 'number' ? changePercents[bot] : null) ??
       (typeof changePercents[rawBot] === 'number' ? changePercents[rawBot] : null)
 
-    map.set(bot, { bot, count, change })
+    const existing = map.get(bot)
+    map.set(bot, {
+      bot,
+      count: (existing?.count ?? 0) + count,
+      change: existing?.change ?? change,
+    })
   }
 
   return map
@@ -77,7 +77,6 @@ function parseBotRows(
 
 function parseTimeSeries(
   payload: AiCrawlersPayload,
-  range: DateRange,
   selectedCrawlers: string[],
 ): Array<{ date: string; rawDate: string; value: number }> {
   const rows = filterByBot(payload.timeSeriesData, selectedCrawlers)
@@ -85,9 +84,9 @@ function parseTimeSeries(
 
   for (const row of rows) {
     const rawDate = pickString(row, ['date', 'day', 'timestamp']).slice(0, 10)
-    if (!rawDate || !inDateRange(rawDate, range)) continue
+    if (!rawDate) continue
     const value =
-      pickNumber(row, ['entries', 'requests', 'count', 'value', 'hits', 'totalRequests']) ?? 0
+      pickNumber(row, ['totalRequests', 'requests', 'entries', 'count', 'value', 'hits']) ?? 0
     byDate.set(rawDate, (byDate.get(rawDate) ?? 0) + value)
   }
 
@@ -109,39 +108,36 @@ function parsePathDistribution(payload: AiCrawlersPayload): DistributionRow[] {
 
 export function buildAiCrawlersViewModel(
   payload: AiCrawlersPayload,
-  range: DateRange,
+  _range: DateRange,
   selectedCrawlers: string[],
 ): AiCrawlersViewModel {
   const botMap = parseBotRows(payload, selectedCrawlers)
-  const chartRows = parseTimeSeries(payload, range, selectedCrawlers)
+  const chartRows = parseTimeSeries(payload, selectedCrawlers)
 
-  const bots: CrawlerBotMetric[] = CRAWLER_BOT_ORDER.map((bot) => {
-    const existing = botMap.get(bot)
-    return existing ?? { bot, count: 0, change: 0 }
-  })
+  const bots = [...botMap.values()].sort((a, b) => b.count - a.count || a.bot.localeCompare(b.bot))
 
   const totalFromChart = chartRows.reduce((sum, row) => sum + row.value, 0)
-  const totalFromBots = [...botMap.values()].reduce((sum, b) => sum + b.count, 0)
-  const hasMeaningfulSeries = totalFromChart > 0
-  const totalEntries = hasMeaningfulSeries
-    ? totalFromChart
-    : totalFromBots > 0
-      ? totalFromBots
-      : typeof payload.totalRequests === 'number'
-        ? payload.totalRequests
-        : typeof (payload as Record<string, unknown>).totalEntries === 'number'
-          ? ((payload as Record<string, unknown>).totalEntries as number)
-          : 0
+  const totalFromBots = bots.reduce((sum, b) => sum + b.count, 0)
+  const payloadTotal =
+    typeof payload.totalRequests === 'number'
+      ? payload.totalRequests
+      : typeof (payload as Record<string, unknown>).totalEntries === 'number'
+        ? ((payload as Record<string, unknown>).totalEntries as number)
+        : null
+  const totalEntries = payloadTotal ?? (totalFromBots > 0 ? totalFromBots : totalFromChart)
 
   const changePercents = payload.changePercents ?? {}
+  const payloadRec = payload as Record<string, unknown>
   const totalChange =
-    typeof changePercents.total === 'number'
-      ? changePercents.total
-      : typeof changePercents.requests === 'number'
-        ? changePercents.requests
-        : typeof changePercents.entries === 'number'
-          ? changePercents.entries
-          : null
+    typeof payloadRec.totalRequestsChangePercent === 'number'
+      ? payloadRec.totalRequestsChangePercent
+      : typeof changePercents.total === 'number'
+        ? changePercents.total
+        : typeof changePercents.requests === 'number'
+          ? changePercents.requests
+          : typeof changePercents.entries === 'number'
+            ? changePercents.entries
+            : null
 
   const crawlerDistribution: DistributionRow[] = [...botMap.values()]
     .sort((a, b) => b.count - a.count)
