@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { useMcpConnection } from '../api/carouselGeneration'
 import { AccountSwitcher } from './AccountSwitcher'
-import { IgeoConnectionPanel } from './IgeoConnectionPanel'
 
 const NAV = [
   { to: '/', label: 'Dashboard', end: true },
@@ -40,8 +38,6 @@ export function BrandMark() {
 
 export function Layout() {
   const { pathname } = useLocation()
-  const connection = useMcpConnection()
-  const igeoConnected = connection.data?.connected === true
   const [navOpen, setNavOpen] = useState(false)
   const toggleRef = useRef<HTMLButtonElement>(null)
 
@@ -145,11 +141,7 @@ export function Layout() {
         </header>
 
         <main id="main-content" className="app-content" tabIndex={-1}>
-          {connection.isLoading ? null : !igeoConnected && pathname !== '/carousel' ? (
-            <IgeoConnectionPanel />
-          ) : (
-            <Outlet />
-          )}
+          <Outlet />
         </main>
       </div>
     </div>

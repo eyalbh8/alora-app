@@ -1,6 +1,5 @@
 import { createContext, useContext, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useMcpConnection } from '../api/carouselGeneration'
 import { getGeoMeta, type GeoMeta } from '../api/geo'
 import { queryKeys } from '../api/queryKeys'
 import { useAccountStore } from '../store/useAccountStore'
@@ -23,15 +22,13 @@ const GeoMetaContext = createContext<GeoMetaContextValue>({
 
 export function GeoMetaProvider({ children }: { children: ReactNode }) {
   const { selectedAccount } = useAccountStore()
-  const connection = useMcpConnection()
-  const igeoConnected = connection.data?.connected === true
 
   const { data, isLoading, error } = useQuery({
     queryKey: queryKeys.geo.meta(selectedAccount?.id),
     queryFn: getGeoMeta,
     staleTime: 30 * 60 * 1000,
     retry: false,
-    enabled: Boolean(selectedAccount) && igeoConnected,
+    enabled: Boolean(selectedAccount),
   })
 
   const errorMessage =
@@ -41,7 +38,7 @@ export function GeoMetaProvider({ children }: { children: ReactNode }) {
     <GeoMetaContext.Provider
       value={{
         meta: data ?? null,
-        loading: connection.isLoading || isLoading,
+        loading: isLoading,
         error: errorMessage,
         geoMode: Boolean(data),
       }}

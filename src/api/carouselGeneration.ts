@@ -97,11 +97,15 @@ export function useMcpConnection() {
       const response = await fetch(`${API_BASE}/mcp-connection`, {
         headers: getAuthHeaders(),
       })
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to fetch MCP connection')
+      const contentType = response.headers.get('content-type') || ''
+      if (!contentType.includes('application/json')) {
+        throw new Error('Carousel API is not available on this host')
       }
-      return response.json()
+      const payload = await response.json()
+      if (!response.ok) {
+        throw new Error(payload.error || 'Failed to fetch MCP connection')
+      }
+      return payload
     },
     enabled: !!selectedAccountId,
     staleTime: 30 * 1000,
