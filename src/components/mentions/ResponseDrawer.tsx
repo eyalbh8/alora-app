@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import type { ResponseRow } from '../../api/types'
 import { getGeoResponseDetail, type GeoResponseDetail } from '../../api/geo'
 import { queryKeys } from '../../api/queryKeys'
@@ -13,16 +13,12 @@ import {
   responseDateTimeLabel,
   responseFullText,
   responsePreviewText,
-  responseRaw,
   responseSentiment,
 } from './responseHelpers'
 import { ResponseFormattedText } from './ResponseFormattedText'
 
-type DrawerTab = 'response' | 'raw'
-
 interface ResponseDrawerProps {
   row: ResponseRow & { raw?: unknown }
-  initialTab?: DrawerTab
   onClose: () => void
 }
 
@@ -62,10 +58,9 @@ function BrandAvatar({ name, logo }: { name?: string | null; logo?: string | nul
   )
 }
 
-export function ResponseDrawer({ row, initialTab = 'response', onClose }: ResponseDrawerProps) {
+export function ResponseDrawer({ row, onClose }: ResponseDrawerProps) {
   const { geoMode, meta } = useGeoMeta()
   const { selectedAccount } = useAccountStore()
-  const [tab, setTab] = useState<DrawerTab>(initialTab)
 
   const { data: detailPayload, loading } = useApi<GeoResponseDetail>(
     queryKeys.geo.responseDetail(selectedAccount?.id, row.id),
@@ -80,7 +75,6 @@ export function ResponseDrawer({ row, initialTab = 'response', onClose }: Respon
   const sentiment = responseSentiment(detail)
   const brands = responseBrands(detail)
   const citations = detail.sources ?? []
-  const raw = responseRaw(detail)
 
   const competitorLogos = useMemo(
     () => new Map((meta?.competitors ?? []).map((c) => [c.name.toLowerCase(), c.logo])),
@@ -114,33 +108,12 @@ export function ResponseDrawer({ row, initialTab = 'response', onClose }: Respon
               Close
             </button>
           </div>
-
-          <div className="mt-4 flex gap-1 rounded-lg border border-line bg-paper-soft p-1">
-            {(['response', 'raw'] as const).map((key) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setTab(key)}
-                className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium capitalize transition ${
-                  tab === key ? 'bg-surface text-ink ' : 'text-muted hover:text-ink'
-                }`}
-              >
-                {key === 'raw' ? 'Raw' : 'Response'}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Body */}
         <div className="min-h-0 flex-1 overflow-y-auto">
-          {loading && tab === 'response' ? (
+          {loading ? (
             <div className="flex h-40 items-center justify-center text-sm text-muted-dark">Loading response…</div>
-          ) : tab === 'raw' ? (
-            <div className="px-5 py-4">
-              <pre className="overflow-x-auto rounded-xl border border-line bg-paper-soft p-4 text-xs leading-relaxed text-ink">
-                {raw ? JSON.stringify(raw, null, 2) : 'No raw payload available.'}
-              </pre>
-            </div>
           ) : (
             <div className="flex flex-col gap-5 px-5 py-4">
               {detail.promptText && (
@@ -170,8 +143,7 @@ export function ResponseDrawer({ row, initialTab = 'response', onClose }: Respon
                   </div>
                 ) : (
                   <div className="rounded-xl border border-dashed border-line bg-paper-soft px-4 py-6 text-center text-sm text-muted">
-                    Response text is not available for this row yet. Re-sync prompt responses to populate it, or
-                    check the Raw tab.
+                    Response text is not available for this row yet. Re-sync prompt responses to populate it.
                   </div>
                 )}
               </section>
