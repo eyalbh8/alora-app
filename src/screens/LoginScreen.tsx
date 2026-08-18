@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Descope, useSession } from '@descope/react-sdk'
+import { BrandMark } from '../components/Layout'
 
 const DESCOPE_FLOW_ID = (import.meta.env.VITE_DESCOPE_FLOW_ID || 'sign-up-or-in').trim()
 
@@ -15,15 +16,16 @@ export function LoginScreen() {
   }, [isAuthenticated, navigate])
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#faf9f7]">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-sm">
-        <div className="mb-8 text-center">
-          <h1 className="font-serif text-[32px] font-semibold leading-none tracking-[-0.01em] text-brand-950">
-            Alora
+    <div className="flex min-h-screen items-center justify-center bg-bg px-6">
+      <div className="w-full max-w-md border border-line bg-surface p-8">
+        <div className="mb-8">
+          <div className="mb-6 flex items-center gap-2.5">
+            <BrandMark />
+            <span className="brand__name">Alora</span>
+          </div>
+          <h1 className="screen-title">
+            Sign <span className="screen-title__rest">in</span>
           </h1>
-          <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-600">
-            AI Favorite
-          </p>
         </div>
         <Descope flowId={DESCOPE_FLOW_ID} />
       </div>

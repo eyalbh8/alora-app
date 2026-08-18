@@ -153,16 +153,16 @@ export function DateRangePicker({
 
     let cls =
       'relative flex h-8 w-8 items-center justify-center text-xs transition-colors '
-    if (disabled) cls += 'cursor-not-allowed text-slate-300 '
+    if (disabled) cls += 'cursor-not-allowed text-muted-dark/40 '
     else cls += 'cursor-pointer '
-    if (outside && !inSpan && !isStart && !isEnd) cls += 'text-slate-300 '
-    else if (!disabled) cls += 'text-slate-700 '
+    if (outside && !inSpan && !isStart && !isEnd) cls += 'text-muted-dark/50 '
+    else if (!disabled) cls += 'text-ink '
 
-    if (inSpan && !disabled) cls += 'bg-teal-50 '
+    if (inSpan && !disabled) cls += 'bg-accent/20 '
     if ((isStart || isEnd) && !disabled) {
-      cls += 'rounded-full bg-teal-600 font-medium text-white hover:bg-teal-700 '
+      cls += 'bg-accent font-medium text-button-ink hover:bg-accent '
     } else if (!disabled) {
-      cls += 'rounded-full hover:bg-teal-50 '
+      cls += 'hover:bg-paper-soft '
     }
 
     return cls
@@ -173,22 +173,20 @@ export function DateRangePicker({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-sm ${
-          open
-            ? 'border-teal-300 bg-teal-50/40'
-            : 'border-slate-200 bg-white hover:border-slate-300'
+        className={`inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[11px] tracking-[0.1em] uppercase ${
+          open ? 'border-ink bg-paper-soft' : 'border-line bg-surface hover:border-ink'
         }`}
       >
-        <CalendarIcon className="h-3.5 w-3.5 text-slate-400" />
-        <span className="font-medium text-slate-700">{buttonLabel}</span>
-        <svg className="h-3 w-3 text-slate-400" viewBox="0 0 12 12" fill="currentColor" aria-hidden>
+        <CalendarIcon className="h-3.5 w-3.5 text-muted-dark" />
+        <span className="font-medium text-ink">{buttonLabel}</span>
+        <svg className="h-3 w-3 text-muted-dark" viewBox="0 0 12 12" fill="currentColor" aria-hidden>
           <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
         </svg>
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 flex overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
-          <div className="flex w-44 flex-col border-r border-slate-100 py-2">
+        <div className="absolute left-0 top-full z-50 mt-1 flex overflow-hidden border border-line bg-paper-soft">
+          <div className="flex w-44 flex-col border-r border-line py-2">
             {TIME_PRESET_OPTIONS.map(({ days, label }) => (
               <button
                 key={days}
@@ -197,23 +195,23 @@ export function DateRangePicker({
                   onPreset(days)
                   setDraftStart(null)
                 }}
-                className={`px-4 py-2 text-left text-sm transition-colors ${
+                className={`px-4 py-2 text-left font-mono text-[11px] tracking-[0.1em] uppercase transition-colors ${
                   activePreset === days
-                    ? 'bg-teal-50 font-medium text-teal-800'
-                    : 'text-slate-700 hover:bg-slate-50'
+                    ? 'bg-surface font-medium text-ink'
+                    : 'text-muted hover:bg-surface hover:text-ink'
                 }`}
               >
                 {label}
               </button>
             ))}
-            <div className="mt-2 border-t border-slate-100 pt-2">
+            <div className="mt-2 border-t border-line pt-2">
               <button
                 type="button"
                 onClick={() => {
                   onResetDefault()
                   setDraftStart(null)
                 }}
-                className="w-full px-4 py-2 text-left text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                className="w-full px-4 py-2 text-left font-mono text-[11px] tracking-[0.1em] text-muted-dark uppercase hover:bg-surface hover:text-ink"
               >
                 Reset to default
               </button>
@@ -225,25 +223,25 @@ export function DateRangePicker({
               <button
                 type="button"
                 onClick={() => setViewMonth((m) => subMonths(m, 1))}
-                className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                className="p-1 text-muted-dark hover:bg-surface hover:text-ink"
                 aria-label="Previous month"
               >
                 ‹
               </button>
-              <span className="text-sm font-medium text-slate-800">
+              <span className="font-mono text-[12px] font-medium tracking-[0.1em] text-ink uppercase">
                 {format(viewMonth, 'MMMM yyyy')}
               </span>
               <button
                 type="button"
                 onClick={() => setViewMonth((m) => addMonths(m, 1))}
-                className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                className="p-1 text-muted-dark hover:bg-surface hover:text-ink"
                 aria-label="Next month"
               >
                 ›
               </button>
             </div>
 
-            <div className="mb-1 grid grid-cols-7 text-center text-[10px] font-medium uppercase tracking-wide text-slate-400">
+            <div className="mb-1 grid grid-cols-7 text-center font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-muted-dark">
               {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
                 <span key={d}>{d}</span>
               ))}
@@ -266,7 +264,7 @@ export function DateRangePicker({
               })}
             </div>
 
-            <p className="mt-3 text-[11px] text-slate-400">
+            <p className="mt-3 font-mono text-[11px] tracking-[0.08em] text-muted-dark uppercase">
               {draftStart
                 ? 'Select end date'
                 : `${format(rangeStart, 'MMM d, yyyy')} – ${format(rangeEnd, 'MMM d, yyyy')}`}

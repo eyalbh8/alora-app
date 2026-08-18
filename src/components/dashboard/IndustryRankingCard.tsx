@@ -22,7 +22,7 @@ function BrandCell({ row }: { row: CompetitorPerformance }) {
         site={row.site}
         size="sm"
       />
-      <span className="truncate font-medium text-[#302d29]">{row.name}</span>
+      <span className="truncate font-medium text-ink">{row.name}</span>
     </div>
   )
 }
@@ -53,7 +53,7 @@ export function IndustryRankingCard({ competitors }: IndustryRankingCardProps) {
     >
       {isEmpty ? (
         <div
-          className="flex flex-col items-center justify-center border border-dashed border-[#d8d2c7] px-6 text-center"
+          className="flex flex-col items-center justify-center border border-dashed border-line px-6 text-center"
           style={{
             minHeight:
               PAIRED_LEGEND_HEIGHT_PX +
@@ -61,8 +61,8 @@ export function IndustryRankingCard({ competitors }: IndustryRankingCardProps) {
               PAIRED_XAXIS_HEIGHT_PX,
           }}
         >
-          <p className="text-sm font-semibold text-[#302d29]">Add competitors to track share of voice</p>
-          <p className="mt-1 text-xs text-[#8a847b]">Market signals will appear once competing brands are tracked.</p>
+          <p className="text-sm font-semibold text-ink">Add competitors to track share of voice</p>
+          <p className="mt-1 text-xs text-muted">Market signals will appear once competing brands are tracked.</p>
         </div>
       ) : (
         <div className="flex h-full flex-col">
@@ -75,18 +75,18 @@ export function IndustryRankingCard({ competitors }: IndustryRankingCardProps) {
             </colgroup>
             <thead>
               <tr
-                className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8a847b]"
+                className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted"
                 style={{ height: PAIRED_LEGEND_HEIGHT_PX }}
               >
-                <th className="border-b-2 border-[#101414] pr-2 text-left font-semibold">
+                <th className="border-b-2 border-ink pr-2 text-left font-semibold">
                   <span className="inline-flex items-center gap-2">
                     <span>Position</span>
                     <span>Brand</span>
                   </span>
                 </th>
-                <th className="border-b-2 border-[#101414] px-1.5 text-right font-semibold">Avg. rank</th>
-                <th className="border-b-2 border-[#101414] px-1.5 text-right font-semibold">Mentions</th>
-                <th className="border-b-2 border-[#101414] pl-1.5 text-right font-semibold">Sentiment</th>
+                <th className="border-b-2 border-ink px-1.5 text-right font-semibold">Avg. rank</th>
+                <th className="border-b-2 border-ink px-1.5 text-right font-semibold">Mentions</th>
+                <th className="border-b-2 border-ink pl-1.5 text-right font-semibold">Sentiment</th>
               </tr>
             </thead>
             <tbody>
@@ -94,7 +94,7 @@ export function IndustryRankingCard({ competitors }: IndustryRankingCardProps) {
                 if (!row) {
                   return (
                     <tr key={`empty-${index}`} style={{ height: PAIRED_ROW_HEIGHT_PX }}>
-                      <td colSpan={4} className="border-b border-[#e4dfd6]" />
+                      <td colSpan={4} className="border-b border-line" />
                     </tr>
                   )
                 }
@@ -102,28 +102,30 @@ export function IndustryRankingCard({ competitors }: IndustryRankingCardProps) {
                 return (
                   <tr
                     key={row.id}
-                    className={hovered ? 'bg-[#f3f0ea]' : ''}
+                    className={hovered ? 'bg-[#1a1a1a]' : ''}
                     style={{ height: PAIRED_ROW_HEIGHT_PX }}
                     onMouseEnter={() => setHoveredCompetitor(row.name)}
                     onMouseLeave={() => setHoveredCompetitor(null)}
                   >
-                    <td className="min-w-0 border-b border-[#e4dfd6] pr-2">
+                    <td className="min-w-0 border-b border-line pr-2">
                       <div className="flex min-w-0 items-center gap-1.5">
-                        <span className="w-3.5 shrink-0 text-[#6b655e]">{row.position ?? '—'}</span>
+                        <span className="card-number w-8 shrink-0">
+                          // {String(row.position ?? index + 1).padStart(2, '0')}
+                        </span>
                         <BrandCell row={row} />
                       </div>
                     </td>
-                    <td className="border-b border-[#e4dfd6] px-1.5">
+                    <td className="border-b border-line px-1.5">
                       <div className="flex items-center justify-end gap-1">
-                        <span className="font-medium text-[#302d29]">{formatScore(row.avgRank)}</span>
+                        <span className="font-medium text-ink">{formatScore(row.avgRank)}</span>
                         {row.avgRankDelta != null && (
                           <DeltaBadge value={row.avgRankDelta} mode="absolute" invert />
                         )}
                       </div>
                     </td>
-                    <td className="border-b border-[#e4dfd6] px-1.5">
+                    <td className="border-b border-line px-1.5">
                       <div className="flex items-center justify-end gap-1">
-                        <span className="font-medium text-[#302d29]">
+                        <span className="font-medium text-ink">
                           {formatNumber(row.occurrences, 0)}
                         </span>
                         {row.occurrencesDelta != null && (
@@ -131,9 +133,9 @@ export function IndustryRankingCard({ competitors }: IndustryRankingCardProps) {
                         )}
                       </div>
                     </td>
-                    <td className="border-b border-[#e4dfd6] pl-1.5">
+                    <td className="border-b border-line pl-1.5">
                       <div className="flex items-center justify-end gap-1">
-                        <span className="text-xs font-semibold text-brand-700">
+                        <span className="text-xs font-semibold text-accent">
                           {row.sentimentScore != null ? row.sentimentScore : '—'}
                         </span>
                         {row.sentimentScoreDelta != null && (

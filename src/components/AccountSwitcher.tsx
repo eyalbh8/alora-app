@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronDown, Check, Search, LogOut } from 'lucide-react'
 import { useDescope } from '@descope/react-sdk'
 import { useAccountStore, type Account } from '../store/useAccountStore'
 import { getAccounts } from '../api/accounts'
 import { queryKeys } from '../api/queryKeys'
 
-export function AccountSwitcher() {
+export function AccountSwitcher({ onNavigate }: { onNavigate?: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -21,7 +20,6 @@ export function AccountSwitcher() {
     staleTime: Infinity,
   })
 
-  // Close popover when clicking outside
   useEffect(() => {
     if (!isOpen) return
 
@@ -59,7 +57,7 @@ export function AccountSwitcher() {
     setSelectedAccount(account)
     setIsOpen(false)
     setSearchQuery('')
-    // Invalidate all queries to refetch data for the new account
+    onNavigate?.()
     void queryClient.invalidateQueries()
   }
 
@@ -69,99 +67,79 @@ export function AccountSwitcher() {
   }
 
   const displayName = selectedAccount?.account?.title || selectedAccount?.name || 'Account'
-  const displayDomain =
-    selectedAccount?.account?.domains?.[0] || selectedAccount?.domain || ''
-  const logo = selectedAccount?.account?.logo
 
   return (
     <div className="relative">
       <button
         ref={triggerRef}
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-left transition-colors hover:bg-white/10"
+        className="nav-assessment"
+        aria-expanded={isOpen}
+        title={displayName}
       >
-        {logo ? (
-          <img src={logo} alt="" className="h-6 w-6 rounded object-cover" />
-        ) : (
-          <div className="flex h-6 w-6 items-center justify-center rounded bg-brand-400 text-xs font-semibold text-brand-950">
-            {displayName.charAt(0).toUpperCase()}
-          </div>
-        )}
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-[13px] font-semibold text-brand-50">{displayName}</div>
-          {displayDomain && (
-            <div className="truncate text-[11px] text-brand-300">{displayDomain}</div>
-          )}
-        </div>
-        <ChevronDown className="h-4 w-4 shrink-0 text-brand-300" />
+        <span className="nav-assessment__name">{displayName}</span>
       </button>
 
       {isOpen && (
         <div
           ref={popoverRef}
-          className="absolute left-0 top-full z-50 mt-2 w-full min-w-[280px] rounded-lg border border-brand-800 bg-brand-900 shadow-xl"
+          className="absolute left-0 top-full z-50 mt-2 w-[min(320px,calc(100vw-32px))] border border-line bg-surface"
         >
-          {/* Search */}
-          <div className="border-b border-white/10 p-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-400" />
-              <input
-                type="text"
-                placeholder="Search accounts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-md border border-white/10 bg-brand-950 py-2 pl-9 pr-3 text-sm text-brand-50 placeholder:text-brand-500 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
-              />
-            </div>
+          <div className="form-field border-b border-line p-3">
+            <label htmlFor="account-search">Account — search</label>
+            <input
+              id="account-search"
+              type="text"
+              placeholder="Search accounts"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
 
-          {/* Account list */}
           <div className="max-h-[320px] overflow-y-auto">
             {filteredAccounts.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-brand-500">No accounts found</div>
+              <div className="px-4 py-8 text-center font-mono text-[12px] uppercase tracking-[0.1em] text-muted-dark">
+                No accounts found
+              </div>
             ) : (
-              filteredAccounts.map((account) => {
+              filteredAccounts.map((account, index) => {
                 const accountTitle = account.account?.title || account.name || 'Account'
                 const accountDomain = account.account?.domains?.[0] || account.domain || ''
-                const accountLogo = account.account?.logo
                 const isSelected = selectedAccount?.id === account.id
 
                 return (
                   <button
                     key={account.id}
+                    type="button"
                     onClick={() => handleSelectAccount(account)}
-                    className="flex w-full items-center gap-2 border-b border-white/5 px-4 py-3 text-left transition-colors hover:bg-white/5 last:border-b-0"
+                    className="flex w-full items-center gap-3 border-b border-line px-4 py-3 text-left last:border-b-0 hover:bg-paper-soft"
                   >
-                    {accountLogo ? (
-                      <img src={accountLogo} alt="" className="h-8 w-8 rounded object-cover" />
-                    ) : (
-                      <div className="flex h-8 w-8 items-center justify-center rounded bg-brand-700 text-sm font-semibold text-brand-50">
-                        {accountTitle.charAt(0).toUpperCase()}
-                      </div>
-                    )}
+                    <span className="card-number">
+                      // {String(index + 1).padStart(2, '0')}
+                    </span>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-medium text-brand-50">
-                        {accountTitle}
-                      </div>
+                      <div className="truncate text-[15px] text-ink">{accountTitle}</div>
                       {accountDomain && (
-                        <div className="truncate text-xs text-brand-400">{accountDomain}</div>
+                        <div className="truncate font-mono text-[11px] uppercase tracking-[0.1em] text-muted-dark">
+                          {accountDomain}
+                        </div>
                       )}
                     </div>
-                    {isSelected && <Check className="h-4 w-4 shrink-0 text-brand-400" />}
+                    {isSelected && (
+                      <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-accent">
+                        Active
+                      </span>
+                    )}
                   </button>
                 )
               })
             )}
           </div>
 
-          {/* Logout */}
-          <div className="border-t border-white/10 p-2">
-            <button
-              onClick={handleLogout}
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-brand-300 transition-colors hover:bg-white/5 hover:text-brand-50"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Logout</span>
+          <div className="border-t border-line px-4 py-3">
+            <button type="button" onClick={handleLogout} className="text-link">
+              Logout
             </button>
           </div>
         </div>

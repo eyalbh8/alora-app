@@ -29,12 +29,12 @@ interface EntryCardProps {
 function EntryCard({ title, value, change, periodText, bot }: EntryCardProps) {
   const trend =
     change == null
-      ? { arrow: '—', value: 'No comparison', className: 'text-[#9a938a]' }
+      ? { arrow: '—', value: 'No comparison', className: 'text-muted' }
       : change > 0
         ? {
             arrow: '↑',
             value: `${formatNumber(Math.abs(change), 1)}%`,
-            className: 'text-brand-600',
+            className: 'text-accent',
           }
         : change < 0
           ? {
@@ -42,25 +42,25 @@ function EntryCard({ title, value, change, periodText, bot }: EntryCardProps) {
               value: `${formatNumber(Math.abs(change), 1)}%`,
               className: 'text-red-600',
             }
-          : { arrow: '→', value: '0%', className: 'text-[#9a938a]' }
+          : { arrow: '→', value: '0%', className: 'text-muted' }
 
   return (
-    <div className="flex w-[13.5rem] shrink-0 flex-col border-r border-[#eae6de] px-4 py-5 last:border-r-0 md:px-5">
+    <div className="flex w-[13.5rem] shrink-0 flex-col border-r border-line px-4 py-5 last:border-r-0 md:px-5">
       <div className="mb-3 flex min-h-4 items-center gap-2">
         {bot && <CrawlerIcon bot={bot} size="sm" />}
-        <span className="truncate text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#9a938a]">
+        <span className="truncate text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted">
           {title}
         </span>
       </div>
 
-      <span className="font-serif text-[28px] font-semibold leading-none tracking-tight text-[#101414]">
+      <span className="font-display text-[28px] font-semibold leading-none tracking-tight text-ink">
         {formatNumber(value, 0)}
       </span>
       <div className="mt-2 flex items-center justify-between gap-2 text-[11.5px]">
         <span className={trend.className}>
           {trend.arrow} {trend.value}
         </span>
-        <span className="truncate text-[#9a938a]" title={`Entries in the ${periodText}`}>
+        <span className="truncate text-muted" title={`Entries in the ${periodText}`}>
           {periodText}
         </span>
       </div>
@@ -88,7 +88,7 @@ export function CrawlerEntryCardsRow({
   )
 
   return (
-    <div className="overflow-x-auto border-y border-b-[#eae6de] border-t-[#101414]">
+    <div className="overflow-x-auto border-y border-b-line border-t-ink">
       <div className="flex min-w-max">
         <EntryCard
           title="Total entries"

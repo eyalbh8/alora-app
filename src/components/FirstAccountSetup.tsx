@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFirstAccount } from '../api/accounts'
 import { queryKeys } from '../api/queryKeys'
 import { useAccountStore } from '../store/useAccountStore'
+import { BrandMark } from './Layout'
 
 export function FirstAccountSetup() {
   const queryClient = useQueryClient()
@@ -26,40 +27,46 @@ export function FirstAccountSetup() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#faf9f7] px-6">
-      <div className="w-full max-w-xl rounded-lg border border-[#d8d2c7] bg-white p-8 shadow-sm">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-700">
-          First-time setup
-        </p>
-        <h1 className="mt-2 font-serif text-2xl font-semibold text-[#101414]">
-          Connect your first iGEO account
+    <div className="flex min-h-screen items-center justify-center bg-bg px-6">
+      <div className="w-full max-w-xl border border-line bg-surface p-8">
+        <div className="mb-6 flex items-center gap-2.5">
+          <BrandMark />
+          <span className="brand__name">Alora</span>
+        </div>
+        <p className="eyebrow">First-time setup</p>
+        <h1 className="screen-title">
+          Connect your first <span className="screen-title__rest">iGEO account</span>
         </h1>
-        <p className="mt-2 text-sm leading-6 text-[#6b655e]">
+        <p className="mt-4 text-[15px] leading-[1.7] text-muted">
           You&apos;re signed in. Paste the iGEO MCP URL for this workspace. We&apos;ll save the
           API key and workspace id on your first Alora account.
         </p>
 
-        <form onSubmit={handleSave} className="mt-6 flex flex-col gap-3">
-          <input
-            type="url"
-            autoComplete="off"
-            spellCheck={false}
-            placeholder="https://api.igeo.ai/mcp?mcp_token=igeo_live_…&workspace_id=…"
-            value={connectionUrl}
-            onChange={(event) => setConnectionUrl(event.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-700 focus:outline-none focus:ring-1 focus:ring-brand-700"
-          />
+        <form onSubmit={handleSave} className="mt-8 flex flex-col gap-4">
+          <div className="form-field">
+            <label htmlFor="first-account-url">MCP URL — required</label>
+            <input
+              id="first-account-url"
+              type="url"
+              autoComplete="off"
+              spellCheck={false}
+              placeholder="https://api.igeo.ai/mcp?mcp_token=igeo_live_…&workspace_id=…"
+              value={connectionUrl}
+              onChange={(event) => setConnectionUrl(event.target.value)}
+            />
+          </div>
           <button
             type="submit"
             disabled={mutation.isPending || !connectionUrl.trim()}
-            className="rounded-md bg-brand-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-900 disabled:opacity-50"
+            className="button button--primary"
           >
-            {mutation.isPending ? 'Verifying…' : 'Connect account'}
+            <span>{mutation.isPending ? 'Verifying…' : 'Connect account'}</span>
+            <span aria-hidden="true">→</span>
           </button>
         </form>
 
         {mutation.isError && (
-          <p className="mt-4 text-sm text-red-600">
+          <p className="field-error">
             {mutation.error instanceof Error ? mutation.error.message : 'Could not connect this account.'}
           </p>
         )}

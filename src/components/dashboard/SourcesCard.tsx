@@ -29,7 +29,7 @@ export function SourcesCard({ sources }: SourcesCardProps) {
       contentClassName="overflow-x-auto"
     >
       {isEmpty ? (
-        <div className="flex min-h-52 items-center justify-center border border-dashed border-[#d8d2c7] px-6 text-xs text-[#8a847b]">
+        <div className="flex min-h-52 items-center justify-center border border-dashed border-line px-6 text-xs text-muted">
           No citation data for this period.
         </div>
       ) : (
@@ -39,25 +39,28 @@ export function SourcesCard({ sources }: SourcesCardProps) {
             <col className="w-[6.75rem]" />
           </colgroup>
           <thead>
-            <tr className="border-b-2 border-[#101414] text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8a847b]">
+            <tr className="border-b-2 border-ink text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
               <th className="pb-2.5 text-left font-semibold">Domain</th>
               <th className="pb-2.5 text-right font-semibold">Cited pages</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => {
+            {rows.map((row, index) => {
               const host = hostLabel(row.domain)
               return (
-                <tr key={row.domain} className="border-b border-[#e4dfd6]">
+                <tr key={row.domain} className="border-b border-line">
                   <td className="min-w-0 py-3">
                     <div className="flex min-w-0 items-center gap-2.5">
+                      <span className="card-number shrink-0">
+                        // {String(index + 1).padStart(2, '0')}
+                      </span>
                       <BrandLogo name={host} domain={host} size="md" shape="rounded" />
-                      <span className="min-w-0 truncate font-medium text-[#302d29]" title={host}>
+                      <span className="min-w-0 truncate font-medium text-ink" title={host}>
                         {host}
                       </span>
                     </div>
                   </td>
-                  <td className="py-3 text-right font-medium text-[#6b655e]">
+                  <td className="py-3 text-right font-medium text-muted">
                     {formatNumber(row.pageCount, 0)}
                   </td>
                 </tr>

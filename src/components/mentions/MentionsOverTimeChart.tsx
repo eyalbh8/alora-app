@@ -69,16 +69,16 @@ function ChartBody({
         >
           <XAxis
             dataKey="date"
-            axisLine={{ stroke: '#eae6de' }}
+            axisLine={{ stroke: 'rgba(227, 220, 200, 0.12)' }}
             tickLine={false}
-            tick={{ fill: '#9a938a', fontSize: 10 }}
+            tick={{ fill: '#a79f8c', fontSize: 10 }}
             interval="preserveStartEnd"
             minTickGap={28}
           />
           <YAxis hide width={0} domain={[0, yMax]} allowDecimals={false} />
-          <ReferenceLine y={0} stroke="#eae6de" />
+          <ReferenceLine y={0} stroke="rgba(227, 220, 200, 0.12)" />
           <Tooltip
-            cursor={{ stroke: '#d8d2c7', strokeWidth: 1 }}
+            cursor={{ stroke: 'rgba(227, 220, 200, 0.12)', strokeWidth: 1 }}
             content={({ active, payload }) => {
               const raw = payload?.[0]?.payload?.rawDate
               return (
@@ -106,7 +106,7 @@ function ChartBody({
               activeDot={{
                 r: 3,
                 fill: mentionsProviderColor(provider),
-                stroke: '#faf9f7',
+                stroke: '#0d0d0d',
                 strokeWidth: 1,
               }}
               isAnimationActive={false}
@@ -181,16 +181,16 @@ export function MentionsOverTimeChart({
       <section aria-labelledby="mentions-trend-heading">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 id="mentions-trend-heading" className="text-[19px] font-semibold text-[#101414]">
+            <h2 id="mentions-trend-heading" className="text-[19px] font-semibold text-ink">
               Mentions Over Time
             </h2>
-            <p className="mt-1 text-xs text-[#9a938a]">{periodLabel}</p>
+            <p className="mt-1 text-xs text-muted">{periodLabel}</p>
           </div>
           {hasData && (
             <button
               type="button"
               onClick={() => setExpanded(true)}
-              className="p-1.5 text-[#9a938a] transition-colors hover:text-[#101414]"
+              className="p-1.5 text-muted transition-colors hover:text-ink"
               title="Expand chart"
               aria-label="Expand mentions chart"
             >
@@ -209,7 +209,7 @@ export function MentionsOverTimeChart({
             />
           ) : (
             <div
-              className="flex items-center justify-center border-b border-[#eae6de] text-sm text-[#9a938a]"
+              className="flex items-center justify-center border-b border-line text-sm text-muted"
               style={{ height: MENTIONS_CHART_HEIGHT }}
             >
               No mention trend data for the selected period.
@@ -220,30 +220,30 @@ export function MentionsOverTimeChart({
 
       {expanded && hasData && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#101414]/35 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 p-4"
           onClick={() => setExpanded(false)}
         >
           <section
-            className="w-full max-w-5xl border border-[#eae6de] bg-[#faf9f7] p-6 shadow-2xl"
+            className="w-full max-w-5xl border border-line bg-bg p-6 "
             aria-modal="true"
             role="dialog"
             aria-labelledby="expanded-mentions-heading"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="mb-6 flex items-start justify-between gap-4 border-b border-[#eae6de] pb-4">
+            <div className="mb-6 flex items-start justify-between gap-4 border-b border-line pb-4">
               <div>
                 <h2
                   id="expanded-mentions-heading"
-                  className="font-serif text-2xl font-semibold tracking-tight text-[#101414]"
+                  className="font-display text-2xl font-semibold tracking-tight text-ink"
                 >
                   Mentions Over Time
                 </h2>
-                <p className="mt-1 text-xs text-[#9a938a]">{periodLabel}</p>
+                <p className="mt-1 text-xs text-muted">{periodLabel}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
-                className="p-1.5 text-[#9a938a] transition-colors hover:text-[#101414]"
+                className="p-1.5 text-muted transition-colors hover:text-ink"
                 aria-label="Close expanded chart"
               >
                 <CloseIcon />

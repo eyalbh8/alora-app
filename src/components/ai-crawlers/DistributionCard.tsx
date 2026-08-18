@@ -30,17 +30,17 @@ function DistributionRowItem({
       <div className="mb-1.5 flex items-center justify-between gap-4 text-[12.5px]">
         <div className="flex min-w-0 items-center gap-2">
           {showBotIcon && row.bot && <CrawlerIcon bot={row.bot} size="sm" />}
-          <span className="truncate text-[#101414]" title={label}>
+          <span className="truncate text-ink" title={label}>
             {label}
           </span>
         </div>
-        <span className="shrink-0 font-semibold text-[#5c554c]">
+        <span className="shrink-0 font-semibold text-muted">
           {formatNumber(row.value, 0)}
         </span>
       </div>
-      <div className="h-0.5 w-full bg-[#eae6de]">
+      <div className="h-0.5 w-full bg-[rgba(227, 220, 200, 0.12)]">
         <div
-          className={`h-full ${accent === 'light' ? 'bg-brand-400' : 'bg-brand-600'}`}
+          className={`h-full ${accent === 'light' ? 'bg-accent' : 'bg-accent'}`}
           style={{ width: `${widthPct}%` }}
         />
       </div>
@@ -62,11 +62,11 @@ export function DistributionCard({
   return (
     <section>
       <div className="mb-[18px]">
-        <h2 className="text-[19px] font-semibold text-[#101414]">{title}</h2>
-        <p className="mt-0.5 text-xs text-[#9a938a]">{subtitle}</p>
+        <h2 className="text-[19px] font-semibold text-ink">{title}</h2>
+        <p className="mt-0.5 text-xs text-muted">{subtitle}</p>
       </div>
       {isEmpty ? (
-        <div className="flex min-h-36 items-center justify-center border-y border-dashed border-[#d8d2c7] px-6 text-sm text-[#9a938a]">
+        <div className="flex min-h-36 items-center justify-center border-y border-dashed border-line px-6 text-sm text-muted">
           No data for the selected period.
         </div>
       ) : (

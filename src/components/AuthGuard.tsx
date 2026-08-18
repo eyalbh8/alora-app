@@ -9,10 +9,10 @@ import { FirstAccountSetup } from './FirstAccountSetup'
 
 function LoadingScreen() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#faf9f7]">
+    <div className="flex min-h-screen items-center justify-center bg-bg">
       <div className="flex flex-col items-center gap-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-200 border-t-brand-600" />
-        <p className="text-sm text-brand-600">Loading...</p>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-accent" />
+        <p className="font-mono text-[12px] tracking-[0.1em] text-muted uppercase">Loading...</p>
       </div>
     </div>
   )
@@ -85,12 +85,12 @@ export function AuthGuard({ children }: PropsWithChildren) {
 
   if (accountsError) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#faf9f7]">
-        <div className="rounded-lg bg-white p-8 shadow-sm">
-          <h2 className="mb-2 text-lg font-semibold text-brand-900">Failed to load accounts</h2>
-          <p className="text-sm text-brand-600">Please try refreshing the page.</p>
+      <div className="flex min-h-screen items-center justify-center bg-bg">
+        <div className="border-l-4 border-error bg-error-surface p-8">
+          <p className="eyebrow mb-3 text-error">Failed to load accounts</p>
+          <p className="text-[15px] text-error-link">Please try refreshing the page.</p>
           {accountsErrorDetail instanceof Error ? (
-            <p className="mt-3 max-w-md text-xs text-brand-500">{accountsErrorDetail.message}</p>
+            <p className="mt-3 max-w-md text-[13px] text-error-link">{accountsErrorDetail.message}</p>
           ) : null}
         </div>
       </div>

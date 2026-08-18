@@ -16,10 +16,10 @@ interface ChartCardProps {
 
 export function ChartCard({ title, subtitle, loading, error, onRetry, hasData, children }: ChartCardProps) {
   return (
-    <div className="rounded-xl border border-slate-200/60 bg-white p-4 shadow-sm">
-      <div className="mb-3">
-        <h2 className="text-sm font-semibold text-[#101414]">{title}</h2>
-        {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+    <div className="border border-line bg-surface p-[22px]">
+      <div className="mb-4">
+        <p className="eyebrow mb-1">{title}</p>
+        {subtitle && <p className="text-[13px] text-muted">{subtitle}</p>}
       </div>
       {loading ? (
         <ChartSkeleton />

@@ -39,7 +39,7 @@ export function ProviderIcon({
     return (
       <span className="inline-flex items-center gap-2">
         {img}
-        <span className="text-sm text-slate-700">{label}</span>
+        <span className="text-sm text-ink">{label}</span>
       </span>
     )
   }

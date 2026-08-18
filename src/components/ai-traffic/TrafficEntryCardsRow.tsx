@@ -30,28 +30,28 @@ function EntryCard({ title, value, change, periodText, provider }: EntryCardProp
   const isNeutral = change === 0
   const isPositive = change !== null && change > 0
   const trendTone =
-    change === null || isNeutral ? 'text-[#9a938a]' : isPositive ? 'text-brand-700' : 'text-[#b44336]'
+    change === null || isNeutral ? 'text-muted' : isPositive ? 'text-accent' : 'text-[#e07a6a]'
   const trendArrow = isNeutral ? '→' : isPositive ? '↑' : '↓'
 
   return (
-    <div className="flex min-w-0 flex-col border-b border-r border-[#eae6de] px-5 py-5">
+    <div className="flex min-w-0 flex-col border-b border-r border-line px-5 py-5">
       <div className="mb-3 flex min-h-5 items-center gap-2">
         {provider ? (
           <>
             <ProviderIcon provider={provider} size="sm" />
-            <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#6f6961]">
+            <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#a79f8c]">
               {providerLabel(provider)}
             </span>
           </>
         ) : (
-          <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#6f6961]">
+          <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#a79f8c]">
             {title}
           </span>
         )}
       </div>
 
       <div className="mt-auto flex items-end justify-between gap-3">
-        <span className="font-serif text-[30px] font-semibold leading-none tracking-[-0.02em] text-[#101414]">
+        <span className="font-display text-[30px] font-semibold leading-none tracking-[-0.02em] text-ink">
           {formatNumber(value, 0)}
         </span>
         <span className={`pb-0.5 text-[11.5px] font-medium ${trendTone}`}>
@@ -59,7 +59,7 @@ function EntryCard({ title, value, change, periodText, provider }: EntryCardProp
         </span>
       </div>
 
-      <p className="mt-2 text-[11.5px] text-[#9a938a]">Entries in the {periodText}</p>
+      <p className="mt-2 text-[11.5px] text-muted">Entries in the {periodText}</p>
     </div>
   )
 }
@@ -86,7 +86,7 @@ export function TrafficEntryCardsRow({
   const providerByKey = new Map(providers.map((p) => [p.provider, p]))
 
   return (
-    <div className="grid grid-cols-1 border-t border-t-[#101414] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+    <div className="grid grid-cols-1 border-t border-t-ink sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       <EntryCard
         title="Total entries"
         value={totalEntries}

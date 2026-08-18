@@ -28,27 +28,30 @@ function BreakdownCard({ title, subtitle, columnLabel, rows, kind }: BreakdownCa
   return (
     <section className="min-w-0">
       <div className="mb-[18px] min-h-[4.5rem]">
-        <h2 className="text-[19px] font-semibold text-[#101414]">{title}</h2>
-        <p className="mt-0.5 text-xs leading-4 text-[#9a938a]">{subtitle}</p>
+        <h2 className="text-[19px] font-semibold text-ink">{title}</h2>
+        <p className="mt-0.5 text-xs leading-4 text-muted">{subtitle}</p>
       </div>
       {isEmpty ? (
-        <div className="flex min-h-36 items-center justify-center border-y border-dashed border-[#d8d2c7] px-6 text-sm text-[#9a938a]">
+        <div className="flex min-h-36 items-center justify-center border-y border-dashed border-line px-6 text-sm text-muted">
           No data for the selected period.
         </div>
       ) : (
         <div>
-          <div className="grid grid-cols-[minmax(0,1fr)_5.25rem] items-end border-b-2 border-[#101414] pb-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8a847b]">
+          <div className="grid grid-cols-[minmax(0,1fr)_5.25rem] items-end border-b-2 border-ink pb-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
             <span className="min-w-0 truncate text-left">{columnLabel}</span>
             <span className="text-right">Visitors</span>
           </div>
-          {visibleRows.map((row) => {
+          {visibleRows.map((row, index) => {
             const label = rowLabel(row, kind)
             return (
               <div
                 key={`${kind}-${row.label}`}
-                className="grid grid-cols-[minmax(0,1fr)_5.25rem] items-center border-b border-[#e4dfd6] py-3"
+                className="grid grid-cols-[minmax(0,1fr)_5.25rem] items-center border-b border-line py-3"
               >
                 <div className="flex min-w-0 items-center gap-2.5">
+                  <span className="card-number shrink-0">
+                    // {String(index + 1).padStart(2, '0')}
+                  </span>
                   {showLeading && (
                     <span className="flex h-5 w-5 shrink-0 items-center justify-center">
                       {kind === 'source' && row.domain ? (
@@ -61,11 +64,11 @@ function BreakdownCard({ title, subtitle, columnLabel, rows, kind }: BreakdownCa
                       ) : null}
                     </span>
                   )}
-                  <span className="min-w-0 truncate text-sm text-[#101414]" title={label}>
+                  <span className="min-w-0 truncate text-sm text-ink" title={label}>
                     {label}
                   </span>
                 </div>
-                <span className="text-right text-sm font-medium tabular-nums text-[#6b655e]">
+                <span className="text-right text-sm font-medium tabular-nums text-muted">
                   {formatNumber(row.value, 0)}
                 </span>
               </div>

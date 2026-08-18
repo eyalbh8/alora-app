@@ -110,8 +110,8 @@ export function BrandVisibilityChart({
             paired ? '' : 'h-full'
           } ${
             variant === 'editorial'
-              ? 'border-y border-[#eae6de] text-[#8a847b]'
-              : 'text-slate-500'
+              ? 'border-y border-line text-muted'
+              : 'text-muted'
           }`}
           style={
             paired
@@ -130,13 +130,13 @@ export function BrandVisibilityChart({
         <div className={`flex h-full flex-col ${variant === 'card' ? 'px-2 pb-4 pt-2' : ''}`}>
           {showLegend && (
             <div
-              className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 overflow-hidden border-b-2 border-[#101414]"
+              className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 overflow-hidden border-b-2 border-ink"
               style={{ height: PAIRED_LEGEND_HEIGHT_PX }}
             >
               {competitors.map((competitor, index) => (
                 <span
                   key={competitor.id}
-                  className="inline-flex items-center gap-1.5 whitespace-nowrap text-[10px] text-[#6b655e]"
+                  className="inline-flex items-center gap-1.5 whitespace-nowrap text-[10px] text-muted"
                 >
                   <span
                     className="h-1.5 w-1.5 rounded-full"
@@ -165,14 +165,14 @@ export function BrandVisibilityChart({
                 <CartesianGrid
                   strokeDasharray={variant === 'card' ? '3 3' : undefined}
                   vertical={false}
-                  stroke={variant === 'editorial' ? '#eae6de' : '#e2e8f0'}
+                  stroke={variant === 'editorial' ? 'rgba(227, 220, 200, 0.12)' : 'rgba(227, 220, 200, 0.12)'}
                   syncWithTicks
                 />
                 <XAxis
                   dataKey="label"
-                  axisLine={{ stroke: variant === 'editorial' ? '#eae6de' : '#cbd5e1' }}
+                  axisLine={{ stroke: variant === 'editorial' ? 'rgba(227, 220, 200, 0.12)' : '#a79f8c' }}
                   tickLine={false}
-                  tick={{ fontSize: 11, fill: variant === 'editorial' ? '#9a938a' : undefined }}
+                  tick={{ fontSize: 11, fill: variant === 'editorial' ? '#a79f8c' : undefined }}
                   interval="preserveStartEnd"
                   height={paired ? PAIRED_XAXIS_HEIGHT_PX : undefined}
                   tickMargin={paired ? 4 : undefined}
@@ -182,7 +182,7 @@ export function BrandVisibilityChart({
                   ticks={paired ? yTicks : showLegend ? yTicks.slice(0, -1) : yTicks}
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 11, fill: variant === 'editorial' ? '#9a938a' : undefined }}
+                  tick={{ fontSize: 11, fill: variant === 'editorial' ? '#a79f8c' : undefined }}
                   width={36}
                 />
                 <Tooltip
@@ -190,8 +190,8 @@ export function BrandVisibilityChart({
                     if (!active || !payload?.length) return null
                     const date = payload[0]?.payload?.date
                     return (
-                      <div className="min-w-48 border border-[#d8d2c7] bg-white px-3 py-2.5 text-xs shadow-lg">
-                        <p className="mb-2 font-semibold text-[#302d29]">{date}</p>
+                      <div className="min-w-48 border border-line bg-surface px-3 py-2.5 text-xs ">
+                        <p className="mb-2 font-semibold text-ink">{date}</p>
                         <div className="space-y-1.5">
                           {payload.map((entry) => {
                             const name = String(entry.name ?? entry.dataKey ?? '')
@@ -208,7 +208,7 @@ export function BrandVisibilityChart({
                                     size="sm"
                                   />
                                 )}
-                                <span className="min-w-0 flex-1 truncate text-[#6b655e]">{name}</span>
+                                <span className="min-w-0 flex-1 truncate text-muted">{name}</span>
                                 <span className="font-medium" style={{ color: entry.color }}>
                                   {Math.round(Number(entry.value ?? 0))}{' '}
                                   {valueLabel ?? (variant === 'editorial' ? '% visibility' : 'mentions')}
@@ -228,7 +228,7 @@ export function BrandVisibilityChart({
                     iconType="circle"
                     iconSize={7}
                     formatter={(value) => (
-                      <span className="text-xs text-slate-600">{value}</span>
+                      <span className="text-xs text-muted">{value}</span>
                     )}
                   />
                 )}

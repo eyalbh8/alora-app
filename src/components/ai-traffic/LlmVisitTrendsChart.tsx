@@ -59,7 +59,7 @@ function ChartBody({
   return (
     <div className={`relative ${expanded ? 'h-[480px]' : 'h-[220px] sm:h-[280px]'}`}>
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <span className="select-none font-serif text-5xl font-semibold tracking-tight text-[#f0ede8]">
+        <span className="select-none font-display text-5xl font-semibold tracking-tight text-[#e3dcc8]">
           Alora
         </span>
       </div>
@@ -73,17 +73,17 @@ function ChartBody({
               </linearGradient>
             ))}
           </defs>
-          <CartesianGrid vertical={false} stroke="#eae6de" />
+          <CartesianGrid vertical={false} stroke="rgba(227, 220, 200, 0.12)" />
           <XAxis
             dataKey="date"
-            tick={{ fill: '#9a938a', fontSize: 11 }}
+            tick={{ fill: '#a79f8c', fontSize: 11 }}
             tickLine={false}
             axisLine={{ stroke: '#bdb6ad' }}
             interval={days <= 7 ? 0 : 'preserveStartEnd'}
           />
           <YAxis
             domain={[0, yMax]}
-            tick={{ fill: '#9a938a', fontSize: 11 }}
+            tick={{ fill: '#a79f8c', fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             width={38}
@@ -161,15 +161,15 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
       >
         <div className="flex shrink-0 items-start justify-between gap-3 pb-4">
           <div>
-            <h2 className="text-[19px] font-semibold tracking-[-0.01em] text-[#101414]">
+            <h2 className="text-[19px] font-semibold tracking-[-0.01em] text-ink">
               LLM Visit Trends
             </h2>
-            <p className="mt-0.5 text-xs text-[#9a938a]">
+            <p className="mt-0.5 text-xs text-muted">
               Track visits from different LLM providers over time.
             </p>
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
               {legendKeys.map((p) => (
-                <span key={p} className="inline-flex items-center gap-1.5 text-[11.5px] text-[#5c554c]">
+                <span key={p} className="inline-flex items-center gap-1.5 text-[11.5px] text-muted">
                   <span
                     className="h-[7px] w-[7px] rounded-full"
                     style={{ backgroundColor: trafficProviderColor(p) }}
@@ -184,7 +184,7 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
             <button
               type="button"
               onClick={() => setExpanded(true)}
-              className="p-1.5 text-[#9a938a] transition hover:bg-[#f3f0eb] hover:text-[#101414]"
+              className="p-1.5 text-muted transition hover:bg-[#1a1a1a] hover:text-ink"
               title="Expand chart"
               aria-label="Expand chart"
             >
@@ -195,7 +195,7 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
 
         <div>
           {!hasChart ? (
-            <div className="flex h-[220px] items-center justify-center border-y border-[#eae6de] px-6 text-sm text-[#9a938a] sm:h-[280px]">
+            <div className="flex h-[220px] items-center justify-center border-y border-line px-6 text-sm text-muted sm:h-[280px]">
               No visit trend data for the selected period.
             </div>
           ) : (
@@ -211,22 +211,22 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
 
       {expanded && hasValues && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 p-4"
           onClick={() => setExpanded(false)}
         >
           <div
-            className="flex w-full max-w-5xl flex-col overflow-hidden border border-[#eae6de] bg-[#faf9f7] shadow-xl"
+            className="flex w-full max-w-5xl flex-col overflow-hidden border border-line bg-bg "
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-[#eae6de] px-6 py-5">
+            <div className="flex items-center justify-between border-b border-line px-6 py-5">
               <div>
-                <h2 className="text-[19px] font-semibold text-[#101414]">LLM Visit Trends</h2>
-                <p className="mt-0.5 text-xs text-[#9a938a]">
+                <h2 className="text-[19px] font-semibold text-ink">LLM Visit Trends</h2>
+                <p className="mt-0.5 text-xs text-muted">
                   Track visits from different LLM providers over time.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
                   {providerKeys.map((p) => (
-                    <span key={p} className="inline-flex items-center gap-1.5 text-[11.5px] text-[#5c554c]">
+                    <span key={p} className="inline-flex items-center gap-1.5 text-[11.5px] text-muted">
                       <span
                         className="h-[7px] w-[7px] rounded-full"
                         style={{ backgroundColor: trafficProviderColor(p) }}
@@ -240,7 +240,7 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
-                className="border border-[#d8d2c9] px-3 py-1.5 text-sm text-[#5c554c] transition hover:bg-[#f3f0eb]"
+                className="border border-[rgba(227, 220, 200, 0.12)] px-3 py-1.5 text-sm text-muted transition hover:bg-[#1a1a1a]"
               >
                 Close
               </button>

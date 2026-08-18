@@ -31,8 +31,8 @@ interface DataTableProps<T> {
 }
 
 function SortIndicator({ active, descending }: { active: boolean; descending: boolean }) {
-  if (!active) return <span className="text-slate-300">↕</span>
-  return <span className="text-slate-700">{descending ? '↓' : '↑'}</span>
+  if (!active) return <span className="text-muted-dark">↕</span>
+  return <span className="text-ink">{descending ? '↓' : '↑'}</span>
 }
 
 export function DataTable<T>({
@@ -69,18 +69,18 @@ export function DataTable<T>({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm">
+    <div className="overflow-hidden border border-line bg-bg">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-100 bg-slate-50/60">
+            <tr className="border-b border-line bg-surface">
               {columns.map((column) => (
                 <th
                   key={column.key}
                   onClick={() => handleHeaderClick(column)}
-                  className={`px-4 py-3 text-xs font-semibold tracking-wide whitespace-nowrap text-slate-500 uppercase ${
+                  className={`px-4 py-3 font-mono text-[11px] font-medium tracking-[0.1em] whitespace-nowrap text-muted uppercase ${
                     column.align === 'right' ? 'text-right' : 'text-left'
-                  } ${column.sortable ? 'cursor-pointer select-none hover:text-slate-700' : ''}`}
+                  } ${column.sortable ? 'cursor-pointer select-none hover:text-ink' : ''}`}
                 >
                   <span className="inline-flex items-center gap-1">
                     {column.header}
@@ -95,7 +95,7 @@ export function DataTable<T>({
           <tbody>
             {loading
               ? Array.from({ length: 8 }).map((_, rowIndex) => (
-                  <tr key={rowIndex} className="border-b border-slate-50">
+                  <tr key={rowIndex} className="border-b border-line">
                     {columns.map((column) => (
                       <td key={column.key} className="px-4 py-3">
                         <Skeleton className="h-4 w-full max-w-32" />
@@ -104,11 +104,11 @@ export function DataTable<T>({
                   </tr>
                 ))
               : rows.map((row) => (
-                  <tr key={rowKey(row)} className="border-b border-slate-50 transition hover:bg-slate-50/50">
+                  <tr key={rowKey(row)} className="border-b border-line transition hover:bg-surface">
                     {columns.map((column) => (
                       <td
                         key={column.key}
-                        className={`px-4 py-3 ${column.align === 'right' ? 'text-right' : 'text-left'}`}
+                        className={`px-4 py-3 text-ink ${column.align === 'right' ? 'text-right' : 'text-left'}`}
                       >
                         {column.render(row)}
                       </td>
@@ -126,8 +126,8 @@ export function DataTable<T>({
       )}
 
       {(totalPages > 1 || totalCount !== undefined) && (
-        <div className="flex items-center justify-between border-t border-slate-100 px-4 py-2.5">
-          <span className="text-xs text-slate-400">
+        <div className="flex items-center justify-between border-t border-line px-4 py-2.5">
+          <span className="font-mono text-[11px] tracking-[0.1em] text-muted-dark uppercase">
             {totalCount !== undefined ? `${totalCount.toLocaleString()} total` : ''}
           </span>
           {totalPages > 1 && onPageChange && (
@@ -135,17 +135,17 @@ export function DataTable<T>({
               <button
                 disabled={page <= 1 || loading}
                 onClick={() => onPageChange(page - 1)}
-                className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                className="border border-line px-3 py-1 font-mono text-[11px] tracking-[0.1em] text-ink uppercase hover:border-ink disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Previous
               </button>
-              <span className="text-xs text-slate-500">
+              <span className="font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
                 Page {page} of {totalPages}
               </span>
               <button
                 disabled={page >= totalPages || loading}
                 onClick={() => onPageChange(page + 1)}
-                className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                className="border border-line px-3 py-1 font-mono text-[11px] tracking-[0.1em] text-ink uppercase hover:border-ink disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next
               </button>

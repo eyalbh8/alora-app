@@ -71,18 +71,18 @@ function PeriodStat({
   return (
     <div>
       <div className="flex items-baseline gap-2">
-        <span className="font-serif text-[34px] font-semibold tracking-tight text-[#101414]">
+        <span className="font-display text-[34px] font-semibold tracking-tight text-ink">
           {value != null ? formatNumber(value, 0) : '—'}
         </span>
         {delta != null && (
           <span
-            className={`text-xs font-medium ${delta >= 0 ? 'text-brand-700' : 'text-red-600'}`}
+            className={`text-xs font-medium ${delta >= 0 ? 'text-accent' : 'text-red-600'}`}
           >
             {formatPctDelta(delta)}
           </span>
         )}
       </div>
-      {label && <p className="mt-0.5 text-xs text-[#9a938a]">{label}</p>}
+      {label && <p className="mt-0.5 text-xs text-muted">{label}</p>}
     </div>
   )
 }
@@ -102,7 +102,7 @@ function ChartBody({
             dataKey="date"
             axisLine={{ stroke: SENTIMENT_DIVIDER }}
             tickLine={false}
-            tick={{ fontSize: 10, fill: '#9a938a' }}
+            tick={{ fontSize: 10, fill: '#a79f8c' }}
             interval="preserveStartEnd"
             dy={8}
           />
@@ -163,7 +163,7 @@ export function SentimentTrendChart({
       <section aria-labelledby="sentiment-trend-title">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 id="sentiment-trend-title" className="text-[19px] font-semibold text-[#101414]">
+            <h2 id="sentiment-trend-title" className="text-[19px] font-semibold text-ink">
               Sentiment Trend
             </h2>
             <div className="mt-0.5 flex flex-wrap items-end gap-x-8 gap-y-2">
@@ -182,7 +182,7 @@ export function SentimentTrendChart({
             <button
               type="button"
               onClick={() => setExpanded(true)}
-              className="p-1.5 text-[#9a938a] transition hover:text-[#101414]"
+              className="p-1.5 text-muted transition hover:text-ink"
               title="Expand chart"
               aria-label="Expand chart"
             >
@@ -193,7 +193,7 @@ export function SentimentTrendChart({
 
         <div className="mt-3">
           {!hasData ? (
-            <div className="flex h-[180px] items-center justify-center border-b border-[#eae6de] px-6 text-sm text-[#9a938a]">
+            <div className="flex h-[180px] items-center justify-center border-b border-line px-6 text-sm text-muted">
               No sentiment trend data for the selected period.
             </div>
           ) : (
@@ -204,16 +204,16 @@ export function SentimentTrendChart({
 
       {expanded && hasData && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 p-4"
           onClick={() => setExpanded(false)}
         >
           <div
-            className="flex w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-white shadow-xl"
+            className="flex w-full max-w-5xl flex-col overflow-hidden border border-line bg-surface"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-line px-5 py-4">
               <div>
-                <h2 className="text-lg font-semibold text-[#101414]">Sentiment Trend</h2>
+                <h2 className="text-lg font-semibold text-ink">Sentiment Trend</h2>
                 <div className="mt-3 flex flex-wrap gap-x-8 gap-y-2">
                   <PeriodStat
                     value={currentScore != null ? Math.round(currentScore) : null}
@@ -229,7 +229,7 @@ export function SentimentTrendChart({
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+                className="rounded-lg border border-line px-3 py-1.5 text-sm text-muted hover:bg-paper-soft"
               >
                 Close
               </button>

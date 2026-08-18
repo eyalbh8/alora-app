@@ -27,11 +27,10 @@ interface ResponseDrawerProps {
 }
 
 function SentimentBadge({ score }: { score: number | null }) {
-  if (score == null) return <span className="text-slate-400">—</span>
-  const tone =
-    score >= 70 ? 'bg-emerald-500 text-white' : score >= 40 ? 'bg-amber-400 text-white' : 'bg-rose-500 text-white'
+  if (score == null) return <span className="text-muted-dark">—</span>
+  const tone = score >= 70 ? 'text-accent' : score >= 40 ? 'text-muted' : 'text-error'
   return (
-    <span className={`inline-flex min-w-[2.5rem] items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${tone}`}>
+    <span className={`inline-flex min-w-[2.5rem] items-center justify-center font-mono text-[11px] font-medium tracking-[0.1em] ${tone}`}>
       {formatNumber(score, 0)}
     </span>
   )
@@ -39,9 +38,9 @@ function SentimentBadge({ score }: { score: number | null }) {
 
 function MetricChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
-      <p className="mt-0.5 text-sm font-semibold text-[#101414]">{value}</p>
+    <div className="rounded-lg border border-line bg-paper-soft/80 px-3 py-2">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-dark">{label}</p>
+      <p className="mt-0.5 text-sm font-semibold text-ink">{value}</p>
     </div>
   )
 }
@@ -52,12 +51,12 @@ function BrandAvatar({ name, logo }: { name?: string | null; logo?: string | nul
       <img
         src={logo}
         alt={name ?? 'Brand'}
-        className="h-7 w-7 rounded-full border border-slate-200 bg-white object-contain p-0.5"
+        className="h-7 w-7 rounded-full border border-line bg-surface object-contain p-0.5"
       />
     )
   }
   return (
-    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-[10px] font-bold text-slate-600">
+    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-line bg-paper-soft text-[10px] font-bold text-muted">
       {(name ?? '?').slice(0, 1).toUpperCase()}
     </span>
   )
@@ -89,41 +88,41 @@ export function ResponseDrawer({ row, initialTab = 'response', onClose }: Respon
   )
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/20">
+    <div className="fixed inset-0 z-50 flex justify-end bg-bg/80">
       <button type="button" className="flex-1 cursor-default" aria-label="Close drawer" onClick={onClose} />
-      <div className="flex h-full w-full max-w-2xl flex-col overflow-hidden border-l border-slate-200 bg-white shadow-2xl">
+      <div className="flex h-full w-full max-w-2xl flex-col overflow-hidden border-l border-line bg-surface ">
         {/* Header */}
-        <div className="shrink-0 border-b border-slate-100 px-5 py-4">
+        <div className="shrink-0 border-b border-line px-5 py-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <ProviderIcon provider={provider} size="md" />
                 <div>
-                  <h2 className="text-base font-semibold text-[#101414]">{providerLabel(provider)}</h2>
-                  <p className="text-xs text-slate-500">{responseDateTimeLabel(detail)}</p>
+                  <h2 className="text-base font-semibold text-ink">{providerLabel(provider)}</h2>
+                  <p className="text-xs text-muted">{responseDateTimeLabel(detail)}</p>
                 </div>
               </div>
               {detail.region && (
-                <p className="mt-2 text-xs text-slate-400">{regionLabel(detail.region)}</p>
+                <p className="mt-2 text-xs text-muted-dark">{regionLabel(detail.region)}</p>
               )}
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg px-2 py-1 text-sm text-slate-500 hover:bg-slate-50"
+              className="rounded-lg px-2 py-1 text-sm text-muted hover:bg-paper-soft"
             >
               Close
             </button>
           </div>
 
-          <div className="mt-4 flex gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+          <div className="mt-4 flex gap-1 rounded-lg border border-line bg-paper-soft p-1">
             {(['response', 'raw'] as const).map((key) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => setTab(key)}
                 className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium capitalize transition ${
-                  tab === key ? 'bg-white text-[#101414] shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  tab === key ? 'bg-surface text-ink ' : 'text-muted hover:text-ink'
                 }`}
               >
                 {key === 'raw' ? 'Raw' : 'Response'}
@@ -135,10 +134,10 @@ export function ResponseDrawer({ row, initialTab = 'response', onClose }: Respon
         {/* Body */}
         <div className="min-h-0 flex-1 overflow-y-auto">
           {loading && tab === 'response' ? (
-            <div className="flex h-40 items-center justify-center text-sm text-slate-400">Loading response…</div>
+            <div className="flex h-40 items-center justify-center text-sm text-muted-dark">Loading response…</div>
           ) : tab === 'raw' ? (
             <div className="px-5 py-4">
-              <pre className="overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed text-slate-700">
+              <pre className="overflow-x-auto rounded-xl border border-line bg-paper-soft p-4 text-xs leading-relaxed text-ink">
                 {raw ? JSON.stringify(raw, null, 2) : 'No raw payload available.'}
               </pre>
             </div>
@@ -146,31 +145,31 @@ export function ResponseDrawer({ row, initialTab = 'response', onClose }: Respon
             <div className="flex flex-col gap-5 px-5 py-4">
               {detail.promptText && (
                 <section>
-                  <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-dark">
                     Prompt
                   </h3>
-                  <p className="rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm leading-relaxed text-slate-700">
+                  <p className="rounded-xl border border-line bg-paper-soft/80 px-4 py-3 text-sm leading-relaxed text-ink">
                     {detail.promptText}
                   </p>
                 </section>
               )}
 
               {detail.topic && (
-                <p className="text-xs text-slate-500">
-                  Topic: <span className="font-medium text-slate-700">{detail.topic}</span>
+                <p className="text-xs text-muted">
+                  Topic: <span className="font-medium text-ink">{detail.topic}</span>
                 </p>
               )}
 
               <section>
-                <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-dark">
                   Response
                 </h3>
                 {fullText ? (
-                  <div className="rounded-xl border border-slate-200/80 bg-white px-4 py-4">
+                  <div className="rounded-xl border border-line bg-surface px-4 py-4">
                     <ResponseFormattedText text={fullText} />
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+                  <div className="rounded-xl border border-dashed border-line bg-paper-soft px-4 py-6 text-center text-sm text-muted">
                     Response text is not available for this row yet. Re-sync prompt responses to populate it, or
                     check the Raw tab.
                   </div>
@@ -182,8 +181,8 @@ export function ResponseDrawer({ row, initialTab = 'response', onClose }: Respon
                   label="Rank"
                   value={detail.myRank != null ? formatNumber(detail.myRank, 0) : '—'}
                 />
-                <div className="rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Sentiment</p>
+                <div className="rounded-lg border border-line bg-paper-soft/80 px-3 py-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-dark">Sentiment</p>
                   <div className="mt-1">
                     <SentimentBadge score={sentiment} />
                   </div>
@@ -200,7 +199,7 @@ export function ResponseDrawer({ row, initialTab = 'response', onClose }: Respon
 
               {(brands.length > 0 || meta?.account?.logo) && (
                 <section>
-                  <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-dark">
                     Brands
                   </h3>
                   <div className="flex flex-wrap items-center gap-2">
@@ -223,21 +222,21 @@ export function ResponseDrawer({ row, initialTab = 'response', onClose }: Respon
 
               {citations.length > 0 && (
                 <section>
-                  <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-dark">
                     Citations ({citationCount(detail)})
                   </h3>
-                  <ul className="divide-y divide-slate-100 rounded-xl border border-slate-200/80">
+                  <ul className="divide-y divide-slate-100 rounded-xl border border-line">
                     {citations.map((source, i) => (
                       <li key={`${source.url}-${i}`} className="px-3 py-2.5">
                         <a
                           href={source.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm font-medium text-brand-700 hover:underline"
+                          className="text-sm font-medium text-accent hover:underline"
                         >
                           {source.title || truncateMiddle(source.url, 72)}
                         </a>
-                        <p className="mt-0.5 truncate text-xs text-slate-400">{source.url}</p>
+                        <p className="mt-0.5 truncate text-xs text-muted-dark">{source.url}</p>
                       </li>
                     ))}
                   </ul>

@@ -9,13 +9,11 @@ export function FreshnessBadge({
 }) {
   if (!day) return null
   return (
-    <div className="inline-flex flex-wrap items-center gap-2 rounded-lg border border-slate-200/80 bg-white px-3 py-1.5 text-xs text-slate-600 shadow-sm">
+    <div className="inline-flex flex-wrap items-center gap-2 border border-line bg-surface px-3 py-1.5 font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
       <span>
-        Snapshot day: <span className="font-semibold text-slate-800">{day}</span>
+        Snapshot day: <span className="text-ink">{day}</span>
       </span>
-      {pulledAt && (
-        <span className="text-slate-400">Pulled {formatPulledAt(pulledAt)}</span>
-      )}
+      {pulledAt && <span className="text-muted-dark">Pulled {formatPulledAt(pulledAt)}</span>}
     </div>
   )
 }

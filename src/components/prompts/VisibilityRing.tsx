@@ -21,7 +21,7 @@ export function VisibilityRing({ value, size = 44 }: VisibilityRingProps) {
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#e2e8f0"
+          stroke="rgba(227, 220, 200, 0.12)"
           strokeWidth={stroke}
         />
         {pct != null && (
@@ -30,7 +30,7 @@ export function VisibilityRing({ value, size = 44 }: VisibilityRingProps) {
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="#148f85"
+            stroke="#42ca80"
             strokeWidth={stroke}
             strokeLinecap="round"
             strokeDasharray={circumference}
@@ -38,7 +38,7 @@ export function VisibilityRing({ value, size = 44 }: VisibilityRingProps) {
           />
         )}
       </svg>
-      <span className="absolute text-[11px] font-semibold text-[#101414]">
+      <span className="absolute text-[11px] font-semibold text-ink">
         {pct == null ? '—' : `${formatNumber(pct, 0)}%`}
       </span>
     </div>

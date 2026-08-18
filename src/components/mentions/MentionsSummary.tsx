@@ -32,34 +32,34 @@ export function MentionsSummary({ providers, range }: MentionsSummaryProps) {
 
   return (
     <section aria-labelledby="llm-mentions-heading">
-      <h2 id="llm-mentions-heading" className="text-[19px] font-semibold text-[#101414]">
+      <h2 id="llm-mentions-heading" className="text-[19px] font-semibold text-ink">
         LLM Mentions
       </h2>
-      <p className="mt-5 font-serif text-[40px] font-semibold leading-none tracking-tight text-[#101414] sm:text-[52px]">
+      <p className="mt-5 font-display text-[40px] font-semibold leading-none tracking-tight text-ink sm:text-[52px]">
         {formatNumber(total, 0)}
       </p>
-      <p className="mt-2 text-xs text-[#9a938a]">Total mentions, {periodLabel}</p>
+      <p className="mt-2 text-xs text-muted">Total mentions, {periodLabel}</p>
 
       {rows.length > 0 ? (
         <div className="mt-4" role="list" aria-label="Mentions by provider">
           {rows.map((provider) => (
             <div
               key={provider.provider}
-              className="flex items-center gap-2.5 border-b border-[#eae6de]/70 py-2 last:border-b-0"
+              className="flex items-center gap-2.5 border-b border-line/70 py-2 last:border-b-0"
               role="listitem"
             >
               <ProviderIcon provider={provider.provider} size="sm" />
-              <span className="min-w-0 flex-1 text-[13px] text-[#3a352e]">
+              <span className="min-w-0 flex-1 text-[13px] text-[#e3dcc8]">
                 {providerLabel(provider.provider)}
               </span>
-              <span className="font-serif text-[15px] font-semibold tabular-nums text-[#101414]">
+              <span className="font-display text-[15px] font-semibold tabular-nums text-ink">
                 {formatNumber(provider.count, 0)}
               </span>
             </div>
           ))}
         </div>
       ) : (
-        <p className="mt-5 max-w-xs text-sm leading-relaxed text-[#9a938a]">
+        <p className="mt-5 max-w-xs text-sm leading-relaxed text-muted">
           No mention data for the selected period.
         </p>
       )}

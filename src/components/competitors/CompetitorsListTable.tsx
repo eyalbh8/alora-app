@@ -13,16 +13,16 @@ const SENTIMENT_THRESHOLDS = {
 
 function sentimentStyle(score: number | null | undefined) {
   if (score == null || Number.isNaN(score)) {
-    return 'text-slate-500'
+    return 'text-muted'
   }
   if (score >= SENTIMENT_THRESHOLDS.VERY_POSITIVE) {
-    return 'text-brand-700'
+    return 'text-accent'
   }
   if (score >= SENTIMENT_THRESHOLDS.POSITIVE) {
-    return 'text-brand-700'
+    return 'text-accent'
   }
   if (score >= -SENTIMENT_THRESHOLDS.NEUTRAL && score <= SENTIMENT_THRESHOLDS.NEUTRAL) {
-    return 'text-slate-700'
+    return 'text-ink'
   }
   if (score >= SENTIMENT_THRESHOLDS.NEGATIVE) {
     return 'text-red-700'
@@ -44,8 +44,8 @@ function BrandCell({ row }: { row: CompetitorPerformance }) {
       <span
         className={`min-w-0 truncate ${
           row.isAccount || row.id === 'account'
-            ? 'font-semibold text-[#101414]'
-            : 'font-medium text-slate-800'
+            ? 'font-semibold text-ink'
+            : 'font-medium text-ink'
         }`}
       >
         {row.name}
@@ -55,9 +55,9 @@ function BrandCell({ row }: { row: CompetitorPerformance }) {
 }
 
 function TopicTags({ topics }: { topics?: string[] }) {
-  if (!topics?.length) return <span className="text-slate-400">—</span>
+  if (!topics?.length) return <span className="text-muted-dark">—</span>
 
-  return <span className="text-xs text-slate-500">{topics.join(', ')}</span>
+  return <span className="text-xs text-muted">{topics.join(', ')}</span>
 }
 
 interface CompetitorsListTableProps {
@@ -69,35 +69,35 @@ export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
 
   if (rows.length === 0) {
     return (
-      <div className="border-y border-slate-200 px-6 py-12 text-center">
-        <p className="text-base font-semibold text-slate-800">No competitors</p>
-        <p className="mt-1 text-sm text-slate-500">No ranking rows match the current filters.</p>
+      <div className="border-y border-line px-6 py-12 text-center">
+        <p className="text-base font-semibold text-ink">No competitors</p>
+        <p className="mt-1 text-sm text-muted">No ranking rows match the current filters.</p>
       </div>
     )
   }
 
   return (
     <section aria-labelledby="competitors-list-title">
-      <h2 id="competitors-list-title" className="mb-4 text-[19px] font-semibold text-[#101414]">
+      <h2 id="competitors-list-title" className="mb-4 text-[19px] font-semibold text-ink">
         Competitors List
       </h2>
       <div className="overflow-x-auto">
         <table className="w-full min-w-0 border-collapse text-sm">
           <thead>
-            <tr className="border-b-2 border-[#101414]">
-              <th className="min-w-0 pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+            <tr className="border-b-2 border-ink">
+              <th className="min-w-0 pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
                 Brand
               </th>
-              <th className="hidden px-3 pb-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 md:table-cell">
+              <th className="hidden px-3 pb-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted md:table-cell">
                 Shared Topics
               </th>
-              <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+              <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
                 Rank
               </th>
-              <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+              <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
                 Mentions
               </th>
-              <th className="pb-2.5 pl-3 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+              <th className="pb-2.5 pl-3 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
                 Sentiment
               </th>
             </tr>
@@ -110,8 +110,8 @@ export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
               return (
                 <tr
                   key={row.id}
-                  className={`border-b border-[#eae6de] transition-colors ${
-                    hovered ? 'bg-brand-50/50' : ''
+                  className={`border-b border-line transition-colors ${
+                    hovered ? 'bg-surface/50' : ''
                   }`}
                   onMouseEnter={() => setHoveredCompetitor(row.name)}
                   onMouseLeave={() => setHoveredCompetitor(null)}
@@ -119,7 +119,7 @@ export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
                   <td className="min-w-0 py-4 pr-3">
                     <BrandCell row={row} />
                     {row.topics?.length ? (
-                      <p className="mt-1.5 truncate text-[10px] text-slate-500 md:hidden">
+                      <p className="mt-1.5 truncate text-[10px] text-muted md:hidden">
                         {row.topics.join(', ')}
                       </p>
                     ) : null}
@@ -132,7 +132,7 @@ export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
                       {row.avgRankDelta != null && (
                         <DeltaBadge value={row.avgRankDelta} mode="absolute" invert />
                       )}
-                      <span className="text-[13px] text-slate-700">{formatScore(row.avgRank)}</span>
+                      <span className="text-[13px] text-ink">{formatScore(row.avgRank)}</span>
                     </div>
                   </td>
                   <td className="px-3 py-4">
@@ -140,7 +140,7 @@ export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
                       {row.occurrencesDelta != null && (
                         <DeltaBadge value={row.occurrencesDelta} mode="percent" />
                       )}
-                      <span className="text-[13px] text-slate-700">
+                      <span className="text-[13px] text-ink">
                         {formatNumber(row.occurrences, 0)}
                       </span>
                     </div>

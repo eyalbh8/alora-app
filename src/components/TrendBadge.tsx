@@ -12,16 +12,20 @@ interface TrendBadgeProps {
 /** ↑ / ↓ with the delta — green when improving, red when declining, grey when flat/unknown. */
 export function TrendBadge({ value, percent = false, invert = false }: TrendBadgeProps) {
   if (value === null || value === undefined || Number.isNaN(value)) {
-    return <span className="text-xs text-slate-300">–</span>
+    return <span className="font-mono text-[11px] text-muted-dark">–</span>
   }
   if (value === 0) {
-    return <span className="text-xs font-medium text-slate-400">0{percent ? '%' : ''}</span>
+    return (
+      <span className="font-mono text-[11px] font-medium tracking-[0.08em] text-muted-dark">
+        0{percent ? '%' : ''}
+      </span>
+    )
   }
   const improving = invert ? value < 0 : value > 0
   const arrow = value > 0 ? '↑' : '↓'
-  const color = improving ? 'text-brand-600' : 'text-red-600'
+  const color = improving ? 'text-accent' : 'text-error'
   return (
-    <span className={`text-xs font-medium ${color}`}>
+    <span className={`font-mono text-[11px] font-medium tracking-[0.08em] ${color}`}>
       {arrow} {formatNumber(Math.abs(value))}
       {percent ? '%' : ''}
     </span>

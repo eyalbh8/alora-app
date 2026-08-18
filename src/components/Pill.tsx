@@ -13,16 +13,16 @@ export type PillTone =
   | 'coral'
 
 const TONE_CLASSES: Record<PillTone, string> = {
-  grey: 'bg-slate-100 text-slate-600',
-  blue: 'bg-blue-50 text-blue-700',
-  green: 'bg-brand-50 text-brand-700',
-  orange: 'bg-orange-50 text-orange-700',
-  red: 'bg-red-50 text-red-700',
-  purple: 'bg-purple-50 text-purple-700',
-  yellow: 'bg-amber-50 text-amber-700',
-  pink: 'bg-pink-50 text-pink-700',
-  teal: 'bg-brand-50 text-brand-700',
-  coral: 'bg-orange-50 text-orange-700',
+  grey: 'text-muted-dark',
+  blue: 'text-muted',
+  green: 'text-accent',
+  orange: 'text-muted',
+  red: 'text-error',
+  purple: 'text-muted',
+  yellow: 'text-muted',
+  pink: 'text-muted',
+  teal: 'text-accent',
+  coral: 'text-error',
 }
 
 /** Maps topic color token names onto pill tones. */
@@ -37,7 +37,7 @@ export function toneFromColor(color: string | null | undefined): PillTone {
 export function Pill({ tone = 'grey', children }: { tone?: PillTone; children: ReactNode }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${TONE_CLASSES[tone]}`}
+      className={`inline-flex items-center border border-line px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.1em] whitespace-nowrap uppercase ${TONE_CLASSES[tone]}`}
     >
       {children}
     </span>

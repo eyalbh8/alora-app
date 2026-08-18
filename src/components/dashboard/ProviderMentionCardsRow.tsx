@@ -38,10 +38,10 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
 
   return (
     <>
-      <div className="flex min-w-[10.5rem] flex-1 flex-col border-r border-[#e4dfd6] px-5 py-5 last:border-r-0">
+      <div className="flex min-w-[10.5rem] flex-1 flex-col border-r border-line px-5 py-5 last:border-r-0">
         <div className="mb-3 flex items-center gap-2">
           <ProviderIcon provider={mention.provider} size="sm" />
-          <span className="truncate text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#8a847b]">
+          <span className="truncate text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted">
             {label}
           </span>
         </div>
@@ -51,8 +51,8 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
             type="button"
             disabled={!clickable}
             onClick={() => clickable && setOpen(true)}
-            className={`font-serif text-[34px] font-semibold leading-none tracking-[-0.02em] text-[#101414] transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600 ${
-              clickable ? 'cursor-pointer hover:text-brand-700' : 'cursor-default opacity-60'
+            className={`font-display text-[34px] font-semibold leading-none tracking-[-0.02em] text-ink transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${
+              clickable ? 'cursor-pointer hover:text-accent' : 'cursor-default opacity-60'
             }`}
           >
             {formatNumber(mention.count, 0)}
@@ -62,7 +62,7 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
           )}
         </div>
 
-        <p className="mt-2 whitespace-nowrap text-[11px] text-[#8a847b]">
+        <p className="mt-2 whitespace-nowrap text-[11px] text-muted">
           Answers citing you,{' '}
           {periodLabel(filters.startDate, filters.endDate, presetEndDay ?? filters.endDate, factDays?.min)}
         </p>
@@ -70,21 +70,21 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 p-4"
           onClick={() => setOpen(false)}
         >
           <div
-            className="flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-white shadow-xl"
+            className="flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-surface "
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="border-b border-slate-100 px-5 py-4">
+            <div className="border-b border-line px-5 py-4">
               <div className="flex items-center gap-2">
                 <ProviderIcon provider={mention.provider} size="md" />
-                <h3 className="text-lg font-semibold text-[#101414]">
+                <h3 className="text-lg font-semibold text-ink">
                   Prompts driving {label} visibility
                 </h3>
               </div>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-muted">
                 {loading ? 'Loading prompts…' : `${prompts.length} prompts where your brand appeared`}
               </p>
             </div>
@@ -93,7 +93,7 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
               {loading ? (
                 <div className="space-y-2">
                   {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="h-8 animate-pulse rounded bg-slate-100" />
+                    <div key={i} className="h-8 animate-pulse rounded bg-paper-soft" />
                   ))}
                 </div>
               ) : prompts.length > 0 ? (
@@ -102,7 +102,7 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
                     <li key={item.promptId ?? i}>
                       <button
                         type="button"
-                        className="flex w-full items-start gap-2 rounded-lg px-2 py-2 text-left hover:bg-slate-50"
+                        className="flex w-full items-start gap-2 rounded-lg px-2 py-2 text-left hover:bg-paper-soft"
                         onClick={() => {
                           setProviders([mention.provider])
                           setOpen(false)
@@ -110,22 +110,22 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
                           else navigate('/prompts')
                         }}
                       >
-                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" />
-                        <span className="text-sm font-medium text-slate-800">{item.prompt}</span>
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-surface0" />
+                        <span className="text-sm font-medium text-ink">{item.prompt}</span>
                       </button>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="py-8 text-center text-sm text-slate-500">No visibility-driving prompts for this platform.</p>
+                <p className="py-8 text-center text-sm text-muted">No visibility-driving prompts for this platform.</p>
               )}
             </div>
 
-            <div className="border-t border-slate-100 px-5 py-3">
+            <div className="border-t border-line px-5 py-3">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                className="rounded-lg border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-paper-soft"
               >
                 Close
               </button>
@@ -172,24 +172,24 @@ export function ProviderMentionCardsRow({
       <header
         className={
           embedded
-            ? 'flex flex-col gap-0.5 border-t border-[#d8d2c7] bg-[#f3efe8] px-5 py-3 sm:flex-row sm:items-baseline sm:gap-3'
+            ? 'flex flex-col gap-0.5 border-t border-line bg-paper-soft px-5 py-3 sm:flex-row sm:items-baseline sm:gap-3'
             : 'mb-5'
         }
       >
         <h2
           className={
             embedded
-              ? 'text-xs font-semibold uppercase tracking-[0.08em] text-[#302d29]'
-              : 'text-[19px] font-semibold tracking-[-0.01em] text-[#101414]'
+              ? 'text-xs font-semibold uppercase tracking-[0.08em] text-ink'
+              : 'text-[19px] font-semibold tracking-[-0.01em] text-ink'
           }
         >
           By platform
         </h2>
-        <p className="text-xs text-[#8a847b]">Where AI models are choosing to surface your brand</p>
+        <p className="text-xs text-muted">Where AI models are choosing to surface your brand</p>
       </header>
       <div
-        className={`overflow-x-auto border-[#e4dfd6] ${
-          embedded ? 'border-t bg-[#faf9f7]' : 'border-y border-t-[#101414] bg-[#faf9f7]'
+        className={`overflow-x-auto border-line ${
+          embedded ? 'border-t bg-bg' : 'border-y border-t-ink bg-bg'
         }`}
       >
         <div className="flex min-w-max md:min-w-full">

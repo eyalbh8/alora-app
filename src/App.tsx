@@ -15,6 +15,7 @@ import { MentionsScreen } from './screens/MentionsScreen'
 import { PromptsScreen } from './screens/PromptsScreen'
 import { SentimentScreen } from './screens/SentimentScreen'
 import InstagramCarouselScreen from './screens/InstagramCarouselScreen'
+import { NotFoundScreen } from './screens/NotFoundScreen'
 import {
   AnalyticsScreenLayout,
   GeoFiltersShell,
@@ -63,6 +64,7 @@ export default function App() {
                             <Route path="/ai-crawlers" element={<AiCrawlersScreen />} />
                           </Route>
                           <Route path="/carousel" element={<InstagramCarouselScreen />} />
+                          <Route path="*" element={<NotFoundScreen />} />
                         </Route>
                       </Routes>
                     </GeoMetaProvider>

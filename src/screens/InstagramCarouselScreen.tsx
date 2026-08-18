@@ -115,10 +115,10 @@ export default function InstagramCarouselScreen() {
     <div>
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-            Instagram Carousel Generator
+          <h1 className="screen-title">
+            Instagram <span className="screen-title__rest">Carousel Generator</span>
           </h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-3 text-[15px] text-muted">
             Transform your Instagram posts into professional carousels
           </p>
         </div>
@@ -138,23 +138,23 @@ export default function InstagramCarouselScreen() {
                 <div
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full sm:h-10 sm:w-10 ${
                     phase === p
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-button text-button-ink'
                       : idx < ['select', 'review', 'progress', 'results'].indexOf(phase)
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-300 text-gray-600'
+                      ? 'bg-accent text-button-ink'
+                      : 'bg-paper-soft text-muted'
                   }`}
                 >
                   {idx + 1}
                 </div>
-                <span className="ml-2 hidden text-sm font-medium text-gray-700 capitalize sm:inline">
+                <span className="ml-2 hidden text-sm font-medium text-ink capitalize sm:inline">
                   {p}
                 </span>
                 {idx < 3 && (
-                  <div className="mx-2 h-1 flex-1 bg-gray-300 sm:mx-4">
+                  <div className="mx-2 h-1 flex-1 bg-paper-soft sm:mx-4">
                     <div
                       className={`h-full ${
                         idx < ['select', 'review', 'progress', 'results'].indexOf(phase)
-                          ? 'bg-green-500'
+                          ? 'bg-accent'
                           : ''
                       }`}
                     />
@@ -166,17 +166,17 @@ export default function InstagramCarouselScreen() {
         </div>
 
         {/* Content */}
-        <div className="bg-white rounded-lg shadow">
+        <div className="bg-surface rounded-lg shadow">
           {phase === 'select' && (
             <>
-              <div className="flex border-b border-gray-200 px-6 pt-4">
+              <div className="flex border-b border-line px-6 pt-4">
                 <button
                   type="button"
                   onClick={() => setSelectTab('new')}
-                  className={`mr-6 border-b-2 pb-3 text-sm font-medium ${
+                  className={`mr-6 border-b pb-3 font-mono text-[12px] font-medium tracking-[0.12em] uppercase ${
                     selectTab === 'new'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                      ? 'border-ink text-ink'
+                      : 'border-transparent text-muted-dark hover:text-ink'
                   }`}
                 >
                   New carousel
@@ -184,10 +184,10 @@ export default function InstagramCarouselScreen() {
                 <button
                   type="button"
                   onClick={() => setSelectTab('history')}
-                  className={`border-b-2 pb-3 text-sm font-medium ${
+                  className={`border-b pb-3 font-mono text-[12px] font-medium tracking-[0.12em] uppercase ${
                     selectTab === 'history'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                      ? 'border-ink text-ink'
+                      : 'border-transparent text-muted-dark hover:text-ink'
                   }`}
                 >
                   History
@@ -210,7 +210,7 @@ export default function InstagramCarouselScreen() {
                       <button
                         type="button"
                         onClick={handleResumeLast}
-                        className="mt-3 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                        className="mt-3 rounded-md bg-button px-4 py-2 text-sm font-medium text-button-ink hover:bg-button"
                       >
                         Resume from step {(resumable.steps_completed || 0) + 1}
                       </button>
@@ -288,8 +288,8 @@ export default function InstagramCarouselScreen() {
               />
             ) : (
               <div className="p-8 text-center">
-                <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
-                <p className="mt-4 text-gray-600">Loading generation…</p>
+                <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-accent" />
+                <p className="mt-4 text-muted">Loading generation…</p>
               </div>
             )
           )}
@@ -313,7 +313,7 @@ function statusLabel(status: CarouselGenerationSummary['status']) {
   if (status === 'completed') return { text: 'Completed', className: 'bg-green-100 text-green-800' }
   if (status === 'failed') return { text: 'Failed', className: 'bg-red-100 text-red-800' }
   if (status === 'running') return { text: 'In progress', className: 'bg-blue-100 text-blue-800' }
-  return { text: 'Pending', className: 'bg-gray-100 text-gray-700' }
+  return { text: 'Pending', className: 'bg-paper-soft text-ink' }
 }
 
 function HistoryPhase({
@@ -330,8 +330,8 @@ function HistoryPhase({
   if (isLoading) {
     return (
       <div className="p-8 text-center">
-        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
-        <p className="mt-4 text-gray-600">Loading history…</p>
+        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-accent" />
+        <p className="mt-4 text-muted">Loading history…</p>
       </div>
     )
   }
@@ -340,7 +340,7 @@ function HistoryPhase({
     return (
       <div className="p-8 text-center">
         <p className="font-medium text-red-600">Could not load history</p>
-        <p className="mt-2 text-sm text-gray-600">{error.message}</p>
+        <p className="mt-2 text-sm text-muted">{error.message}</p>
       </div>
     )
   }
@@ -348,8 +348,8 @@ function HistoryPhase({
   if (generations.length === 0) {
     return (
       <div className="p-8 text-center">
-        <p className="text-gray-700 font-medium">No carousels yet</p>
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="text-ink font-medium">No carousels yet</p>
+        <p className="mt-2 text-sm text-muted-dark">
           Generate a carousel from the New carousel tab and it will show up here.
         </p>
       </div>
@@ -359,7 +359,7 @@ function HistoryPhase({
   return (
     <div className="p-6">
       <h2 className="text-xl font-semibold mb-2">Generation history</h2>
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-sm text-muted mb-4">
         Open a completed carousel, or continue one that failed.
       </p>
       <div className="space-y-4">
@@ -379,22 +379,22 @@ function HistoryPhase({
           return (
             <div
               key={generation.id}
-              className="flex items-start gap-4 rounded-lg border p-4 hover:bg-gray-50"
+              className="flex items-start gap-4 rounded-lg border p-4 hover:bg-paper-soft"
             >
-              <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
+              <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md bg-paper-soft">
                 {thumb ? (
                   <img src={thumb} alt="" className="h-full w-full object-cover" />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
+                  <div className="flex h-full w-full items-center justify-center text-xs text-muted-dark">
                     No image
                   </div>
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-gray-900 truncate">
+                <p className="font-medium text-ink truncate">
                   {generation.post_prompt || 'Untitled carousel'}
                 </p>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-dark">
                   <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badge.className}`}>
                     {badge.text}
                   </span>
@@ -408,7 +408,7 @@ function HistoryPhase({
               <button
                 type="button"
                 onClick={() => onOpen(generation)}
-                className="flex-shrink-0 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                className="flex-shrink-0 rounded-md bg-button px-4 py-2 text-sm font-medium text-button-ink hover:bg-button"
               >
                 {action}
               </button>
@@ -435,8 +435,8 @@ function SelectPostPhase({
   if (isLoading) {
     return (
       <div className="p-8 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
-        <p className="mt-4 text-gray-600">Loading today's posts...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto" />
+        <p className="mt-4 text-muted">Loading today's posts...</p>
       </div>
     )
   }
@@ -450,8 +450,8 @@ function SelectPostPhase({
       <div className="p-8 text-center">
         {notConnected ? (
           <>
-            <p className="text-gray-700 font-medium">Connect iGEO to load posts</p>
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="text-ink font-medium">Connect iGEO to load posts</p>
+            <p className="mt-2 text-sm text-muted-dark">
               Paste the full iGEO MCP URL in the panel above. It looks like
               https://api.igeo.ai/mcp?mcp_token=…&workspace_id=…
             </p>
@@ -459,7 +459,7 @@ function SelectPostPhase({
         ) : (
           <>
             <div className="text-red-600 mb-4">Error loading posts</div>
-            <p className="text-gray-600">{error.message}</p>
+            <p className="text-muted">{error.message}</p>
           </>
         )}
       </div>
@@ -471,9 +471,9 @@ function SelectPostPhase({
   if (postList.length === 0) {
     return (
       <div className="p-8 text-center">
-        <div className="text-gray-400 mb-4">📭</div>
-        <p className="text-gray-600">No Instagram posts found from the last 14 days.</p>
-        <p className="mt-2 text-sm text-gray-500">
+        <div className="text-muted-dark mb-4">📭</div>
+        <p className="text-muted">No Instagram posts found from the last 14 days.</p>
+        <p className="mt-2 text-sm text-muted-dark">
           Generate some posts in iGEO first, then come back here.
         </p>
       </div>
@@ -483,30 +483,30 @@ function SelectPostPhase({
   return (
     <div className="p-6">
       <h2 className="text-xl font-semibold mb-4">Select an Instagram Post</h2>
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-sm text-muted mb-4">
         Showing {postList.length} Instagram post{postList.length !== 1 ? 's' : ''} from the last 14 days
       </p>
       <div className="space-y-4">
         {postList.map((post: any) => (
           <div
             key={post.id}
-            className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition"
+            className="border rounded-lg p-4 hover:bg-paper-soft cursor-pointer transition"
             onClick={() => onSelect(post)}
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 flex-1">
-                <h3 className="font-medium text-gray-900">{post.prompt}</h3>
-                <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                <h3 className="font-medium text-ink">{post.prompt}</h3>
+                <p className="mt-1 text-sm text-muted line-clamp-2">
                   {post.body}
                 </p>
-                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-dark">
                   <span>Topic: {post.topic}</span>
                   <span>
                     Created: {new Date(post.createdAt).toLocaleDateString()}
                   </span>
                 </div>
               </div>
-              <button className="self-start rounded-md bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700 sm:ml-4">
+              <button className="self-start rounded-md bg-button px-4 py-2 text-button-ink transition hover:bg-button sm:ml-4">
                 Select
               </button>
             </div>
@@ -540,65 +540,65 @@ function ReviewPhase({
       <div className="space-y-6">
         {/* Selected Post */}
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Selected Post</h3>
-          <div className="bg-gray-50 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-ink mb-2">Selected Post</h3>
+          <div className="bg-paper-soft rounded-lg p-4">
             <p className="font-medium">{post.prompt}</p>
-            <p className="mt-2 text-sm text-gray-600">{post.body}</p>
+            <p className="mt-2 text-sm text-muted">{post.body}</p>
           </div>
         </div>
 
         {/* BrandHub Summary from iGEO MCP */}
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2">BrandHub Guidelines</h3>
-          <div className="bg-gray-50 rounded-lg p-4">
-            {brandHubLoading && <p className="text-sm text-gray-500">Loading BrandHub from iGEO…</p>}
+          <h3 className="text-sm font-medium text-ink mb-2">BrandHub Guidelines</h3>
+          <div className="bg-paper-soft rounded-lg p-4">
+            {brandHubLoading && <p className="text-sm text-muted-dark">Loading BrandHub from iGEO…</p>}
             {brandHubError && (
               <p className="text-sm text-red-600">Could not load BrandHub: {brandHubError.message}</p>
             )}
             {brandHub && (
               <div className="space-y-4 text-sm">
                 {brandHub.about && (
-                  <p className="text-gray-700">{brandHub.about}</p>
+                  <p className="text-ink">{brandHub.about}</p>
                 )}
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <span className="text-gray-500">Tone of voice</span>
-                    <p className="mt-1 text-gray-900">
+                    <span className="text-muted-dark">Tone of voice</span>
+                    <p className="mt-1 text-ink">
                       {brandHub.toneOfVoice.length
                         ? brandHub.toneOfVoice.join(', ')
                         : 'Not configured'}
                     </p>
                   </div>
                   <div>
-                    <span className="text-gray-500">Brand colors</span>
+                    <span className="text-muted-dark">Brand colors</span>
                     {brandHub.brandColors.length ? (
                       <div className="mt-2 flex flex-wrap gap-3">
                         {brandHub.brandColors.map((color, index) => (
                           <div key={`${color.hex}-${index}`} className="flex items-center gap-2">
                             <div
-                              className="h-7 w-7 rounded border border-black/10 shadow-sm"
+                              className="h-7 w-7 rounded border border-black/10 "
                               style={{ backgroundColor: color.hex }}
                               title={color.name || color.hex}
                             />
-                            <span className="text-xs text-gray-600">
+                            <span className="text-xs text-muted">
                               {color.name || color.hex}
                             </span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="mt-1 text-gray-900">Not configured</p>
+                      <p className="mt-1 text-ink">Not configured</p>
                     )}
                   </div>
                   <div>
-                    <span className="text-gray-500">Values</span>
-                    <p className="mt-1 text-gray-900">
+                    <span className="text-muted-dark">Values</span>
+                    <p className="mt-1 text-ink">
                       {brandHub.values.length ? brandHub.values.join(', ') : 'Not configured'}
                     </p>
                   </div>
                   <div>
-                    <span className="text-gray-500">Personality</span>
-                    <p className="mt-1 text-gray-900">
+                    <span className="text-muted-dark">Personality</span>
+                    <p className="mt-1 text-ink">
                       {brandHub.personality.length
                         ? brandHub.personality.join(', ')
                         : 'Not configured'}
@@ -607,10 +607,10 @@ function ReviewPhase({
                 </div>
                 {(brandHub.postGuidelines.dos.length > 0 ||
                   brandHub.postGuidelines.donts.length > 0) && (
-                  <div className="grid gap-4 border-t border-gray-200 pt-4 md:grid-cols-2">
+                  <div className="grid gap-4 border-t border-line pt-4 md:grid-cols-2">
                     <div>
                       <span className="font-medium text-green-700">Do</span>
-                      <ul className="mt-1 list-disc space-y-1 pl-5 text-gray-700">
+                      <ul className="mt-1 list-disc space-y-1 pl-5 text-ink">
                         {brandHub.postGuidelines.dos.map((item) => (
                           <li key={item}>{item}</li>
                         ))}
@@ -618,7 +618,7 @@ function ReviewPhase({
                     </div>
                     <div>
                       <span className="font-medium text-red-700">Don’t</span>
-                      <ul className="mt-1 list-disc space-y-1 pl-5 text-gray-700">
+                      <ul className="mt-1 list-disc space-y-1 pl-5 text-ink">
                         {brandHub.postGuidelines.donts.map((item) => (
                           <li key={item}>{item}</li>
                         ))}
@@ -633,9 +633,9 @@ function ReviewPhase({
 
         {/* What will happen */}
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Generation Process</h3>
-          <div className="bg-blue-50 rounded-lg p-4">
-            <ul className="space-y-2 text-sm text-gray-700">
+          <h3 className="text-sm font-medium text-ink mb-2">Generation Process</h3>
+          <div className="bg-paper-soft rounded-lg p-4">
+            <ul className="space-y-2 text-sm text-ink">
               <li>✓ Step 1: Choose carousel content plan</li>
               <li>✓ Step 2: Define visual style direction</li>
               <li>✓ Step 3: Select visual templates</li>
@@ -653,13 +653,13 @@ function ReviewPhase({
       <div className="mt-8 flex gap-4">
         <button
           onClick={onBack}
-          className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+          className="px-6 py-2 border border-line rounded-md hover:bg-paper-soft transition"
         >
           Back
         </button>
         <button
           onClick={onConfirm}
-          className="flex-1 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          className="flex-1 px-6 py-2 bg-button text-button-ink rounded-md hover:bg-button transition"
         >
           Generate Carousel
         </button>
@@ -695,13 +695,13 @@ function ProgressPhase({
     return (
       <div className="p-8 text-center">
         <div className="text-red-600 mb-4 text-4xl">❌</div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">Generation Failed</h3>
-        <p className="text-gray-600 mb-4">{error.message}</p>
+        <h3 className="text-xl font-semibold text-ink mb-2">Generation Failed</h3>
+        <p className="text-muted mb-4">{error.message}</p>
         {onResume && (progress?.current || 0) >= 1 && (
           <button
             type="button"
             onClick={onResume}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+            className="px-6 py-2 bg-button text-button-ink rounded-md hover:bg-button transition"
           >
             Resume from step {(progress?.current || 0) + 1}
           </button>
@@ -716,13 +716,13 @@ function ProgressPhase({
       
       {/* Progress bar */}
       <div className="mb-6">
-        <div className="flex justify-between text-sm text-gray-600 mb-2">
+        <div className="flex justify-between text-sm text-muted mb-2">
           <span>Progress</span>
           <span>{progress?.percentage || 0}%</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-paper-soft rounded-full h-2">
           <div
-            className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+            className="bg-button h-2 rounded-full transition-all duration-500"
             style={{ width: `${progress?.percentage || 0}%` }}
           />
         </div>
@@ -740,23 +740,23 @@ function ProgressPhase({
             <div
               key={step.key}
               className={`flex items-center gap-3 p-3 rounded-lg ${
-                isActive ? 'bg-blue-50' : isComplete ? 'bg-green-50' : 'bg-gray-50'
+                isActive ? 'bg-paper-soft' : isComplete ? 'bg-paper-soft' : 'bg-paper-soft'
               }`}
             >
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center ${
                   isActive
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-button text-button-ink'
                     : isComplete
-                    ? 'bg-green-500 text-white'
-                    : 'bg-gray-300 text-gray-600'
+                    ? 'bg-accent text-button-ink'
+                    : 'bg-paper-soft text-muted'
                 }`}
               >
                 {isComplete ? '✓' : idx + 1}
               </div>
               <span className="flex-1 text-sm font-medium">{step.label}</span>
               {isActive && (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-accent" />
               )}
             </div>
           )
@@ -825,17 +825,17 @@ function ResultsPhase({
   return (
     <div className="p-6">
       <div className="text-center mb-6">
-        <div className={`${incomplete ? 'text-amber-500' : figmaJobCompleted ? 'text-green-600' : 'text-blue-600'} mb-4 text-4xl`}>
+        <div className={`${incomplete ? 'text-amber-500' : figmaJobCompleted ? 'text-accent' : 'text-accent'} mb-4 text-4xl`}>
           {incomplete ? '⚠' : figmaJobCompleted ? '✓' : '📝'}
         </div>
-        <h2 className="text-2xl font-semibold text-gray-900">
+        <h2 className="text-2xl font-semibold text-ink">
           {incomplete 
             ? 'Caption ready — slides are missing' 
             : figmaJobCompleted
               ? 'Carousel Complete in Figma!'
               : 'Carousel Generated — Ready for Figma'}
         </h2>
-        <p className="text-gray-600 mt-2">
+        <p className="text-muted mt-2">
           {incomplete
             ? 'The caption was saved, but slide images were not kept on disk. Generate visuals to finish this carousel.'
             : figmaJobCompleted
@@ -846,7 +846,7 @@ function ResultsPhase({
           <button
             type="button"
             onClick={onRegenerateVisuals}
-            className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="mt-4 px-6 py-2 bg-button text-button-ink rounded-md hover:bg-button"
           >
             Generate missing slide images
           </button>
@@ -857,12 +857,12 @@ function ResultsPhase({
         {/* Instagram Caption */}
         {status.final_caption && (
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Instagram Caption</h3>
-            <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="text-sm font-medium text-ink mb-2">Instagram Caption</h3>
+            <div className="bg-paper-soft rounded-lg p-4">
               <p className="text-sm whitespace-pre-wrap">{status.final_caption}</p>
               <button
                 onClick={handleCopyCaption}
-                className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
+                className="mt-3 px-4 py-2 bg-button text-button-ink rounded-md hover:bg-button transition text-sm"
               >
                 {copiedCaption ? 'Copied!' : 'Copy Caption'}
               </button>
@@ -883,7 +883,7 @@ function ResultsPhase({
                 </p>
                 <button
                   onClick={handleCreateFigmaJob}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition text-sm"
+                  className="px-4 py-2 bg-button text-button-ink rounded-md hover:bg-button transition text-sm"
                 >
                   Send to Figma →
                 </button>
@@ -895,22 +895,22 @@ function ResultsPhase({
             )}
             
             {(createFigmaJobMutation.isPending || importCode) && !figmaJobImporting && !figmaJobCompleted && !figmaJobFailed && (
-              <div className="bg-white rounded p-4">
-                <p className="text-sm font-medium text-gray-900 mb-2">Import Code (expires in 24 hours):</p>
+              <div className="bg-surface rounded p-4">
+                <p className="text-sm font-medium text-ink mb-2">Import Code (expires in 24 hours):</p>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 px-3 py-2 bg-gray-100 rounded border border-gray-300 text-lg font-mono">
+                  <code className="flex-1 px-3 py-2 bg-paper-soft rounded border border-line text-lg font-mono">
                     {importCode || '...'}
                   </code>
                   {importCode && (
                     <button
                       onClick={() => handleCopyImportCode(importCode)}
-                      className="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+                      className="px-3 py-2 bg-paper-soft text-ink rounded hover:bg-paper-soft text-sm"
                     >
                       {copiedImportCode ? 'Copied!' : 'Copy'}
                     </button>
                   )}
                 </div>
-                <ol className="mt-3 list-decimal pl-4 text-xs text-gray-600 space-y-1">
+                <ol className="mt-3 list-decimal pl-4 text-xs text-muted space-y-1">
                   <li>Open Figma Desktop and the file where you want the carousel.</li>
                   <li>Run Plugins → Development → Alora Carousel Importer.</li>
                   <li>Paste this code and click Import Carousel.</li>
@@ -923,19 +923,19 @@ function ResultsPhase({
             )}
             
             {figmaJobImporting && (
-              <div className="bg-white rounded p-4">
+              <div className="bg-surface rounded p-4">
                 <div className="flex items-center gap-2 text-purple-700">
                   <div className="animate-spin h-4 w-4 border-2 border-purple-600 border-t-transparent rounded-full"></div>
                   <span className="text-sm font-medium">Importing to Figma...</span>
                 </div>
-                <p className="text-xs text-gray-600 mt-1">
+                <p className="text-xs text-muted mt-1">
                   Status: {figmaJob?.status}. If the plugin failed, generate a new code.
                 </p>
                 <button
                   type="button"
                   onClick={handleCreateFigmaJob}
                   disabled={createFigmaJobMutation.isPending}
-                  className="mt-3 px-3 py-1.5 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 disabled:opacity-50"
+                  className="mt-3 px-3 py-1.5 bg-button text-button-ink rounded text-sm hover:bg-button disabled:opacity-50"
                 >
                   {createFigmaJobMutation.isPending ? 'Creating…' : 'Get a new import code'}
                 </button>
@@ -948,7 +948,7 @@ function ResultsPhase({
                 <p className="text-xs text-red-700 mt-1">{figmaJob?.error}</p>
                 <button
                   onClick={handleCreateFigmaJob}
-                  className="mt-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                  className="mt-2 px-3 py-1 bg-error text-button-ink rounded text-sm hover:bg-error"
                 >
                   Retry
                 </button>
@@ -956,13 +956,13 @@ function ResultsPhase({
             )}
             
             {figmaJobCompleted && figmaJob?.figma_file_url && (
-              <div className="bg-white rounded p-4">
+              <div className="bg-surface rounded p-4">
                 <p className="text-sm font-medium text-green-900 mb-2">✓ Imported successfully!</p>
                 <a
                   href={figmaJob.figma_file_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition text-sm"
+                  className="inline-block px-4 py-2 bg-button text-button-ink rounded-md hover:bg-button transition text-sm"
                 >
                   Open in Figma →
                 </a>
@@ -974,13 +974,13 @@ function ResultsPhase({
         {/* Raw Generated Images (from Step 6) */}
         {!hasExportedSlides && status.image_urls && status.image_urls.length > 0 && (
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">
+            <h3 className="text-sm font-medium text-ink mb-2">
               Raw Visual Assets ({status.image_urls.length})
             </h3>
-            <p className="text-xs text-gray-500 mb-2">These are the generated backgrounds before Figma assembly</p>
+            <p className="text-xs text-muted-dark mb-2">These are the generated backgrounds before Figma assembly</p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {status.image_urls.map((url: string, idx: number) => (
-                <div key={idx} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                <div key={idx} className="aspect-square bg-paper-soft rounded-lg overflow-hidden">
                   <img
                     src={url}
                     alt={`Raw asset ${idx + 1}`}
@@ -995,13 +995,13 @@ function ResultsPhase({
         {/* Final Exported Slides (from Figma) */}
         {hasExportedSlides && (
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">
+            <h3 className="text-sm font-medium text-ink mb-2">
               Final Carousel Slides ({exportedSlideUrls.length})
             </h3>
-            <p className="text-xs text-gray-500 mb-2">Exported from Figma with text overlays and branding</p>
+            <p className="text-xs text-muted-dark mb-2">Exported from Figma with text overlays and branding</p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {exportedSlideUrls.map((slide: { slideIndex: number; url: string }) => (
-                <div key={slide.slideIndex} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                <div key={slide.slideIndex} className="aspect-square bg-paper-soft rounded-lg overflow-hidden">
                   <img
                     src={slide.url}
                     alt={`Slide ${slide.slideIndex}`}
@@ -1016,12 +1016,12 @@ function ResultsPhase({
         {/* Figma Link (legacy fallback) */}
         {!figmaJobCompleted && isFigmaFileUrl(status.figma_file_url) && (
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Figma File</h3>
+            <h3 className="text-sm font-medium text-ink mb-2">Figma File</h3>
             <a
               href={status.figma_file_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
+              className="inline-block px-4 py-2 bg-button text-button-ink rounded-md hover:bg-button transition"
             >
               Open in Figma →
             </a>
@@ -1032,7 +1032,7 @@ function ResultsPhase({
       <div className="mt-8">
         <button
           onClick={onBack}
-          className="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
+          className="px-6 py-2 bg-paper-soft text-ink rounded-md hover:bg-paper-soft transition"
         >
           Generate Another Carousel
         </button>

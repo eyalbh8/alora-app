@@ -9,7 +9,7 @@ import {
   recommendationUrl,
 } from '../../lib/trackedRecommendations'
 
-const PIN_PURPLE = '#6b4faf'
+const PIN_PURPLE = '#7a5fb0'
 
 function formatCardDate(iso: string | undefined): string {
   if (!iso) return ''
@@ -27,7 +27,7 @@ function formatCardDate(iso: string | undefined): string {
 function BlogGlyph() {
   return (
     <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden>
-      <circle cx="8" cy="8" r="7.25" fill="#21759b" />
+      <circle cx="8" cy="8" r="7.25" fill="#2f6fb0" />
       <path
         fill="#fff"
         d="M4.4 11.7V4.4h2.2c1.7 0 2.6.8 2.6 2.1 0 .9-.5 1.6-1.3 1.9 1 .2 1.6 1 1.6 2.1 0 1.5-1.1 2.2-2.8 2.2H4.4zm1.5-4.1h.6c.7 0 1.1-.3 1.1-.9s-.4-.9-1.1-.9h-.6v1.8zm0 2.9h.8c.8 0 1.3-.4 1.3-1.1s-.5-1.1-1.3-1.1h-.8v2.2z"
@@ -40,7 +40,7 @@ function LinkGlyph() {
   return (
     <svg
       viewBox="0 0 16 16"
-      className="h-3.5 w-3.5 text-[#6b655e]"
+      className="h-3.5 w-3.5 text-muted"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.6"
@@ -60,27 +60,27 @@ function RecommendationCard({ rec }: { rec: TrackedRecommendation }) {
   const image = rec.imageUrl
   const body = (
     <>
-      <div className="flex items-center gap-1.5 text-[10px] text-[#8a847b]">
+      <div className="flex items-center gap-1.5 text-[10px] text-muted">
         {isBlogRecommendation(rec) ? <BlogGlyph /> : <LinkGlyph />}
-        <span className="font-medium text-[#6b655e]">{recommendationTypeLabel(rec)}</span>
+        <span className="font-medium text-muted">{recommendationTypeLabel(rec)}</span>
         {rec.createdAt && <span className="ml-auto">{formatCardDate(rec.createdAt)}</span>}
       </div>
       {image && (
-        <div className="mt-2 overflow-hidden bg-[#f3efe8]">
+        <div className="mt-2 overflow-hidden bg-paper-soft">
           <img src={image} alt="" className="h-20 w-full object-cover" />
         </div>
       )}
       <p
-        className="mt-2 min-w-0 truncate text-[13px] font-medium text-[#101414]"
+        className="mt-2 min-w-0 truncate text-[13px] font-medium text-ink"
         title={recommendationTitle(rec)}
       >
         {recommendationTitle(rec)}
       </p>
-      <p className="mt-2 text-[11px] text-[#8a847b]">Cited: {formatNumber(cited, 0)}</p>
+      <p className="mt-2 text-[11px] text-muted">Cited: {formatNumber(cited, 0)}</p>
     </>
   )
 
-  const cardClass = 'block w-full bg-white p-3 text-left transition-colors hover:bg-[#faf9f7]'
+  const cardClass = 'block w-full bg-surface p-3 text-left transition-colors hover:bg-bg'
 
   if (href) {
     return (
@@ -158,7 +158,7 @@ export function TrackedRecommendationPin({
     >
       <button
         type="button"
-        className="flex items-center justify-center rounded-sm outline-offset-2 focus-visible:outline-2 focus-visible:outline-[#6b4faf]"
+        className="flex items-center justify-center rounded-sm outline-offset-2 focus-visible:outline-2 focus-visible:outline-[#7a5fb0]"
         aria-expanded={open}
         aria-label={`${items.length} tracked recommendation${items.length === 1 ? '' : 's'}`}
         onClick={() => setOpen((current) => !current)}
@@ -172,11 +172,11 @@ export function TrackedRecommendationPin({
           role="dialog"
           aria-label="Tracked recommendations"
         >
-          <div className="max-h-72 overflow-y-auto overscroll-contain rounded-lg border border-[#d8d2c7] bg-white shadow-lg">
+          <div className="max-h-72 overflow-y-auto overscroll-contain rounded-lg border border-line bg-surface ">
             {items.map((rec, index) => (
               <div
                 key={rec.id}
-                className={index > 0 ? 'border-t border-[#eae6de]' : undefined}
+                className={index > 0 ? 'border-t border-line' : undefined}
               >
                 <RecommendationCard rec={rec} />
               </div>

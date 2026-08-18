@@ -39,30 +39,30 @@ export function ShareOfVoiceDonut({ competitors }: ShareOfVoiceDonutProps) {
 
   return (
     <section aria-labelledby="share-of-voice-title">
-      <h2 id="share-of-voice-title" className="text-[19px] font-semibold text-[#101414]">
+      <h2 id="share-of-voice-title" className="text-[19px] font-semibold text-ink">
         Share of Voice
       </h2>
       {segments.length === 0 ? (
-        <div className="mt-5 border-y border-slate-200 py-12 text-sm text-slate-500">
+        <div className="mt-5 border-y border-line py-12 text-sm text-muted">
           No mention data for the selected period.
         </div>
       ) : (
         <div className="mt-4">
           <div className="flex items-baseline gap-2.5">
-            <span className="font-serif text-[44px] font-semibold leading-none tracking-tight text-[#101414]">
+            <span className="font-display text-[44px] font-semibold leading-none tracking-tight text-ink">
               {formatNumber(myShare, 0)}%
             </span>
-            <span className="text-xs text-slate-500">My share of voice</span>
+            <span className="text-xs text-muted">My share of voice</span>
           </div>
 
-          <div className="mt-[18px] flex h-2.5 w-full overflow-hidden bg-slate-100">
+          <div className="mt-[18px] flex h-2.5 w-full overflow-hidden bg-paper-soft">
             {segments.map((segment) => {
               const lit = !hoveredCompetitor || hoveredCompetitor === segment.name
               return (
                 <button
                   key={segment.id}
                   type="button"
-                  className="h-full min-w-px transition-opacity focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+                  className="h-full min-w-px transition-opacity focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                   style={{
                     width: `${(segment.value / total) * 100}%`,
                     backgroundColor: segment.color,
@@ -86,7 +86,7 @@ export function ShareOfVoiceDonut({ competitors }: ShareOfVoiceDonutProps) {
                 <button
                   key={segment.id}
                   type="button"
-                  className={`flex items-center gap-1.5 text-[11.5px] text-slate-600 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 ${
+                  className={`flex items-center gap-1.5 text-[11.5px] text-muted transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                     lit ? 'opacity-100' : 'opacity-35'
                   }`}
                   onMouseEnter={() => setHoveredCompetitor(segment.name)}
@@ -98,7 +98,7 @@ export function ShareOfVoiceDonut({ competitors }: ShareOfVoiceDonutProps) {
                     className="h-[7px] w-[7px] shrink-0"
                     style={{ backgroundColor: segment.color }}
                   />
-                  <span className={segment.isAccount ? 'font-semibold text-[#101414]' : ''}>
+                  <span className={segment.isAccount ? 'font-semibold text-ink' : ''}>
                     {segment.name}
                   </span>
                 </button>

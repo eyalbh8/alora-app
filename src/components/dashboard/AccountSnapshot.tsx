@@ -56,33 +56,33 @@ export function AccountSnapshot({ snapshot, embedded = false }: AccountSnapshotP
     <section>
       {!embedded && (
         <header className="mb-5">
-          <h2 className="text-[19px] font-semibold tracking-[-0.01em] text-[#101414]">
+          <h2 className="text-[19px] font-semibold tracking-[-0.01em] text-ink">
             Period snapshot
           </h2>
-          <p className="mt-0.5 text-xs text-[#8a847b]">Headline performance for the selected range</p>
+          <p className="mt-0.5 text-xs text-muted">Headline performance for the selected range</p>
         </header>
       )}
       <div
-        className={`overflow-x-auto border-[#e4dfd6] ${
-          embedded ? 'border-t bg-white/60' : 'border-y border-t-[#101414] bg-[#faf9f7]'
+        className={`overflow-x-auto border-line ${
+          embedded ? 'border-t bg-surface/60' : 'border-y border-t-ink bg-bg'
         }`}
       >
         <div className="flex min-w-max md:min-w-full">
           {metrics.map((metric) => (
             <div
               key={metric.label}
-              className="flex min-w-[10.5rem] flex-1 flex-col border-r border-[#e4dfd6] px-5 py-5 last:border-r-0"
+              className="flex min-w-[10.5rem] flex-1 flex-col border-r border-line px-5 py-5 last:border-r-0"
             >
-              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#8a847b]">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted">
                 {metric.label}
               </span>
               <div className="mt-3 flex items-end justify-between gap-2">
-                <span className="font-serif text-[34px] font-semibold leading-none tracking-[-0.02em] text-[#101414]">
+                <span className="font-display text-[34px] font-normal leading-none tracking-[-0.02em] text-ink">
                   {metric.value}
                 </span>
                 {metric.delta}
               </div>
-              <span className="mt-2 text-[11px] text-[#8a847b]">{metric.detail}</span>
+              <span className="mt-2 text-[11px] text-muted">{metric.detail}</span>
             </div>
           ))}
         </div>

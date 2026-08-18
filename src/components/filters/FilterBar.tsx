@@ -11,10 +11,10 @@ import { ProviderIcon } from '../ProviderIcon'
 import { getCrawlerBotDisplayName } from '../../lib/crawlerBots'
 
 function filterChipClass(disabled: boolean, active: boolean, open: boolean): string {
-  if (disabled) return 'cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400'
-  if (active) return 'border-brand-300 bg-brand-50 text-brand-800 hover:border-brand-400'
-  if (open) return 'border-brand-300 bg-brand-50/70 text-slate-700 hover:border-brand-400'
-  return 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+  if (disabled) return 'cursor-not-allowed border-line bg-surface text-muted-dark'
+  if (active) return 'border-ink bg-surface text-ink hover:border-ink'
+  if (open) return 'border-ink bg-paper-soft text-ink hover:border-ink'
+  return 'border-line bg-surface text-muted hover:border-ink'
 }
 
 function MultiSelect({
@@ -91,13 +91,13 @@ function MultiSelect({
           setOpen((o) => !o)
           if (open) setQuery('')
         }}
-        className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-colors ${
+        className={`inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[11px] font-medium tracking-[0.1em] uppercase transition-colors ${
           fullWidth ? 'w-full justify-between' : ''
         } ${filterChipClass(Boolean(disabled), hasSelection, open)}`}
       >
         <span>{disabled ? `${label} N/A` : label}</span>
         {hasSelection && values.length > 1 && (
-          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-semibold leading-none text-white">
+          <span className="flex h-4 min-w-4 items-center justify-center bg-accent px-1 font-mono text-[10px] font-medium leading-none text-button-ink">
             {values.length}
           </span>
         )}
@@ -110,48 +110,48 @@ function MultiSelect({
 
       {open && !disabled && (
         <div
-          className={`absolute left-0 top-full z-50 mt-1 rounded-lg border border-slate-200 bg-white py-1 shadow-lg ${
+          className={`absolute left-0 top-full z-50 mt-1 border border-line bg-paper-soft py-1 ${
             fullWidth ? 'w-full max-w-none' : 'min-w-[220px] max-w-[320px]'
           }`}
         >
           {searchable && options.length > 6 && (
-            <div className="border-b border-slate-100 px-2 py-1.5">
+            <div className="form-field border-b border-line px-2 py-1.5">
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search…"
-                className="w-full rounded border border-slate-200 px-2 py-1 text-xs outline-none focus:border-brand-400"
+                className="min-h-9"
               />
             </div>
           )}
           <div className="max-h-56 overflow-y-auto">
             {filteredOptions.length === 0 ? (
-              <p className="px-3 py-2 text-xs text-slate-400">No matches</p>
+              <p className="px-3 py-2 font-mono text-[11px] text-muted-dark uppercase">No matches</p>
             ) : (
               filteredOptions.map((o) => (
                 <label
                   key={String(o.value)}
-                  className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-xs hover:bg-slate-50"
+                  className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-[13px] hover:bg-surface"
                 >
                   <input
                     type="checkbox"
                     checked={values.includes(o.value)}
                     onChange={() => toggle(o.value)}
-                    className="rounded border-slate-300 text-brand-600"
+                    className="accent-accent"
                   />
                   {renderOptionLeading?.(o.value)}
-                  <span className="text-slate-700">{String(o.label)}</span>
+                  <span className="text-ink">{String(o.label)}</span>
                 </label>
               ))
             )}
           </div>
           {values.length > 0 && (
-            <div className="border-t border-slate-100 px-2 py-1.5">
+            <div className="border-t border-line px-2 py-1.5">
               <button
                 type="button"
                 onClick={() => onChange([])}
-                className="text-xs font-medium text-slate-500 hover:text-slate-800"
+                className="text-link"
               >
                 Clear selection
               </button>
@@ -180,7 +180,7 @@ function ChipSelect({
 }) {
   return (
     <label
-      className={`relative inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-colors ${
+      className={`relative inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[11px] font-medium tracking-[0.1em] uppercase transition-colors ${
         fullWidth ? 'w-full justify-between' : ''
       } ${filterChipClass(Boolean(disabled), Boolean(active), false)}`}
       title={title}
@@ -203,7 +203,7 @@ function ClearFiltersButton({ onClick }: { onClick: () => void }) {
       onClick={onClick}
       title="Clear filters"
       aria-label="Clear filters"
-      className="inline-flex shrink-0 items-center justify-center text-slate-400 transition-colors hover:text-slate-600"
+      className="inline-flex shrink-0 items-center justify-center text-muted transition-colors hover:text-ink"
     >
       <svg
         className="h-5 w-5"
@@ -454,11 +454,11 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
           <button
             type="button"
             onClick={() => setSheetOpen(true)}
-            className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-colors ${filterChipClass(false, activeCount > 0, sheetOpen)}`}
+            className={`inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[11px] font-medium tracking-[0.1em] uppercase transition-colors ${filterChipClass(false, activeCount > 0, sheetOpen)}`}
           >
             <span>Filters</span>
             {activeCount > 0 && (
-              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-semibold leading-none text-white">
+              <span className="flex h-4 min-w-4 items-center justify-center bg-accent px-1 font-mono text-[10px] font-medium leading-none text-button-ink">
                 {activeCount}
               </span>
             )}
@@ -472,16 +472,16 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
           <button
             type="button"
             aria-label="Close filters"
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-bg/80"
             onClick={() => setSheetOpen(false)}
           />
-          <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-xl bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-              <h2 className="text-sm font-semibold text-[#101414]">Filters</h2>
+          <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col border-t border-line bg-bg">
+            <div className="flex items-center justify-between border-b border-line px-4 py-3">
+              <h2 className="eyebrow mb-0">Filters</h2>
               <button
                 type="button"
                 onClick={() => setSheetOpen(false)}
-                className="text-xs font-medium text-brand-700 hover:text-brand-800"
+                className="text-link"
               >
                 Done
               </button>

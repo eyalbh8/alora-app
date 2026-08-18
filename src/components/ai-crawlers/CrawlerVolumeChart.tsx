@@ -53,19 +53,19 @@ function ChartBody({
     <div className={expanded ? 'h-[480px]' : 'h-[220px] sm:h-[260px]'}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={formattedRows} margin={{ top: 8, right: 4, left: -12, bottom: 0 }}>
-          <CartesianGrid vertical={false} stroke="#eae6de" />
+          <CartesianGrid vertical={false} stroke="rgba(227, 220, 200, 0.12)" />
           <XAxis
             dataKey="date"
-            axisLine={{ stroke: '#d8d2c7' }}
+            axisLine={{ stroke: 'rgba(227, 220, 200, 0.12)' }}
             tickLine={false}
-            tick={{ fontSize: 11, fill: '#9a938a' }}
+            tick={{ fontSize: 11, fill: '#a79f8c' }}
             interval="preserveStartEnd"
           />
           <YAxis
             domain={[0, yMax]}
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 10, fill: '#9a938a' }}
+            tick={{ fontSize: 10, fill: '#a79f8c' }}
             width={40}
             allowDecimals={false}
           />
@@ -76,14 +76,15 @@ function ChartBody({
               return typeof raw === 'string' ? raw : ''
             }}
             contentStyle={{
-              border: '1px solid #eae6de',
+              background: '#1a1a1a',
+              color: '#e3dcc8',
+              border: '1px solid rgba(227, 220, 200, 0.12)',
               borderRadius: 0,
-              boxShadow: '0 8px 24px rgba(16, 20, 20, 0.08)',
               fontSize: 12,
             }}
-            cursor={{ fill: 'rgba(20, 143, 133, 0.08)' }}
+            cursor={{ fill: 'rgba(66, 202, 128, 0.12)' }}
           />
-          <Bar dataKey="value" fill="#148f85" maxBarSize={56} radius={[2, 2, 0, 0]} />
+          <Bar dataKey="value" fill="#42ca80" maxBarSize={56} radius={[2, 2, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -111,8 +112,8 @@ export function CrawlerVolumeChart({ chartRows, range }: CrawlerVolumeChartProps
       <section>
         <div className="mb-5 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-[19px] font-semibold text-[#101414]">Crawler Volume</h2>
-            <p className="mt-0.5 text-xs text-[#9a938a]">
+            <h2 className="text-[19px] font-semibold text-ink">Crawler Volume</h2>
+            <p className="mt-0.5 text-xs text-muted">
               AI crawler entries over time for the selected period.
             </p>
           </div>
@@ -120,7 +121,7 @@ export function CrawlerVolumeChart({ chartRows, range }: CrawlerVolumeChartProps
             <button
               type="button"
               onClick={() => setExpanded(true)}
-              className="p-1.5 text-[#9a938a] transition hover:text-[#101414]"
+              className="p-1.5 text-muted transition hover:text-ink"
               title="Expand chart"
               aria-label="Expand chart"
             >
@@ -131,7 +132,7 @@ export function CrawlerVolumeChart({ chartRows, range }: CrawlerVolumeChartProps
 
         <div>
           {!hasData ? (
-            <div className="flex h-[220px] items-center justify-center border-y border-dashed border-[#d8d2c7] px-6 text-sm text-[#9a938a] sm:h-[260px]">
+            <div className="flex h-[220px] items-center justify-center border-y border-dashed border-line px-6 text-sm text-muted sm:h-[260px]">
               No crawler volume data for the selected period.
             </div>
           ) : (
@@ -142,24 +143,24 @@ export function CrawlerVolumeChart({ chartRows, range }: CrawlerVolumeChartProps
 
       {expanded && hasData && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 p-4"
           onClick={() => setExpanded(false)}
         >
           <div
-            className="flex w-full max-w-5xl flex-col overflow-hidden bg-[#faf9f7] shadow-xl"
+            className="flex w-full max-w-5xl flex-col overflow-hidden bg-bg "
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-[#eae6de] px-6 py-5">
+            <div className="flex items-center justify-between border-b border-line px-6 py-5">
               <div>
-                <h2 className="text-[19px] font-semibold text-[#101414]">Crawler Volume</h2>
-                <p className="mt-0.5 text-xs text-[#9a938a]">
+                <h2 className="text-[19px] font-semibold text-ink">Crawler Volume</h2>
+                <p className="mt-0.5 text-xs text-muted">
                   AI crawler entries over time for the selected period.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
-                className="border border-[#d8d2c7] px-3 py-1.5 text-sm text-[#5c554c] hover:border-[#101414] hover:text-[#101414]"
+                className="border border-line px-3 py-1.5 text-sm text-muted hover:border-ink hover:text-ink"
               >
                 Close
               </button>

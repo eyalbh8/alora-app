@@ -32,13 +32,13 @@ export function RecentAgentPostsCard({ posts }: RecentAgentPostsCardProps) {
       contentClassName="overflow-x-auto"
     >
       {isEmpty ? (
-        <div className="flex min-h-52 items-center justify-center border border-dashed border-[#d8d2c7] px-6 text-xs text-[#8a847b]">
+        <div className="flex min-h-52 items-center justify-center border border-dashed border-line px-6 text-xs text-muted">
           No agent deliverables in this period.
         </div>
       ) : (
         <table className="w-full min-w-[32rem] text-sm">
           <thead>
-            <tr className="border-b-2 border-[#101414] text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8a847b]">
+            <tr className="border-b-2 border-ink text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
               <th className="pb-2.5 text-left font-semibold">Channel</th>
               <th className="px-4 pb-2.5 text-left font-semibold">Published</th>
               <th className="pb-2.5 text-left font-semibold">Topic / prompt</th>
@@ -46,12 +46,12 @@ export function RecentAgentPostsCard({ posts }: RecentAgentPostsCardProps) {
           </thead>
           <tbody>
             {rows.map((post, i) => (
-              <tr key={post.generationId ?? i} className="border-b border-[#e4dfd6]">
-                <td className="py-3 text-[#302d29]">
+              <tr key={post.generationId ?? i} className="border-b border-line">
+                <td className="py-3 text-ink">
                   {post.socialMediaProvider ?? 'Agent'}
                 </td>
-                <td className="px-4 py-3 text-[#6b655e]">{formatDateTime(post.createdAt)}</td>
-                <td className="max-w-[180px] truncate py-3 font-medium text-[#302d29]">
+                <td className="px-4 py-3 text-muted">{formatDateTime(post.createdAt)}</td>
+                <td className="max-w-[180px] truncate py-3 font-medium text-ink">
                   {post.topic ?? post.prompt ?? '—'}
                 </td>
               </tr>

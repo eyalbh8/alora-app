@@ -30,18 +30,17 @@ function SentimentBadge({
   score: number | null
   editorial?: boolean
 }) {
-  if (score == null) return <span className="text-slate-400">—</span>
+  if (score == null) return <span className="text-muted-dark">—</span>
   if (editorial) {
     return (
-      <span className="text-[13px] tabular-nums text-[#5c554c]">
+      <span className="text-[13px] tabular-nums text-muted">
         {formatNumber(score, 0)}
       </span>
     )
   }
-  const tone =
-    score >= 70 ? 'bg-emerald-500 text-white' : score >= 40 ? 'bg-amber-400 text-white' : 'bg-rose-500 text-white'
+  const tone = score >= 70 ? 'text-accent' : score >= 40 ? 'text-muted' : 'text-error'
   return (
-    <span className={`inline-flex min-w-[2.5rem] items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold ${tone}`}>
+    <span className={`inline-flex min-w-[2.5rem] items-center justify-center font-mono text-[11px] font-medium tracking-[0.1em] ${tone}`}>
       {formatNumber(score, 0)}
     </span>
   )
@@ -61,13 +60,13 @@ function BrandAvatar({
       <img
         src={logo}
         alt={name ?? 'Brand'}
-        className="h-6 w-6 rounded-full border border-slate-200 bg-white object-contain p-0.5"
+        className="h-6 w-6 rounded-full border border-line bg-surface object-contain p-0.5"
       />
     )
   }
   const initial = (name ?? fallback ?? '?').slice(0, 1).toUpperCase()
   return (
-    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-[10px] font-bold text-slate-600">
+    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-line bg-paper-soft text-[10px] font-bold text-muted">
       {initial}
     </span>
   )
@@ -96,13 +95,13 @@ export function ResponsesTable({
         <section aria-labelledby="recent-responses-heading">
           <h2
             id="recent-responses-heading"
-            className="mb-4 text-[19px] font-semibold text-[#101414]"
+            className="mb-4 text-[19px] font-semibold text-ink"
           >
             Recent Responses
           </h2>
-          <div className="border-y border-[#eae6de] py-10 text-center">
-            <p className="text-sm font-medium text-[#5c554c]">No responses</p>
-            <p className="mt-1 text-xs text-[#9a938a]">
+          <div className="border-y border-line py-10 text-center">
+            <p className="text-sm font-medium text-muted">No responses</p>
+            <p className="mt-1 text-xs text-muted">
               {emptyMessage ?? 'No mention responses match the filters.'}
             </p>
           </div>
@@ -124,7 +123,7 @@ export function ResponsesTable({
         {editorial && (
           <h2
             id="recent-responses-heading"
-            className="mb-4 text-[19px] font-semibold text-[#101414]"
+            className="mb-4 text-[19px] font-semibold text-ink"
           >
             Recent Responses
           </h2>
@@ -133,7 +132,7 @@ export function ResponsesTable({
           className={`${
             editorial
               ? 'overflow-hidden'
-              : 'overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm'
+              : 'overflow-hidden rounded-xl border border-line bg-surface '
           }${loading ? ' opacity-70' : ''}`}
         >
         <div className="overflow-x-auto">
@@ -142,8 +141,8 @@ export function ResponsesTable({
               <tr
                 className={
                   editorial
-                    ? 'border-b-2 border-[#101414]'
-                    : 'border-b border-slate-100 bg-slate-50/60'
+                    ? 'border-b-2 border-ink'
+                    : 'border-b border-line bg-paper-soft'
                 }
               >
                 {headers.map((header) => (
@@ -151,8 +150,8 @@ export function ResponsesTable({
                     key={header}
                     className={`whitespace-nowrap font-semibold uppercase ${
                       editorial
-                        ? 'px-3 pb-2.5 text-[10px] tracking-[0.08em] text-[#9a938a]'
-                        : 'px-4 py-3 text-xs tracking-wide text-slate-500'
+                        ? 'px-3 pb-2.5 text-[10px] tracking-[0.08em] text-muted'
+                        : 'px-4 py-3 text-xs tracking-wide text-muted'
                     } ${header === 'Response' ? 'min-w-0 pl-0 text-left' : ''} ${
                       editorial && header === 'Sentiment' ? 'pr-0' : ''
                     } ${
@@ -188,8 +187,8 @@ export function ResponsesTable({
                     key={row.id}
                     className={
                       editorial
-                        ? 'cursor-pointer border-b border-[#eae6de] transition-colors hover:bg-[#f5f2ed]/70'
-                        : 'cursor-pointer border-b border-slate-50 transition hover:bg-slate-50/50'
+                        ? 'cursor-pointer border-b border-line transition-colors hover:bg-[#1a1a1a]/70'
+                        : 'cursor-pointer border-b border-line transition hover:bg-paper-soft'
                     }
                     onClick={() => setSelectedRow(extended)}
                   >
@@ -197,21 +196,21 @@ export function ResponsesTable({
                       {preview ? (
                         <p
                           className={`line-clamp-2 leading-relaxed ${
-                            editorial ? 'text-[13px] text-[#3a352e]' : 'text-sm text-brand-700'
+                            editorial ? 'text-[13px] text-[#e3dcc8]' : 'text-sm text-accent'
                           }`}
                           title={preview}
                         >
                           {preview.length > 160 ? `${preview.slice(0, 159)}…` : preview}
                         </p>
                       ) : (
-                        <span className={editorial ? 'text-[13px] text-[#9a938a]' : 'text-sm text-slate-400'}>
+                        <span className={editorial ? 'text-[13px] text-muted' : 'text-sm text-muted-dark'}>
                           Click to view response
                         </span>
                       )}
                     </td>
                     <td className={`whitespace-nowrap ${editorial ? 'px-3 py-3.5' : 'px-4 py-3'}`}>
                       {editorial ? (
-                        <span className="[&_span]:text-[13px] [&_span]:text-[#5c554c]">
+                        <span className="[&_span]:text-[13px] [&_span]:text-muted">
                           <ProviderIcon provider={provider} size="sm" showLabel />
                         </span>
                       ) : (
@@ -221,8 +220,8 @@ export function ResponsesTable({
                     <td
                       className={`tabular-nums ${
                         editorial
-                          ? 'hidden px-3 py-3.5 text-right text-[13px] text-[#5c554c] md:table-cell'
-                          : 'px-4 py-3 text-center text-sm font-medium text-[#101414]'
+                          ? 'hidden px-3 py-3.5 text-right text-[13px] text-muted md:table-cell'
+                          : 'px-4 py-3 text-center text-sm font-medium text-ink'
                       }`}
                     >
                       {row.myRank != null ? formatNumber(row.myRank, 0) : '—'}
@@ -245,14 +244,14 @@ export function ResponsesTable({
                           )
                         })}
                         {brands.length === 0 && !accountLogo && (
-                          <span className="text-slate-400">—</span>
+                          <span className="text-muted-dark">—</span>
                         )}
                       </div>
                     </td>}
                     <td className={editorial ? 'hidden px-3 py-3.5 text-right md:table-cell' : 'px-4 py-3 text-center'}>
                       <span
                         className={`inline-flex items-center justify-center gap-1 ${
-                          editorial ? 'text-[13px] text-[#5c554c]' : 'text-sm text-slate-600'
+                          editorial ? 'text-[13px] text-muted' : 'text-sm text-muted'
                         }`}
                       >
                         {!editorial && <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -273,7 +272,7 @@ export function ResponsesTable({
                     <td className={editorial ? 'py-3.5 pl-3 text-right' : 'px-4 py-3 text-center'}>
                       <SentimentBadge score={sentiment} editorial={editorial} />
                     </td>
-                    {!editorial && <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                    {!editorial && <td className="whitespace-nowrap px-4 py-3 text-sm text-muted">
                       {responseDateLabel(row)}
                     </td>}
                   </tr>
@@ -286,8 +285,8 @@ export function ResponsesTable({
         {pagination ? (
           <TablePagination {...pagination} />
         ) : total != null ? (
-          <div className={editorial ? 'pt-3' : 'border-t border-slate-100 px-4 py-2.5'}>
-            <span className={editorial ? 'text-xs text-[#9a938a]' : 'text-xs text-slate-400'}>
+          <div className={editorial ? 'pt-3' : 'border-t border-line px-4 py-2.5'}>
+            <span className={editorial ? 'text-xs text-muted' : 'text-xs text-muted-dark'}>
               {rows.length.toLocaleString()}
               {total > rows.length ? ` of ${total.toLocaleString()}` : ''} responses
             </span>
