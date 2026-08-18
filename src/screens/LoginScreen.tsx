@@ -27,7 +27,10 @@ export function LoginScreen() {
             Sign <span className="screen-title__rest">in</span>
           </h1>
         </div>
-        <Descope flowId={DESCOPE_FLOW_ID} />
+        <Descope
+          flowId={DESCOPE_FLOW_ID}
+          redirectUrl={`${window.location.origin}/login`}
+        />
       </div>
     </div>
   )
