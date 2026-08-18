@@ -28,7 +28,7 @@ function ScreenChrome({
       <div className={`flex flex-col ${isCrawlerVariant ? 'gap-7' : 'gap-4'}`}>
         <h1
           className={`font-serif font-semibold tracking-tight text-[#101414] ${
-            isCrawlerVariant ? 'text-[32px] leading-none' : 'text-2xl'
+            isCrawlerVariant ? 'text-[32px] leading-none' : 'text-xl lg:text-2xl'
           }`}
         >
           {title}

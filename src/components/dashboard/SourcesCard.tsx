@@ -1,5 +1,6 @@
 import type { TopSource } from '../../api/types'
 import { formatNumber } from '../../lib/format'
+import { BrandLogo } from '../competitors/BrandLogo'
 import { DashboardCard } from './DashboardCard'
 
 interface SourcesCardProps {
@@ -14,19 +15,6 @@ function hostLabel(domain: string) {
   } catch {
     return raw.replace(/^https?:\/\//i, '').replace(/^www\./i, '').split('/')[0] || raw
   }
-}
-
-function DomainGlyph({ domain }: { domain: string }) {
-  const host = hostLabel(domain)
-  const letter = (host[0] || '?').toUpperCase()
-  return (
-    <span
-      className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-[#efeae2] text-[10px] font-semibold text-[#6b655e]"
-      title={host}
-    >
-      {letter}
-    </span>
-  )
 }
 
 export function SourcesCard({ sources }: SourcesCardProps) {
@@ -45,7 +33,11 @@ export function SourcesCard({ sources }: SourcesCardProps) {
           No citation data for this period.
         </div>
       ) : (
-        <table className="w-full min-w-[22rem] text-sm">
+        <table className="w-full table-fixed text-sm">
+          <colgroup>
+            <col />
+            <col className="w-[6.75rem]" />
+          </colgroup>
           <thead>
             <tr className="border-b-2 border-[#101414] text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8a847b]">
               <th className="pb-2.5 text-left font-semibold">Domain</th>
@@ -53,19 +45,24 @@ export function SourcesCard({ sources }: SourcesCardProps) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
-              <tr key={row.domain} className="border-b border-[#e4dfd6]">
-                <td className="py-3">
-                  <div className="flex items-center gap-2">
-                    <DomainGlyph domain={row.domain} />
-                    <span className="font-medium text-[#302d29]">{hostLabel(row.domain)}</span>
-                  </div>
-                </td>
-                <td className="py-3 text-right font-medium text-[#6b655e]">
-                  {formatNumber(row.pageCount, 0)}
-                </td>
-              </tr>
-            ))}
+            {rows.map((row) => {
+              const host = hostLabel(row.domain)
+              return (
+                <tr key={row.domain} className="border-b border-[#e4dfd6]">
+                  <td className="min-w-0 py-3">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <BrandLogo name={host} domain={host} size="md" shape="rounded" />
+                      <span className="min-w-0 truncate font-medium text-[#302d29]" title={host}>
+                        {host}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-3 text-right font-medium text-[#6b655e]">
+                    {formatNumber(row.pageCount, 0)}
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       )}

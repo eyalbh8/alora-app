@@ -26,6 +26,8 @@ interface BrandLogoProps extends BrandLogoSource {
   className?: string
   /** White circular badge with shadow (Share of Voice callouts). */
   badge?: boolean
+  /** Circle for brands; rounded tile for site favicons. */
+  shape?: 'circle' | 'rounded'
 }
 
 export function BrandLogo({
@@ -37,6 +39,7 @@ export function BrandLogo({
   size = 'md',
   className = '',
   badge = false,
+  shape = 'circle',
 }: BrandLogoProps) {
   const { meta } = useGeoMeta()
   const lookup = useMemo(
@@ -44,7 +47,11 @@ export function BrandLogo({
     [meta],
   )
   const candidates = useMemo(
-    () => brandLogoCandidates({ id, name, logo, domain, site }, metaLogoFor({ id, name }, lookup)),
+    () =>
+      brandLogoCandidates(
+        { id, name, logo, domain, site },
+        metaLogoFor({ id, name, domain, site }, lookup),
+      ),
     [id, name, logo, domain, site, lookup],
   )
   const [index, setIndex] = useState(0)
@@ -55,14 +62,20 @@ export function BrandLogo({
 
   const sizeClass = SIZE_CLASS[size]
   const textClass = TEXT_CLASS[size]
-  const badgeClass = badge
+  const imageClass = badge
     ? 'rounded-full border border-slate-200/60 bg-white p-1.5 shadow-[0_2px_10px_rgba(15,23,42,0.08)] ring-2 ring-white'
-    : 'rounded object-contain'
+    : shape === 'rounded'
+      ? 'rounded-md bg-white object-contain p-0.5 ring-1 ring-[#e4dfd6]'
+      : 'rounded-full bg-white object-cover'
+  const fallbackClass =
+    shape === 'rounded'
+      ? 'rounded-md bg-[#efeae2] text-[#6b655e] ring-1 ring-[#e4dfd6]'
+      : 'rounded-full bg-slate-100 text-slate-500'
 
   if (candidates.length === 0 || index >= candidates.length) {
     return (
       <span
-        className={`flex shrink-0 items-center justify-center rounded-full bg-slate-100 font-semibold text-slate-500 ${sizeClass} ${textClass} ${className}`}
+        className={`flex shrink-0 items-center justify-center font-semibold ${fallbackClass} ${sizeClass} ${textClass} ${className}`}
         title={name}
       >
         {name.slice(0, 1).toUpperCase()}
@@ -75,7 +88,7 @@ export function BrandLogo({
       src={candidates[index]}
       alt={name}
       title={name}
-      className={`shrink-0 ${badgeClass} ${sizeClass} ${className}`}
+      className={`shrink-0 ${imageClass} ${sizeClass} ${className}`}
       onError={() => setIndex((i) => i + 1)}
     />
   )

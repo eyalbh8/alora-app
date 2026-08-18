@@ -27,6 +27,7 @@ function MultiSelect({
   formatOption = (v: string) => v,
   searchable = false,
   renderOptionLeading,
+  fullWidth = false,
 }: {
   label: string
   values: string[]
@@ -37,6 +38,7 @@ function MultiSelect({
   formatOption?: (v: string) => string
   searchable?: boolean
   renderOptionLeading?: (value: string) => React.ReactNode
+  fullWidth?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -75,7 +77,7 @@ function MultiSelect({
   }
 
   return (
-    <div ref={rootRef} className="relative">
+    <div ref={rootRef} className={`relative ${fullWidth ? 'w-full' : ''}`}>
       <button
         type="button"
         disabled={disabled}
@@ -89,7 +91,9 @@ function MultiSelect({
           setOpen((o) => !o)
           if (open) setQuery('')
         }}
-        className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-colors ${filterChipClass(Boolean(disabled), hasSelection, open)}`}
+        className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-colors ${
+          fullWidth ? 'w-full justify-between' : ''
+        } ${filterChipClass(Boolean(disabled), hasSelection, open)}`}
       >
         <span>{disabled ? `${label} N/A` : label}</span>
         {hasSelection && values.length > 1 && (
@@ -105,7 +109,11 @@ function MultiSelect({
       </button>
 
       {open && !disabled && (
-        <div className="absolute left-0 top-full z-50 mt-1 min-w-[220px] max-w-[320px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+        <div
+          className={`absolute left-0 top-full z-50 mt-1 rounded-lg border border-slate-200 bg-white py-1 shadow-lg ${
+            fullWidth ? 'w-full max-w-none' : 'min-w-[220px] max-w-[320px]'
+          }`}
+        >
           {searchable && options.length > 6 && (
             <div className="border-b border-slate-100 px-2 py-1.5">
               <input
@@ -161,16 +169,20 @@ function ChipSelect({
   title,
   active,
   children,
+  fullWidth = false,
 }: {
   label: string
   disabled?: boolean
   title?: string
   active?: boolean
   children?: React.ReactNode
+  fullWidth?: boolean
 }) {
   return (
     <label
-      className={`relative inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-colors ${filterChipClass(Boolean(disabled), Boolean(active), false)}`}
+      className={`relative inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-colors ${
+        fullWidth ? 'w-full justify-between' : ''
+      } ${filterChipClass(Boolean(disabled), Boolean(active), false)}`}
       title={title}
     >
       <span>{label}</span>
@@ -240,144 +252,246 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
     availability,
   } = useAnalyticsFilters()
 
+  const [sheetOpen, setSheetOpen] = useState(false)
+
   const dateMin = factDays?.min ?? undefined
   const dateMax = factDays?.max ?? presetEndDay ?? undefined
 
   const geo = variant === 'geo'
+  const hasCollapsibleFilters = geo || (variant === 'crawlers' && availability.crawlers)
+
+  const activeCount = useMemo(
+    () =>
+      [
+        providers.length > 0,
+        topics.length > 0,
+        prompts.length > 0,
+        regions.length > 0,
+        tags.length > 0,
+        branded != null,
+        promptTypes.length > 0,
+        crawlers.length > 0,
+      ].filter(Boolean).length,
+    [providers, topics, prompts, regions, tags, branded, promptTypes, crawlers],
+  )
+
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 1024px)')
+    const onChange = () => {
+      if (media.matches) setSheetOpen(false)
+    }
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
+  }, [])
+
+  useEffect(() => {
+    if (!sheetOpen) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSheetOpen(false)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [sheetOpen])
+
+  const renderDatePicker = () => (
+    <DateRangePicker
+      range={range}
+      endDay={presetEndDay ?? range.endDate}
+      minDay={dateMin}
+      maxDay={dateMax}
+      onChange={setRange}
+      onPreset={setPresetDays}
+      onResetDefault={resetDateRange}
+    />
+  )
+
+  const filterControls = (fullWidth: boolean) => (
+    <>
+      {geo && (
+        <MultiSelect
+          label="Providers"
+          values={providers}
+          options={options.providers.map((p) => ({ value: p, label: providerLabel(p) }))}
+          onChange={setProviders}
+          disabled={!availability.providers || options.providers.length === 0}
+          unavailableReason="Not available in snapshot"
+          formatOption={providerLabel}
+          fullWidth={fullWidth}
+          renderOptionLeading={(value) => (
+            <ProviderIcon provider={value} size="sm" rounded className="shrink-0" />
+          )}
+        />
+      )}
+
+      {geo && (
+        <>
+          <MultiSelect
+            label="Topics"
+            values={topics}
+            options={options.topics.map((t) => ({ value: t.id, label: t.name }))}
+            onChange={setTopics}
+            disabled={!availability.topics || options.topics.length === 0}
+            unavailableReason="Not available in snapshot"
+            searchable
+            fullWidth={fullWidth}
+          />
+          <MultiSelect
+            label="Prompts"
+            values={prompts}
+            options={options.prompts.map((p) => ({
+              value: p.id,
+              label: p.text.length > 60 ? `${p.text.slice(0, 57)}…` : p.text,
+            }))}
+            onChange={setPrompts}
+            disabled={!availability.prompts || options.prompts.length === 0}
+            unavailableReason="Not available in snapshot"
+            searchable
+            fullWidth={fullWidth}
+          />
+        </>
+      )}
+
+      {geo && (
+        <MultiSelect
+          label="Regions"
+          values={regions}
+          options={options.regions.map((r) => ({ value: r, label: regionLabel(r) }))}
+          onChange={setRegions}
+          disabled={!availability.regions || options.regions.length === 0}
+          unavailableReason="Not available in snapshot"
+          formatOption={regionLabel}
+          fullWidth={fullWidth}
+        />
+      )}
+
+      {geo && (
+        <>
+          <MultiSelect
+            label="Tags"
+            values={tags}
+            options={options.tags.map((t) => ({ value: t, label: t }))}
+            onChange={setTags}
+            disabled={!availability.tags || options.tags.length === 0}
+            unavailableReason="Not available in snapshot"
+            searchable
+            fullWidth={fullWidth}
+          />
+
+          <ChipSelect
+            label="Branded"
+            active={branded != null}
+            fullWidth={fullWidth}
+            title={
+              branded === 'AccountIncluded'
+                ? 'Me in prompt'
+                : branded === 'AccountNotIncluded'
+                  ? 'Not in prompt'
+                  : undefined
+            }
+          >
+            <select
+              className="absolute inset-0 cursor-pointer opacity-0"
+              value={branded ?? ''}
+              onChange={(e) =>
+                setBranded((e.target.value || null) as BrandedFilter)
+              }
+            >
+              <option value="">All</option>
+              <option value="AccountIncluded">Me in prompt</option>
+              <option value="AccountNotIncluded">Not in prompt</option>
+            </select>
+          </ChipSelect>
+
+          <MultiSelect
+            label="Prompt types"
+            values={promptTypes}
+            options={options.promptTypes.map((t) => ({ value: t, label: t }))}
+            onChange={setPromptTypes}
+            disabled={!availability.promptTypes || options.promptTypes.length === 0}
+            unavailableReason="Not available in snapshot"
+            fullWidth={fullWidth}
+          />
+        </>
+      )}
+
+      {variant === 'crawlers' && availability.crawlers && (
+        <MultiSelect
+          label="AI Crawlers"
+          values={crawlers}
+          options={options.crawlers.map((c) => ({
+            value: c,
+            label: getCrawlerBotDisplayName(c),
+          }))}
+          onChange={setCrawlers}
+          disabled={options.crawlers.length === 0}
+          unavailableReason="Not available in snapshot"
+          formatOption={getCrawlerBotDisplayName}
+          fullWidth={fullWidth}
+          renderOptionLeading={(value) => (
+            <CrawlerIcon bot={value} size="sm" className="shrink-0" />
+          )}
+        />
+      )}
+    </>
+  )
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-2">
-        {geo && (
-          <MultiSelect
-            label="Providers"
-            values={providers}
-            options={options.providers.map((p) => ({ value: p, label: providerLabel(p) }))}
-            onChange={setProviders}
-            disabled={!availability.providers || options.providers.length === 0}
-            unavailableReason="Not available in snapshot"
-            formatOption={providerLabel}
-            renderOptionLeading={(value) => (
-              <ProviderIcon provider={value} size="sm" rounded className="shrink-0" />
-            )}
-          />
-        )}
-
-        {geo && (
-          <>
-            <MultiSelect
-              label="Topics"
-              values={topics}
-              options={options.topics.map((t) => ({ value: t.id, label: t.name }))}
-              onChange={setTopics}
-              disabled={!availability.topics || options.topics.length === 0}
-              unavailableReason="Not available in snapshot"
-              searchable
-            />
-            <MultiSelect
-              label="Prompts"
-              values={prompts}
-              options={options.prompts.map((p) => ({
-                value: p.id,
-                label: p.text.length > 60 ? `${p.text.slice(0, 57)}…` : p.text,
-              }))}
-              onChange={setPrompts}
-              disabled={!availability.prompts || options.prompts.length === 0}
-              unavailableReason="Not available in snapshot"
-              searchable
-            />
-          </>
-        )}
-
-        {geo && (
-          <MultiSelect
-            label="Regions"
-            values={regions}
-            options={options.regions.map((r) => ({ value: r, label: regionLabel(r) }))}
-            onChange={setRegions}
-            disabled={!availability.regions || options.regions.length === 0}
-            unavailableReason="Not available in snapshot"
-            formatOption={regionLabel}
-          />
-        )}
-
-        {geo && (
-          <>
-            <MultiSelect
-              label="Tags"
-              values={tags}
-              options={options.tags.map((t) => ({ value: t, label: t }))}
-              onChange={setTags}
-              disabled={!availability.tags || options.tags.length === 0}
-              unavailableReason="Not available in snapshot"
-              searchable
-            />
-
-            <ChipSelect
-              label="Branded"
-              active={branded != null}
-              title={
-                branded === 'AccountIncluded'
-                  ? 'Me in prompt'
-                  : branded === 'AccountNotIncluded'
-                    ? 'Not in prompt'
-                    : undefined
-              }
-            >
-              <select
-                className="absolute inset-0 cursor-pointer opacity-0"
-                value={branded ?? ''}
-                onChange={(e) =>
-                  setBranded((e.target.value || null) as BrandedFilter)
-                }
-              >
-                <option value="">All</option>
-                <option value="AccountIncluded">Me in prompt</option>
-                <option value="AccountNotIncluded">Not in prompt</option>
-              </select>
-            </ChipSelect>
-
-            <MultiSelect
-              label="Prompt types"
-              values={promptTypes}
-              options={options.promptTypes.map((t) => ({ value: t, label: t }))}
-              onChange={setPromptTypes}
-              disabled={!availability.promptTypes || options.promptTypes.length === 0}
-              unavailableReason="Not available in snapshot"
-            />
-          </>
-        )}
-
-        {variant === 'crawlers' && availability.crawlers && (
-          <MultiSelect
-            label="AI Crawlers"
-            values={crawlers}
-            options={options.crawlers.map((c) => ({
-              value: c,
-              label: getCrawlerBotDisplayName(c),
-            }))}
-            onChange={setCrawlers}
-            disabled={options.crawlers.length === 0}
-            unavailableReason="Not available in snapshot"
-            formatOption={getCrawlerBotDisplayName}
-            renderOptionLeading={(value) => (
-              <CrawlerIcon bot={value} size="sm" className="shrink-0" />
-            )}
-          />
-        )}
-
-        <DateRangePicker
-          range={range}
-          endDay={presetEndDay ?? range.endDate}
-          minDay={dateMin}
-          maxDay={dateMax}
-          onChange={setRange}
-          onPreset={setPresetDays}
-          onResetDefault={resetDateRange}
-        />
-
+      <div className="hidden flex-wrap items-center gap-2 lg:flex">
+        {filterControls(false)}
+        {renderDatePicker()}
         {hasActiveFilters && <ClearFiltersButton onClick={clearFilters} />}
       </div>
+
+      <div className="flex flex-wrap items-center gap-2 lg:hidden">
+        {renderDatePicker()}
+        {hasCollapsibleFilters && (
+          <button
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-colors ${filterChipClass(false, activeCount > 0, sheetOpen)}`}
+          >
+            <span>Filters</span>
+            {activeCount > 0 && (
+              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-semibold leading-none text-white">
+                {activeCount}
+              </span>
+            )}
+          </button>
+        )}
+        {hasActiveFilters && <ClearFiltersButton onClick={clearFilters} />}
+      </div>
+
+      {sheetOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <button
+            type="button"
+            aria-label="Close filters"
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setSheetOpen(false)}
+          />
+          <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-xl bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+              <h2 className="text-sm font-semibold text-[#101414]">Filters</h2>
+              <button
+                type="button"
+                onClick={() => setSheetOpen(false)}
+                className="text-xs font-medium text-brand-700 hover:text-brand-800"
+              >
+                Done
+              </button>
+            </div>
+            <div className="flex flex-col gap-2 overflow-y-auto px-4 py-4">
+              {filterControls(true)}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

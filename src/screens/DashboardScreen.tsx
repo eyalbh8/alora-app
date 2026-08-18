@@ -59,7 +59,7 @@ export function DashboardScreen() {
   return (
     <CompetitorHoverProvider>
       <div
-        className={`flex flex-col gap-14 pb-4 transition-opacity${geo.loading ? ' opacity-70' : ''}`}
+        className={`flex flex-col gap-8 pb-4 transition-opacity md:gap-10 lg:gap-14${geo.loading ? ' opacity-70' : ''}`}
       >
         <section className="overflow-hidden border border-[#d8d2c7] border-t-2 border-t-brand-800 bg-[#faf9f7] shadow-[0_12px_32px_rgba(16,20,20,0.05)]">
           <header className="px-5 py-5 sm:px-6">
@@ -81,7 +81,7 @@ export function DashboardScreen() {
           />
         </section>
 
-        <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
+        <div className="grid items-stretch gap-10 lg:grid-cols-2">
           <IndustryRankingCard competitors={competitorRows} />
           <BrandVisibilityChart
             competitors={top5ByOccurrences}
@@ -91,8 +91,8 @@ export function DashboardScreen() {
             variant="editorial"
             emptyMessage="Not enough history to show a trajectory yet."
             valueLabel="mentions"
-            heightClassName="h-[300px]"
             showLegend
+            paired
           />
         </div>
 

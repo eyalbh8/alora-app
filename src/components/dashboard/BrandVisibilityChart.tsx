@@ -14,7 +14,13 @@ import { useCompetitorHover } from '../../context/CompetitorHoverContext'
 import { daysInRange, type DateRange } from '../../lib/dates'
 import { BrandLogo } from '../competitors/BrandLogo'
 import { DashboardCard } from './DashboardCard'
-import { CHART_COLORS } from './constants'
+import {
+  CHART_COLORS,
+  PAIRED_BRAND_COUNT,
+  PAIRED_LEGEND_HEIGHT_PX,
+  PAIRED_PLOT_HEIGHT_PX,
+  PAIRED_XAXIS_HEIGHT_PX,
+} from './constants'
 
 interface BrandVisibilityChartProps {
   competitors: CompetitorPerformance[]
@@ -26,6 +32,7 @@ interface BrandVisibilityChartProps {
   valueLabel?: string
   heightClassName?: string
   showLegend?: boolean
+  paired?: boolean
 }
 
 export function BrandVisibilityChart({
@@ -38,6 +45,7 @@ export function BrandVisibilityChart({
   valueLabel,
   heightClassName,
   showLegend = false,
+  paired = false,
 }: BrandVisibilityChartProps) {
   const { hoveredCompetitor } = useCompetitorHover()
   const days = daysInRange(range)
@@ -73,11 +81,12 @@ export function BrandVisibilityChart({
   )
   const expandedMax = maxValue > 0 ? Math.ceil(maxValue * 1.1) : 100
   const tickStep = Math.max(5, Math.ceil(expandedMax / 20) * 5)
-  const yMax = Math.ceil(expandedMax / tickStep) * tickStep
-  const yTicks = Array.from(
-    { length: Math.ceil(yMax / tickStep) },
-    (_, index) => index * tickStep,
-  )
+  const yMax = paired
+    ? Math.max(25, Math.ceil(expandedMax / 25) * 25)
+    : Math.ceil(expandedMax / tickStep) * tickStep
+  const yTicks = paired
+    ? Array.from({ length: PAIRED_BRAND_COUNT }, (_, index) => (yMax / PAIRED_BRAND_COUNT) * index)
+    : Array.from({ length: Math.ceil(yMax / tickStep) }, (_, index) => index * tickStep)
 
   const hasData = chartData.length > 0 && competitors.length > 0
 
@@ -86,24 +95,44 @@ export function BrandVisibilityChart({
       title={title}
       subtitle={subtitle}
       variant={variant}
+      fill={paired}
       contentClassName={
-        variant === 'editorial' ? (heightClassName ?? 'h-[180px]') : 'overflow-hidden'
+        paired
+          ? ''
+          : variant === 'editorial'
+            ? (heightClassName ?? 'h-[180px]')
+            : 'overflow-hidden'
       }
     >
       {!hasData ? (
         <div
-          className={`flex h-full items-center justify-center px-6 text-sm ${
+          className={`flex items-center justify-center px-6 text-sm ${
+            paired ? '' : 'h-full'
+          } ${
             variant === 'editorial'
               ? 'border-y border-[#eae6de] text-[#8a847b]'
               : 'text-slate-500'
           }`}
+          style={
+            paired
+              ? {
+                  height:
+                    PAIRED_LEGEND_HEIGHT_PX +
+                    PAIRED_PLOT_HEIGHT_PX +
+                    PAIRED_XAXIS_HEIGHT_PX,
+                }
+              : undefined
+          }
         >
           {emptyMessage}
         </div>
       ) : (
         <div className={`flex h-full flex-col ${variant === 'card' ? 'px-2 pb-4 pt-2' : ''}`}>
           {showLegend && (
-            <div className="flex h-[27px] flex-wrap items-start gap-x-3 gap-y-1 overflow-hidden border-b-2 border-[#101414] pb-2.5">
+            <div
+              className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 overflow-hidden border-b-2 border-[#101414]"
+              style={{ height: PAIRED_LEGEND_HEIGHT_PX }}
+            >
               {competitors.map((competitor, index) => (
                 <span
                   key={competitor.id}
@@ -118,14 +147,19 @@ export function BrandVisibilityChart({
               ))}
             </div>
           )}
-          <div className="min-h-0 flex-1">
+          <div
+            className={paired ? 'shrink-0' : 'min-h-0 flex-1'}
+            style={paired ? { height: PAIRED_PLOT_HEIGHT_PX + PAIRED_XAXIS_HEIGHT_PX } : undefined}
+          >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={chartData}
                 margin={
-                  variant === 'editorial'
-                    ? { top: 8, right: 4, left: -12, bottom: 0 }
-                    : { top: 8, right: 12, left: 0, bottom: 0 }
+                  paired
+                    ? { top: 0, right: 4, left: -12, bottom: 0 }
+                    : variant === 'editorial'
+                      ? { top: 8, right: 4, left: -12, bottom: 0 }
+                      : { top: 8, right: 12, left: 0, bottom: 0 }
                 }
               >
                 <CartesianGrid
@@ -140,10 +174,12 @@ export function BrandVisibilityChart({
                   tickLine={false}
                   tick={{ fontSize: 11, fill: variant === 'editorial' ? '#9a938a' : undefined }}
                   interval="preserveStartEnd"
+                  height={paired ? PAIRED_XAXIS_HEIGHT_PX : undefined}
+                  tickMargin={paired ? 4 : undefined}
                 />
                 <YAxis
                   domain={[0, yMax]}
-                  ticks={showLegend ? yTicks.slice(0, -1) : yTicks}
+                  ticks={paired ? yTicks : showLegend ? yTicks.slice(0, -1) : yTicks}
                   axisLine={false}
                   tickLine={false}
                   tick={{ fontSize: 11, fill: variant === 'editorial' ? '#9a938a' : undefined }}

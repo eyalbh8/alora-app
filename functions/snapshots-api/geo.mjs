@@ -90,8 +90,11 @@ function asArray(value) {
 }
 
 function tagName(tag) {
-  if (typeof tag === 'string') return tag
-  if (tag && typeof tag === 'object' && tag.name) return tag.name
+  if (typeof tag === 'string') return tag.trim() || null
+  if (tag && typeof tag === 'object') {
+    const name = tag.name || tag.label || tag.tag
+    if (typeof name === 'string' && name.trim()) return name.trim()
+  }
   return null
 }
 
@@ -228,7 +231,7 @@ export async function geoMeta(db, tenantId) {
     igeoGetCached(accountId, apiKey, `/accounts/${accountId}`),
     igeoGetCached(accountId, apiKey, accountPath(accountId, '/topics')),
     igeoGet(accountId, apiKey, accountPath(accountId, '/prompts', '?take=200&skip=0')),
-    optionalIgeo(accountId, apiKey, accountPath(accountId, '/tags')),
+    igeoGet(accountId, apiKey, accountPath(accountId, '/tags')),
     igeoGet(accountId, apiKey, accountPath(accountId, '/scans/last')),
     optionalIgeo(accountId, apiKey, accountPath(accountId, '/market-players', '?take=100&skip=0')),
   ])
@@ -253,6 +256,12 @@ export async function geoMeta(db, tenantId) {
     const name = tagName(t)
     if (name) tagSet.add(name)
   }
+  console.info('[geo/meta] tags', {
+    rawType: tagsRaw == null ? 'null' : Array.isArray(tagsRaw) ? `array:${tagsRaw.length}` : typeof tagsRaw,
+    rawKeys: tagsRaw && typeof tagsRaw === 'object' && !Array.isArray(tagsRaw) ? Object.keys(tagsRaw) : [],
+    fromPrompts: promptRows.filter((p) => (p.tags ?? []).length > 0).length,
+    collected: [...tagSet],
+  })
 
   const providers = (account?.accountSettings?.aiEngines ?? [])
     .map((e) => e?.name)

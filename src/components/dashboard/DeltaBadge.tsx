@@ -12,8 +12,9 @@ export function DeltaBadge({ value, mode = 'percent', invert = false, className 
     return <span className="text-xs text-slate-400">—</span>
   }
 
-  const isNeutral = value === 0
-  const isPositive = invert ? value <= 0 : value >= 0
+  const displayed = Math.round(value)
+  const isNeutral = displayed === 0
+  const isPositive = invert ? value < 0 : value > 0
   const tone = isNeutral
     ? 'bg-slate-100 text-slate-600'
     : isPositive
