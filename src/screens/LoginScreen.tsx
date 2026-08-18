@@ -7,14 +7,22 @@ const DESCOPE_FLOW_ID = (import.meta.env.VITE_DESCOPE_FLOW_ID || 'sign-up-or-in'
 
 export function LoginScreen() {
   const navigate = useNavigate()
-  const { isAuthenticated } = useSession()
+  const { isAuthenticated, isSessionLoading } = useSession()
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isSessionLoading && isAuthenticated) {
       navigate('/', { replace: true })
     }
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, isSessionLoading, navigate])
+
+  if (isSessionLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-bg">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-accent" />
+      </div>
+    )
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-6">

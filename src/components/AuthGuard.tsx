@@ -1,5 +1,5 @@
 import { type PropsWithChildren, useEffect } from 'react'
-import { Navigate, useSearchParams } from 'react-router-dom'
+import { Navigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useSession } from '@descope/react-sdk'
 import { useQuery } from '@tanstack/react-query'
 import { getAccounts } from '../api/accounts'
@@ -20,6 +20,7 @@ function LoadingScreen() {
 
 export function AuthGuard({ children }: PropsWithChildren) {
   const { isAuthenticated, isSessionLoading } = useSession()
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const { selectedAccount, setSelectedAccount, refreshSelectedAccount } = useAccountStore()
 
@@ -76,7 +77,8 @@ export function AuthGuard({ children }: PropsWithChildren) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    // Keep OAuth query/hash so the Descope widget on /login can finish Google.
+    return <Navigate to={`/login${location.search}${location.hash}`} replace />
   }
 
   if (accountsLoading) {
