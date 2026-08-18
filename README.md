@@ -1,43 +1,50 @@
 # Alora (white-label analytics)
 
-React + Vite + TypeScript app that renders **Alora analytics screens from a Postgres snapshot DB** with **Descope authentication** and **multi-tenant account switching**.
+React + Vite + TypeScript app that renders **Alora analytics screens from the live iGEO Public API** (`https://api.igeo.ai`) with **Descope authentication** and **multi-tenant account switching**.
+
+The browser never calls iGEO directly. Descope JWT + `X-Alora-Tenant-Id` go to Alora’s BFF, which injects the workspace API key.
 
 ## Screens
 
-| Route | Snapshot keys |
+| Route | Live iGEO sources |
 | --- | --- |
-| `/` Dashboard | `dashboard`, `dashboard_top_sources` |
-| `/prompts` | `prompts`, `topics` (+ response detail from `mentions_sentiment`) |
-| `/mentions` | `mentions_chart`, `mentions_sentiment` |
-| `/sentiment` | `sentiment`, `sentiment_historical` |
-| `/competitors` | `competitors` |
-| `/ai-traffic` | `ai_traffic` |
-| `/ai-crawlers` | `ai_crawlers` |
+| `/` Dashboard | `/ui-pages/dashboard`, `/ui-pages/dashboard/top-source-domains` |
+| `/prompts` | `/prompts`, `/prompts/responses` |
+| `/mentions` | `/prompts/responses/chart-data`, `/prompts/responses` |
+| `/sentiment` | `/findings/ai-feel`, `/findings/provider-feel`, sentiment historical + responses |
+| `/competitors` | `/market-players/page-data` |
+| `/ai-traffic` | `/traffic/{id}/ai-dashboard-data` |
+| `/ai-crawlers` | `/traffic/{id}/cloudflare/crawler-analytics` |
 
-Filters are applied **client-side** on payload JSON. Unavailable dimensions are disabled with “Not available in snapshot.”
+Filters are applied **server-side** on iGEO (date range, providers, topics, prompts, regions, tags, branded, prompt types).
 
 ## Setup
 
 ```bash
 npm install
-cp .env.example .env   # fill DATABASE_URL, DESCOPE_PROJECT_ID, VITE_DESCOPE_PROJECT_ID
+cp .env.example .env   # fill DATABASE_URL, DESCOPE_*, and an iGEO API key
 npm run dev
 ```
 
 Open http://localhost:5173. You'll be redirected to the Descope login flow.
 
+Each tenant needs an iGEO key (`igeo_live_…`) bound to `whitelabel_tenants.source_account_id`. Paste the MCP URL in **Carousel → Connect**, or set `IGEO_API_KEY` as a single-workspace fallback.
+
 ### Environment Variables
 
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | **Server-only.** Postgres connection to `whitelabel_*` tables. |
+| `DATABASE_URL` | **Server-only.** Postgres for users, membership, and tenant→workspace mapping. |
 | `DESCOPE_PROJECT_ID` | **Server-only.** Your Descope project ID for JWT verification. |
 | `VITE_DESCOPE_PROJECT_ID` | **Client.** Same Descope project ID, exposed to the browser for auth. |
 | `VITE_DESCOPE_FLOW_ID` | **Client.** Optional Descope flow ID (defaults to `sign-up-or-in`). |
+| `IGEO_API_BASE` | **Server-only.** Public API origin (default `https://api.igeo.ai`). |
+| `IGEO_API_KEY` / `IGEO_MCP_API_KEY` | **Server-only.** Fallback `igeo_live_` key when a tenant has no stored key. |
+| `IGEO_MCP_URL` | **Server-only.** MCP endpoint for carousel (default `https://api.igeo.ai/mcp`). |
 | `WHITELABEL_TENANT_ID` | **Server-only.** Used by sync/backfill scripts only (not browser requests). |
 | `ALLOWED_ORIGIN` | Lambda only — CORS allowlist (optional). |
 
-Never prefix `DATABASE_URL` or `DESCOPE_PROJECT_ID` with `VITE_`.
+Never prefix `DATABASE_URL`, `DESCOPE_PROJECT_ID`, or iGEO keys with `VITE_`.
 
 ### Database Schema
 
@@ -51,6 +58,11 @@ Apply the schemas in order:
 2. **Auth & membership schema**:
    ```bash
    psql "$DATABASE_URL" -f db/schema_auth.sql
+   ```
+
+3. **Per-tenant MCP/API key column**:
+   ```bash
+   psql "$DATABASE_URL" -f db/schema_tenant_mcp.sql
    ```
 
 ### Seeding Users & Memberships
@@ -76,24 +88,25 @@ SELECT id, email, name, is_admin FROM wl_users WHERE email = 'user@example.com';
 ## Architecture
 
 ```
-Browser → Descope JWT + X-Alora-Tenant-Id → [Vite middleware (dev) | Lambda (prod)] → Postgres
+Browser → Descope JWT + X-Alora-Tenant-Id → [Vite middleware (dev) | Lambda (prod)]
+        → Postgres (membership + tenant key)
+        → https://api.igeo.ai (Bearer igeo_live_… + X-Workspace-Id)
 ```
 
 All data endpoints require:
 - **Authentication**: `Authorization: Bearer <Descope JWT>` header
 - **Tenant selection**: `X-Alora-Tenant-Id: <tenant-uuid>` header
 
-The API verifies JWT, checks user membership for the requested tenant, then returns tenant-scoped data.
+The API verifies JWT, checks user membership, then proxies live iGEO reads for that tenant’s `source_account_id`.
 
 Endpoints:
 
 - `GET /api/snapshots/health` — no auth required
 - `GET /api/snapshots/accounts` — list accessible tenants
-- `GET /api/snapshots/tenant` — tenant metadata (requires auth + tenant header)
-- `GET /api/snapshots/snapshots?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&screens=a,b` — snapshots (requires auth + tenant header)
-- `GET /api/snapshots/geo/*` — GEO endpoints (requires auth + tenant header)
-
-Date ranges are capped at **90 days**.
+- `GET /api/snapshots/tenant` — tenant metadata + last scan day
+- `GET /api/snapshots/geo/*` — GEO screens (dashboard, mentions, sentiment, prompts, competitors, responses)
+- `GET /api/snapshots/traffic` — AI traffic dashboard
+- `GET /api/snapshots/crawlers` — Cloudflare crawler analytics
 
 ### Account Switching
 
@@ -111,13 +124,14 @@ Admins see all enabled tenants; non-admins see only their explicit memberships.
 ```bash
 cd functions/snapshots-api
 npm install --omit=dev
-zip -r snapshots-api.zip index.mjs db.mjs package.json node_modules
+zip -r snapshots-api.zip index.mjs db.mjs geo.mjs igeoClient.mjs mcpClient.mjs auth.mjs accounts.mjs package.json node_modules
 ```
 
 Create a Lambda (Node.js 20.x), upload the zip, set handler `index.handler`, and env:
 
 - `DATABASE_URL`
-- `WHITELABEL_TENANT_ID`
+- `IGEO_API_BASE=https://api.igeo.ai`
+- `IGEO_API_KEY` (or store per-tenant keys)
 - optional `ALLOWED_ORIGIN`
 
 Create a **Function URL** (Auth type: NONE).
@@ -137,10 +151,9 @@ Paste [`amplify-redirects.json`](amplify-redirects.json), replacing `YOUR_LAMBDA
 | `npm run dev` | Vite + local `/api/snapshots` middleware |
 | `npm run build` | Typecheck + production bundle |
 | `npm run lint` | oxlint |
-| `npm test` | Vitest unit tests for snapshot helpers |
+| `npm test` | Vitest unit tests |
 
 ## Data model
 
-- `whitelabel_tenants` — tenant registry (`enabled` must be true)
-- `whitelabel_export_runs` — per-day export status
-- `whitelabel_screen_snapshots` — `(tenant_id, day, screen)` → `payload` JSONB + `error` + `pulled_at`
+- `whitelabel_tenants` — tenant registry (`source_account_id` = iGEO workspace, optional `igeo_mcp_api_key`)
+- `wl_users` / `wl_user_tenants` — Descope users and memberships

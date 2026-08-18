@@ -6,9 +6,11 @@ import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
 import { AiCrawlersScreenSkeleton } from '../components/ScreenSkeletons'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
-import { useSnapshots } from '../context/SnapshotContext'
+import { useAccountStore } from '../store/useAccountStore'
+import { getCrawlers } from '../api/traffic'
+import { queryKeys } from '../api/queryKeys'
+import { useApi } from '../hooks/useApi'
 import { buildAiCrawlersViewModel } from '../lib/snapshots/aiCrawlers'
-import { mergeAiCrawlers } from '../lib/snapshots/merge'
 
 function botName(row: Record<string, unknown>): string {
   for (const k of ['bot', 'botName', 'name', 'crawler', 'aiCrawler']) {
@@ -19,12 +21,19 @@ function botName(row: Record<string, unknown>): string {
 }
 
 export function AiCrawlersScreen() {
-  const { snapshots, loading } = useSnapshots()
+  const { selectedAccount } = useAccountStore()
   const { filters, setFilterMeta } = useAnalyticsFilters()
 
-  const snap = useMemo(() => mergeAiCrawlers(snapshots), [snapshots])
+  const { data: payload, loading, error, retry } = useApi(
+    queryKeys.crawlers(selectedAccount?.id, filters),
+    () => getCrawlers(filters),
+    { enabled: Boolean(selectedAccount) },
+  )
 
-  const payload = snap.payload
+  const viewModel = useMemo(() => {
+    if (!payload) return null
+    return buildAiCrawlersViewModel(payload, filters, filters.crawlers)
+  }, [payload, filters])
 
   useEffect(() => {
     const bots = (payload?.byBot ?? []).map(botName).filter((b) => b !== '—')
@@ -38,19 +47,14 @@ export function AiCrawlersScreen() {
     })
   }, [payload, setFilterMeta])
 
-  const viewModel = useMemo(() => {
-    if (!payload) return null
-    return buildAiCrawlersViewModel(payload, filters, filters.crawlers)
-  }, [payload, filters])
-
   if (loading && !payload) {
     return <AiCrawlersScreenSkeleton />
   }
-  if (snap.error) {
-    return <ErrorState message={snap.error} />
+  if (error) {
+    return <ErrorState message={error} onRetry={retry} />
   }
   if (!payload) {
-    return <EmptyState title="No AI crawlers snapshot" message="ai_crawlers payload was empty." />
+    return <EmptyState title="No AI crawlers data" message="No crawler analytics for the selected range." />
   }
 
   return (

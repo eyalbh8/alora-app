@@ -1,12 +1,13 @@
 /**
  * Read-only whitelabel snapshot API for AWS Amplify / Lambda Function URL.
  *
- * Browser → Amplify rewrite `/api/snapshots/*` → this function → Postgres
+ * Browser → Amplify rewrite `/api/snapshots/*` → this function → iGEO Public API
  * Requires Descope JWT auth; tenant selected via X-Alora-Tenant-Id header.
  */
-import { getPool, loadSnapshots, loadTenant, listAvailableDays, SCREEN_KEYS } from './db.mjs'
+import { getPool, loadSnapshots, loadTenant, SCREEN_KEYS } from './db.mjs'
 import {
   geoCompetitors,
+  geoCrawlers,
   geoDashboard,
   geoMentions,
   geoMeta,
@@ -15,9 +16,11 @@ import {
   geoResponseDetail,
   geoResponses,
   geoSentiment,
+  geoTenantScanDays,
+  geoTraffic,
 } from './geo.mjs'
 import { verifyToken, upsertUser, canAccessTenant } from './auth.mjs'
-import { listAccessibleTenants } from './accounts.mjs'
+import { connectFirstAccount, listAccessibleTenants } from './accounts.mjs'
 
 function corsHeaders(requestHeaders = {}) {
   const allowed = process.env.ALLOWED_ORIGIN || '*'
@@ -25,7 +28,7 @@ function corsHeaders(requestHeaders = {}) {
   const allowOrigin = allowed === '*' ? origin || '*' : allowed
   return {
     'Access-Control-Allow-Origin': allowOrigin,
-    'Access-Control-Allow-Methods': 'GET,OPTIONS',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     'Access-Control-Allow-Headers':
       requestHeaders['access-control-request-headers'] || 'Content-Type, Authorization, X-Alora-Tenant-Id',
     'Access-Control-Max-Age': '86400',
@@ -64,6 +67,15 @@ function queryParams(event) {
   return {}
 }
 
+function parseJsonBody(event) {
+  if (!event.body) return {}
+  const raw = event.isBase64Encoded
+    ? Buffer.from(event.body, 'base64').toString('utf8')
+    : event.body
+  if (typeof raw !== 'string' || !raw.trim()) return {}
+  return JSON.parse(raw)
+}
+
 export const handler = async (event) => {
   const requestHeaders = event.headers || {}
   const method = event.requestContext?.http?.method || event.httpMethod || 'GET'
@@ -71,7 +83,7 @@ export const handler = async (event) => {
   if (method === 'OPTIONS') {
     return { statusCode: 204, headers: corsHeaders(requestHeaders), body: '' }
   }
-  if (method !== 'GET') {
+  if (method !== 'GET' && method !== 'POST') {
     return json(405, { error: 'Method not allowed' }, requestHeaders)
   }
 
@@ -96,10 +108,20 @@ export const handler = async (event) => {
     // Upsert user record
     const user = await upsertUser(db, authUser)
 
-    // /accounts endpoint: list accessible tenants
-    if (path === '/accounts') {
+    if (path === '/accounts' && method === 'GET') {
       const accounts = await listAccessibleTenants(db, user.id, user.isAdmin)
       return json(200, { accounts }, requestHeaders)
+    }
+
+    if (path === '/accounts' && method === 'POST') {
+      const body = parseJsonBody(event)
+      const connectionUrl = typeof body.connectionUrl === 'string' ? body.connectionUrl : ''
+      const account = await connectFirstAccount(db, user, connectionUrl)
+      return json(201, { account }, requestHeaders)
+    }
+
+    if (method !== 'GET') {
+      return json(405, { error: 'Method not allowed' }, requestHeaders)
     }
 
     // All data routes require X-Alora-Tenant-Id header
@@ -118,7 +140,12 @@ export const handler = async (event) => {
       const tenant = await loadTenant(db, tenantId)
       if (!tenant) return json(404, { error: 'Configured tenant was not found' }, requestHeaders)
       if (!tenant.enabled) return json(403, { error: 'Configured tenant is disabled' }, requestHeaders)
-      const availableDays = await listAvailableDays(db, tenantId)
+      let availableDays = []
+      try {
+        availableDays = await geoTenantScanDays(db, tenantId)
+      } catch (err) {
+        if (err?.statusCode !== 400) throw err
+      }
       return json(
         200,
         {
@@ -134,7 +161,15 @@ export const handler = async (event) => {
       )
     }
 
-    // GEO aggregation endpoints computed from the relational mirror tables.
+    if (path === '/traffic') {
+      return json(200, await geoTraffic(db, tenantId, q), requestHeaders)
+    }
+
+    if (path === '/crawlers') {
+      return json(200, await geoCrawlers(db, tenantId, q), requestHeaders)
+    }
+
+    // GEO aggregation endpoints proxied to the live iGEO Public API.
     if (path.startsWith('/geo/')) {
       const providerPromptsMatch = path.match(/^\/geo\/provider-mentions\/([^/]+)\/prompts$/)
       const responseDetailMatch = path.match(/^\/geo\/responses\/([^/]+)$/)

@@ -9,10 +9,8 @@ import type {
 } from './types'
 
 /**
- * Client for the /geo/* aggregation endpoints. These are computed server-side
- * from the relational mirror tables (wl_results, wl_prompt_responses, ...)
- * with iGEO-identical filter semantics, so any date range / provider / topic /
- * tag combination returns the same numbers iGEO would show.
+ * Client for the /geo/* aggregation endpoints. The BFF proxies these to the
+ * live iGEO Public API and returns the same payload shapes the screens use.
  */
 
 export interface GeoMeta {
@@ -167,8 +165,22 @@ export function getGeoMeta(): Promise<GeoMeta> {
   return apiGet<GeoMeta>('/geo/meta')
 }
 
-export function getGeoDashboard(filters: GeoFilters): Promise<GeoDashboard> {
-  return apiGet<GeoDashboard>(`/geo/dashboard?${filtersToQuery(filters)}`)
+export async function getGeoDashboard(filters: GeoFilters): Promise<GeoDashboard> {
+  const query = filtersToQuery(filters)
+  console.info('[dashboard-ui] fetching /geo/dashboard', { filters, query })
+  const payload = await apiGet<GeoDashboard>(`/geo/dashboard?${query}`)
+  console.info('[dashboard-ui] /geo/dashboard response', {
+    keys: payload && typeof payload === 'object' ? Object.keys(payload) : [],
+    isLive: payload?.isLive,
+    promptsCount: payload?.data?.promptsCount,
+    mentions: payload?.data?.providerMentions?.map((m) => ({
+      provider: m.provider,
+      count: m.count,
+    })),
+    competitors: payload?.data?.competitorsPerformance?.length,
+    sources: payload?.data?.topSourceDomains?.length,
+  })
+  return payload
 }
 
 export function getGeoMentions(filters: GeoFilters): Promise<GeoMentions> {

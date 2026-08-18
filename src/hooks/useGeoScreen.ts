@@ -2,33 +2,29 @@ import { useEffect } from 'react'
 import type { GeoFilters } from '../api/types'
 import { useAnalyticsFilters, type FilterAvailability } from '../context/AnalyticsFiltersContext'
 import { useGeoMeta } from '../context/GeoMetaContext'
-import { useSnapshots } from '../context/SnapshotContext'
+import { useAccountStore } from '../store/useAccountStore'
 import { useApi, type ApiState } from './useApi'
 
 /**
- * Drives a GEO screen from a /geo/* aggregation endpoint when relational fact
- * data exists (geoMode), seeding the filter bar options from /geo/meta.
- * When geoMode is off the screen falls back to its snapshot-based rendering
- * and `data` stays null.
+ * Drives a GEO screen from a live /geo/* endpoint, seeding the filter bar
+ * options from /geo/meta.
  */
 export function useGeoScreenData<T>(
-  queryKey: (filters: GeoFilters) => readonly unknown[],
+  queryKey: (accountId: string | undefined, filters: GeoFilters) => readonly unknown[],
   fetcher: (filters: GeoFilters) => Promise<T>,
   availability?: Partial<FilterAvailability>,
 ): ApiState<T | null> & { geoMode: boolean; pending: boolean } {
+  const { selectedAccount } = useAccountStore()
   const { meta, geoMode, loading: geoMetaLoading } = useGeoMeta()
-  const { loading: snapshotsLoading } = useSnapshots()
   const { filters, setFilterMeta } = useAnalyticsFilters()
 
   const state = useApi<T | null>(
-    queryKey(filters),
+    queryKey(selectedAccount?.id, filters),
     () => fetcher(filters),
     { enabled: geoMode },
   )
 
-  const pending =
-    geoMetaLoading ||
-    (geoMode ? state.loading && state.data == null : snapshotsLoading)
+  const pending = geoMetaLoading || (state.loading && state.data == null)
 
   useEffect(() => {
     if (!geoMode || !meta) return

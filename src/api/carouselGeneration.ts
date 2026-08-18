@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getSessionToken } from '@descope/react-sdk'
 import { useAccountStore } from '../store/useAccountStore'
+import { queryKeys } from './queryKeys'
 
 // API base URL
 const API_BASE = '/api/carousel'
@@ -36,6 +37,7 @@ function getAuthHeaders(): HeadersInit {
 export interface McpConnectionStatus {
   connected: boolean
   keyPrefix: string | null
+  workspaceId: string | null
 }
 
 export interface InstagramCarouselFormat {
@@ -129,7 +131,19 @@ export function useSaveMcpConnection() {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(['carousel', 'mcp-connection', selectedAccountId], data)
-      void queryClient.invalidateQueries({ queryKey: ['carousel', 'posts'] })
+      void queryClient.invalidateQueries({ queryKey: ['carousel'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.accounts })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.tenant(selectedAccountId) })
+      void queryClient.invalidateQueries({ queryKey: ['geo'] })
+      void queryClient.invalidateQueries({ queryKey: ['traffic'] })
+      void queryClient.invalidateQueries({ queryKey: ['crawlers'] })
+      const current = useAccountStore.getState().selectedAccount
+      if (current && data.workspaceId) {
+        useAccountStore.getState().setSelectedAccount({
+          ...current,
+          sourceAccountId: data.workspaceId,
+        })
+      }
     },
   })
 }

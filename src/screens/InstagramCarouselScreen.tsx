@@ -8,15 +8,13 @@ import {
   useTodayInstagramPosts,
   useCarouselGeneration,
   useCarouselGenerations,
-  useMcpConnection,
-  useSaveMcpConnection,
   useBrandHub,
   useCreateFigmaJob,
   useFigmaJobStatus,
   type BrandHubData,
   type CarouselGenerationSummary,
 } from '../api/carouselGeneration'
-import { useAccountStore } from '../store/useAccountStore'
+import { IgeoConnectionPanel } from '../components/IgeoConnectionPanel'
 
 function isFigmaFileUrl(value: unknown): value is string {
   return (
@@ -126,7 +124,9 @@ export default function InstagramCarouselScreen() {
           </p>
         </div>
 
-        <McpConnectionStrip />
+        <div className="mb-8">
+          <IgeoConnectionPanel compact />
+        </div>
 
         {/* Phase Indicator */}
         <div className="mb-8">
@@ -296,78 +296,6 @@ export default function InstagramCarouselScreen() {
           )}
         </div>
       </div>
-    </div>
-  )
-}
-
-function McpConnectionStrip() {
-  const selectedAccount = useAccountStore((s) => s.selectedAccount)
-  const connection = useMcpConnection()
-  const saveMutation = useSaveMcpConnection()
-  const [connectionUrl, setConnectionUrl] = useState('')
-
-  const accountName = selectedAccount?.account?.title || selectedAccount?.name || 'this account'
-  const connected = connection.data?.connected === true
-
-  const handleSave = (event: React.FormEvent) => {
-    event.preventDefault()
-    const trimmed = connectionUrl.trim()
-    if (!trimmed) return
-    saveMutation.mutate(trimmed, {
-      onSuccess: () => setConnectionUrl(''),
-    })
-  }
-
-  return (
-    <div className="mb-8 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-sm font-semibold text-gray-900">iGEO MCP connection</h2>
-          <p className="mt-1 text-sm text-gray-600">
-            {connected
-              ? `${accountName} is connected (${connection.data?.keyPrefix}).`
-              : `Paste the iGEO MCP URL for ${accountName} (Account → MCP). It must include mcp_token and workspace_id.`}
-          </p>
-        </div>
-        {connected && (
-          <button
-            type="button"
-            onClick={() => saveMutation.mutate(null)}
-            disabled={saveMutation.isPending}
-            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-          >
-            {saveMutation.isPending ? 'Disconnecting…' : 'Disconnect'}
-          </button>
-        )}
-      </div>
-
-      {!connected && (
-        <form onSubmit={handleSave} className="mt-4 flex flex-col gap-3 sm:flex-row">
-          <input
-            type="url"
-            autoComplete="off"
-            spellCheck={false}
-            placeholder="https://api.igeo.ai/mcp?mcp_token=igeo_live_…&workspace_id=…"
-            value={connectionUrl}
-            onChange={(event) => setConnectionUrl(event.target.value)}
-            className="min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-          <button
-            type="submit"
-            disabled={saveMutation.isPending || !connectionUrl.trim()}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            {saveMutation.isPending ? 'Verifying…' : 'Connect'}
-          </button>
-        </form>
-      )}
-
-      {connection.isError && (
-        <p className="mt-3 text-sm text-red-600">{connection.error.message}</p>
-      )}
-      {saveMutation.isError && (
-        <p className="mt-3 text-sm text-red-600">{saveMutation.error.message}</p>
-      )}
     </div>
   )
 }

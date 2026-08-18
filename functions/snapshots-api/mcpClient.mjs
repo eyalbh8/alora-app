@@ -218,19 +218,18 @@ export async function fetchTodayPosts(accountId, apiKey, provider = 'INSTAGRAM')
 }
 
 /**
- * Fetch BrandHub data (Account brandbook) from iGEO MCP
- * Uses 'api_get' tool with path /accounts/{accountId}
+ * Fetch BrandHub data from the iGEO Public REST API.
+ * GET /accounts/{accountId} with Bearer + X-Workspace-Id (catalog first request).
  *
  * @param {string} accountId - iGEO Account UUID
- * @param {string} apiKey - Tenant MCP key
+ * @param {string} apiKey - Tenant MCP / Public API key
  * @returns {Promise<Object>} BrandHub object with Account fields
  */
 export async function fetchBrandHub(accountId, apiKey) {
   try {
-    const path = `/accounts/${accountId}`
-
-    console.log(`[MCP] Fetching BrandHub for account ${accountId}`)
-    const account = await callMcpTool(accountId, apiKey, 'api_get', { path })
+    const { igeoGet } = await import('./igeoClient.mjs')
+    console.log(`[iGEO] Fetching BrandHub for account ${accountId}`)
+    const account = await igeoGet(accountId, apiKey, `/accounts/${accountId}`)
 
     // Normalize typography from various possible fields
     const typography = account.typography || account.fonts || {}
@@ -267,7 +266,7 @@ export async function fetchBrandHub(accountId, apiKey) {
       generatePostsOnRecommendation: account.generatePostsOnRecommendation || false,
     }
   } catch (error) {
-    console.error('[MCP] Error fetching BrandHub:', error.message)
+    console.error('[iGEO] Error fetching BrandHub:', error.message)
     throw new Error(`Failed to fetch BrandHub data: ${error.message}`)
   }
 }

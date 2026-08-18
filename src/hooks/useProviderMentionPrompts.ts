@@ -2,14 +2,16 @@ import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
 import { useGeoMeta } from '../context/GeoMetaContext'
 import { getGeoProviderMentionPrompts } from '../api/geo'
 import { queryKeys } from '../api/queryKeys'
+import { useAccountStore } from '../store/useAccountStore'
 import { useApi } from './useApi'
 
 export function useProviderMentionPrompts(provider: string | null) {
   const { filters } = useAnalyticsFilters()
   const { geoMode } = useGeoMeta()
+  const { selectedAccount } = useAccountStore()
 
   return useApi(
-    provider ? queryKeys.geo.providerPrompts(provider, filters) : ['geo', 'providerPrompts', 'idle'],
+    provider ? queryKeys.geo.providerPrompts(selectedAccount?.id, provider, filters) : ['geo', 'providerPrompts', 'idle'],
     () =>
       provider
         ? getGeoProviderMentionPrompts(provider, filters)

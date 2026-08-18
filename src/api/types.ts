@@ -19,7 +19,7 @@ export interface TenantInfo {
   id: string
   name: string | null
   domain: string | null
-  sourceAccountId: string
+  sourceAccountId: string | null
 }
 
 export interface AvailableDay {

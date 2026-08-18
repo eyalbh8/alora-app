@@ -8,12 +8,14 @@ import { ErrorState } from '../components/ErrorState'
 import { AiTrafficScreenSkeleton } from '../components/ScreenSkeletons'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
 import { useScreenSubheader } from '../context/ScreenSubheaderContext'
-import { useSnapshots } from '../context/SnapshotContext'
+import { useAccountStore } from '../store/useAccountStore'
+import { getTraffic } from '../api/traffic'
+import { queryKeys } from '../api/queryKeys'
+import { useApi } from '../hooks/useApi'
 import { buildAiTrafficViewModel } from '../lib/snapshots/aiTraffic'
-import { mergeAiTraffic } from '../lib/snapshots/merge'
 
 export function AiTrafficScreen() {
-  const { snapshots, loading } = useSnapshots()
+  const { selectedAccount } = useAccountStore()
   const { filters } = useAnalyticsFilters()
   const [activeTab, setActiveTab] = useState<AiTrafficTab>('traffic')
 
@@ -23,9 +25,11 @@ export function AiTrafficScreen() {
   )
   useScreenSubheader(tabBar)
 
-  const snap = useMemo(() => mergeAiTraffic(snapshots), [snapshots])
-
-  const payload = snap.payload
+  const { data: payload, loading, error, retry } = useApi(
+    queryKeys.traffic(selectedAccount?.id, filters),
+    () => getTraffic(filters),
+    { enabled: Boolean(selectedAccount) },
+  )
 
   const viewModel = useMemo(() => {
     if (!payload) return null
@@ -35,11 +39,11 @@ export function AiTrafficScreen() {
   if (loading && !payload) {
     return <AiTrafficScreenSkeleton />
   }
-  if (snap.error) {
-    return <ErrorState message={snap.error} />
+  if (error) {
+    return <ErrorState message={error} onRetry={retry} />
   }
   if (!payload) {
-    return <EmptyState title="No AI traffic snapshot" message="ai_traffic payload was empty." />
+    return <EmptyState title="No AI traffic data" message="No traffic events for the selected range." />
   }
 
   if (activeTab === 'settings') {

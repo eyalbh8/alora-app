@@ -90,6 +90,24 @@ export async function setTenantMcpKey(db, tenantId, key) {
   )
 }
 
+/**
+ * Persist the per-account iGEO connection: API key plus workspace id.
+ * workspaceId is written only when the tenant does not already have one.
+ * @param {import('pg').Pool | import('pg').Client} db
+ * @param {string} tenantId
+ * @param {string | null} key
+ * @param {string | null} [workspaceId]
+ */
+export async function setTenantIgeoConnection(db, tenantId, key, workspaceId = null) {
+  await db.query(
+    `UPDATE whitelabel_tenants
+     SET igeo_mcp_api_key = $2,
+         source_account_id = COALESCE(source_account_id, $3)
+     WHERE id = $1`,
+    [tenantId, key, workspaceId],
+  )
+}
+
 export async function listAvailableDays(db, tenantId) {
   const { rows } = await db.query(
     `SELECT er.day::text AS day,

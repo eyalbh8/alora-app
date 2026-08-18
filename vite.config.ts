@@ -30,6 +30,7 @@ async function handleCarouselRoutes(
   if (env.IGEO_MCP_URL) process.env.IGEO_MCP_URL = env.IGEO_MCP_URL
   if (env.IGEO_MCP_API_KEY) process.env.IGEO_MCP_API_KEY = env.IGEO_MCP_API_KEY
   if (env.IGEO_API_KEY) process.env.IGEO_API_KEY = env.IGEO_API_KEY
+  if (env.IGEO_API_BASE) process.env.IGEO_API_BASE = env.IGEO_API_BASE
 
   const carouselModulePath = pathToFileURL(
     path.join(__dirname, 'functions/snapshots-api/carouselGeneration.mjs'),
@@ -210,23 +211,19 @@ async function handleCarouselRoutes(
     return
   }
 
-  if (!sourceAccountId) {
-    send(400, { error: 'Tenant has no linked iGEO workspace (source_account_id)' })
-    return
-  }
-
   const notConnectedBody = {
     error: 'This account is not connected to iGEO MCP. Paste the full MCP URL to continue.',
     code: 'MCP_NOT_CONNECTED',
   }
 
-  // GET /carousel/mcp-connection — masked status only
+  // GET /carousel/mcp-connection — masked status only (allowed before workspace is linked)
   if (pathName === '/mcp-connection' && req.method === 'GET') {
     try {
       const tenantKey = await api.getTenantMcpKey(db, tenantId)
       send(200, {
-        connected: Boolean(tenantKey),
+        connected: Boolean(tenantKey && sourceAccountId),
         keyPrefix: mcpClient.maskMcpKey(tenantKey),
+        workspaceId: sourceAccountId,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
@@ -236,7 +233,7 @@ async function handleCarouselRoutes(
     return
   }
 
-  // PUT /carousel/mcp-connection — save or disconnect
+  // PUT /carousel/mcp-connection — save key + workspace_id on this Alora account
   if (pathName === '/mcp-connection' && req.method === 'PUT') {
     let body = ''
     req.on('data', (chunk) => {
@@ -254,8 +251,8 @@ async function handleCarouselRoutes(
           apiKeyField === ''
 
         if (disconnect) {
-          await api.setTenantMcpKey(db, tenantId, null)
-          send(200, { connected: false, keyPrefix: null })
+          await api.setTenantIgeoConnection(db, tenantId, null, null)
+          send(200, { connected: false, keyPrefix: null, workspaceId: sourceAccountId })
           return
         }
 
@@ -276,7 +273,7 @@ async function handleCarouselRoutes(
         }
 
         const { apiKey, workspaceId } = parsedConnection
-        if (sourceAccountId.toLowerCase() !== workspaceId) {
+        if (sourceAccountId && sourceAccountId.toLowerCase() !== workspaceId) {
           send(400, {
             error:
               'This MCP URL is for a different iGEO workspace than the selected Alora account.',
@@ -296,10 +293,11 @@ async function handleCarouselRoutes(
           return
         }
 
-        await api.setTenantMcpKey(db, tenantId, apiKey)
+        await api.setTenantIgeoConnection(db, tenantId, apiKey, workspaceId)
         send(200, {
           connected: true,
           keyPrefix: mcpClient.maskMcpKey(apiKey),
+          workspaceId,
         })
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
@@ -307,6 +305,11 @@ async function handleCarouselRoutes(
         send(500, { error: message })
       }
     })
+    return
+  }
+
+  if (!sourceAccountId) {
+    send(400, { error: 'Tenant has no linked iGEO workspace (source_account_id)' })
     return
   }
 
@@ -558,11 +561,17 @@ interface SnapshotDbModule {
     id: string
     name: string | null
     domain: string | null
-    source_account_id: string
+    source_account_id: string | null
     enabled: boolean
   } | null>
   getTenantMcpKey: (db: unknown, tenantId: string) => Promise<string | null>
   setTenantMcpKey: (db: unknown, tenantId: string, key: string | null) => Promise<void>
+  setTenantIgeoConnection: (
+    db: unknown,
+    tenantId: string,
+    key: string | null,
+    workspaceId?: string | null,
+  ) => Promise<void>
   listAvailableDays: (db: unknown, tenantId: string) => Promise<unknown>
   SCREEN_KEYS: string[]
 }
@@ -583,6 +592,11 @@ interface AuthModule {
 
 interface AccountsModule {
   listAccessibleTenants: (db: unknown, userId: string, isAdmin: boolean) => Promise<unknown>
+  connectFirstAccount: (
+    db: unknown,
+    user: { id: string; isAdmin: boolean },
+    connectionUrl: string,
+  ) => Promise<unknown>
 }
 
 interface GeoApiModule {
@@ -600,6 +614,9 @@ interface GeoApiModule {
     q: Record<string, string>,
     provider: string,
   ) => Promise<unknown>
+  geoTenantScanDays: (db: unknown, tenantId: string) => Promise<unknown>
+  geoTraffic: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
+  geoCrawlers: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
 }
 
 function snapshotsApiPlugin(env: Record<string, string>): Plugin {
@@ -641,16 +658,23 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
     const modPath = pathToFileURL(
       path.join(__dirname, 'functions/snapshots-api/accounts.mjs'),
     ).href
-    return import(modPath) as Promise<AccountsModule>
+    return import(`${modPath}?v=${Date.now()}`) as Promise<AccountsModule>
   }
 
   const loadGeo = () => {
     process.env.DATABASE_URL = env.DATABASE_URL || process.env.DATABASE_URL
-    const modPath = pathToFileURL(
-      path.join(__dirname, 'functions/snapshots-api/geo.mjs'),
+    if (env.IGEO_API_BASE) process.env.IGEO_API_BASE = env.IGEO_API_BASE
+    if (env.IGEO_API_KEY) process.env.IGEO_API_KEY = env.IGEO_API_KEY
+    if (env.IGEO_MCP_API_KEY) process.env.IGEO_MCP_API_KEY = env.IGEO_MCP_API_KEY
+    const bust = Date.now()
+    const geoPath = pathToFileURL(path.join(__dirname, 'functions/snapshots-api/geo.mjs')).href
+    const clientPath = pathToFileURL(
+      path.join(__dirname, 'functions/snapshots-api/igeoClient.mjs'),
     ).href
-    // Always reload in dev so geo.mjs edits and DB backfills are picked up immediately.
-    return import(`${modPath}?v=${Date.now()}`) as Promise<GeoApiModule>
+    // Bust both modules — Node caches igeoClient if only geo.mjs is re-imported.
+    return import(clientPath + `?v=${bust}`).then(
+      () => import(`${geoPath}?v=${bust}`) as Promise<GeoApiModule>,
+    )
   }
 
   const getHeader = (headers: Connect.IncomingMessage['headers'], name: string): string | undefined => {
@@ -788,16 +812,16 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
         return
       }
 
-      // Original snapshots routes - require GET
-      if (req.method !== 'GET') {
-        send(405, { error: 'Method not allowed' })
-        return
-      }
-
       const api = await loadApi()
       const db = api.getPool()
       const url = new URL(req.url, 'http://localhost')
       const pathName = url.pathname.replace(/^\/api\/snapshots/, '') || '/'
+      const isAccountsPost = req.method === 'POST' && pathName === '/accounts'
+
+      if (req.method !== 'GET' && !isAccountsPost) {
+        send(405, { error: 'Method not allowed' })
+        return
+      }
 
       if (pathName === '/' || pathName === '/health') {
         send(200, { ok: true, screens: api.SCREEN_KEYS })
@@ -820,11 +844,31 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
       // Upsert user record
       const user = await auth.upsertUser(db, authUser)
 
-      // /accounts endpoint: list accessible tenants
-      if (pathName === '/accounts') {
+      if (pathName === '/accounts' && req.method === 'GET') {
         const accountsModule = await loadAccounts()
         const accounts = await accountsModule.listAccessibleTenants(db, user.id, user.isAdmin)
         send(200, { accounts })
+        return
+      }
+
+      if (pathName === '/accounts' && req.method === 'POST') {
+        let body = ''
+        req.on('data', (chunk) => {
+          body += chunk.toString()
+        })
+        req.on('end', async () => {
+          try {
+            const parsed = body ? JSON.parse(body) : {}
+            const connectionUrl = typeof parsed.connectionUrl === 'string' ? parsed.connectionUrl : ''
+            const accountsModule = await loadAccounts()
+            const account = await accountsModule.connectFirstAccount(db, user, connectionUrl)
+            send(201, { account })
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            console.error('[snapshots-api] create account failed:', message)
+            send((error as { statusCode?: number })?.statusCode || 400, { error: message })
+          }
+        })
         return
       }
 
@@ -852,7 +896,13 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
           send(403, { error: 'Configured tenant is disabled' })
           return
         }
-        const availableDays = await api.listAvailableDays(db, tenantId)
+        const geo = await loadGeo()
+        let availableDays: unknown = []
+        try {
+          availableDays = await geo.geoTenantScanDays(db, tenantId)
+        } catch (err) {
+          if ((err as { statusCode?: number })?.statusCode !== 400) throw err
+        }
         send(200, {
           tenant: {
             id: tenant.id,
@@ -862,6 +912,17 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
           },
           availableDays,
         })
+        return
+      }
+
+      if (pathName === '/traffic' || pathName === '/crawlers') {
+        const geo = await loadGeo()
+        const q = Object.fromEntries(url.searchParams.entries())
+        const data =
+          pathName === '/traffic'
+            ? await geo.geoTraffic(db, tenantId, q)
+            : await geo.geoCrawlers(db, tenantId, q)
+        send(200, data)
         return
       }
 

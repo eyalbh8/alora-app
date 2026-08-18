@@ -1,7 +1,9 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { useMcpConnection } from '../api/carouselGeneration'
 import { useGeoMeta } from '../context/GeoMetaContext'
 import { useSnapshots } from '../context/SnapshotContext'
 import { AccountSwitcher } from './AccountSwitcher'
+import { IgeoConnectionPanel } from './IgeoConnectionPanel'
 
 const NAV = [
   {
@@ -43,6 +45,8 @@ export function Layout() {
   const { tenant } = useSnapshots()
   const { meta } = useGeoMeta()
   const { pathname } = useLocation()
+  const connection = useMcpConnection()
+  const igeoConnected = connection.data?.connected === true
   const accountName = meta?.account?.title || tenant.name || 'Account'
   const accountDomain = meta?.account?.domains[0] || tenant.domain
 
@@ -105,7 +109,11 @@ export function Layout() {
           </div>
         </header>
         <main className="w-full max-w-[1400px] flex-1 px-14 py-11">
-          <Outlet />
+          {connection.isLoading ? null : !igeoConnected && pathname !== '/carousel' ? (
+            <IgeoConnectionPanel />
+          ) : (
+            <Outlet />
+          )}
         </main>
       </div>
     </div>

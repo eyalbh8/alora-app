@@ -27,4 +27,8 @@ export const queryKeys = {
     providerPrompts: (accountId: string | undefined, provider: string, filters: GeoFilters) =>
       ['geo', 'providerPrompts', accountId, provider, filters] as const,
   },
+  traffic: (accountId: string | undefined, filters: GeoFilters) =>
+    ['traffic', accountId, filters] as const,
+  crawlers: (accountId: string | undefined, filters: GeoFilters) =>
+    ['crawlers', accountId, filters] as const,
 }

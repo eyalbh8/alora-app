@@ -1,5 +1,6 @@
 import { createContext, useContext, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useMcpConnection } from '../api/carouselGeneration'
 import { getGeoMeta, type GeoMeta } from '../api/geo'
 import { queryKeys } from '../api/queryKeys'
 import { useAccountStore } from '../store/useAccountStore'
@@ -9,7 +10,7 @@ interface GeoMetaContextValue {
   meta: GeoMeta | null
   loading: boolean
   error: string | null
-  /** true when relational fact data exists and /geo/* endpoints should drive the GEO screens */
+  /** true once live /geo/meta has loaded */
   geoMode: boolean
 }
 
@@ -22,13 +23,15 @@ const GeoMetaContext = createContext<GeoMetaContextValue>({
 
 export function GeoMetaProvider({ children }: { children: ReactNode }) {
   const { selectedAccount } = useAccountStore()
-  
+  const connection = useMcpConnection()
+  const igeoConnected = connection.data?.connected === true
+
   const { data, isLoading, error } = useQuery({
     queryKey: queryKeys.geo.meta(selectedAccount?.id),
     queryFn: getGeoMeta,
     staleTime: 30 * 60 * 1000,
     retry: false,
-    enabled: Boolean(selectedAccount),
+    enabled: Boolean(selectedAccount) && igeoConnected,
   })
 
   const errorMessage =
@@ -38,9 +41,9 @@ export function GeoMetaProvider({ children }: { children: ReactNode }) {
     <GeoMetaContext.Provider
       value={{
         meta: data ?? null,
-        loading: isLoading,
+        loading: connection.isLoading || isLoading,
         error: errorMessage,
-        geoMode: Boolean(data?.hasFacts),
+        geoMode: Boolean(data),
       }}
     >
       {children}

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Descope, useSession } from '@descope/react-sdk'
 
-const DESCOPE_FLOW_ID = import.meta.env.VITE_DESCOPE_FLOW_ID || 'sign-up-or-in'
+const DESCOPE_FLOW_ID = (import.meta.env.VITE_DESCOPE_FLOW_ID || 'sign-up-or-in').trim()
 
 export function LoginScreen() {
   const navigate = useNavigate()

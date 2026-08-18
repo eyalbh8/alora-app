@@ -9,15 +9,7 @@ import { IntentBadge } from '../components/prompts/IntentBadge'
 import { IntentDistribution } from '../components/prompts/IntentDistribution'
 import { TopicFilterCard } from '../components/prompts/TopicFilterCard'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
-import { useSnapshots } from '../context/SnapshotContext'
-import {
-  collectFilterOptions,
-  detectPromptFilterAvailability,
-  activePrompts,
-  filterPrompts,
-  filterResponses,
-} from '../lib/snapshots/filter'
-import { mergeMentions, mergePrompts } from '../lib/snapshots/merge'
+import { activePrompts } from '../lib/snapshots/filter'
 import { formatNumber, formatScore, providerLabel } from '../lib/format'
 import { regionFlag, regionShortLabel } from '../lib/regions'
 import { ProviderIcon } from '../components/ProviderIcon'
@@ -25,6 +17,7 @@ import { getGeoPrompts, getGeoResponses } from '../api/geo'
 import { queryKeys } from '../api/queryKeys'
 import { useApi } from '../hooks/useApi'
 import { useGeoScreenData } from '../hooks/useGeoScreen'
+import { useAccountStore } from '../store/useAccountStore'
 import type { PromptRow, ResponseRow, TopicRow } from '../api/types'
 import { sentimentOf } from '../lib/snapshots/normalize'
 
@@ -62,8 +55,8 @@ function sortRows(rows: PromptRow[], key: SortKey, dir: SortDir): PromptRow[] {
 }
 
 export function PromptsScreen() {
-  const { snapshots } = useSnapshots()
-  const { filters, setFilterMeta, topics: selectedTopics, setTopics } = useAnalyticsFilters()
+  const { selectedAccount } = useAccountStore()
+  const { filters, topics: selectedTopics, setTopics } = useAnalyticsFilters()
   const [searchParams, setSearchParams] = useSearchParams()
   const [drawerPrompt, setDrawerPrompt] = useState<PromptRow | null>(null)
   const [drawerResponse, setDrawerResponse] = useState<ResponseRow | null>(null)
@@ -72,30 +65,11 @@ export function PromptsScreen() {
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const geo = useGeoScreenData(queryKeys.geo.prompts, getGeoPrompts)
 
-  const { prompts, topics } = useMemo(() => mergePrompts(snapshots), [snapshots])
-  const mentions = useMemo(() => mergeMentions(snapshots), [snapshots])
-
   const promptRows: PromptRow[] = useMemo(() => {
-    const rows = geo.data
-      ? (geo.data.prompts as unknown as PromptRow[])
-      : prompts.payload?.prompts ?? []
-    return activePrompts(rows)
-  }, [geo.data, prompts.payload?.prompts])
+    return activePrompts((geo.data?.prompts ?? []) as unknown as PromptRow[])
+  }, [geo.data])
 
   const topicRows: TopicRow[] = useMemo(() => {
-    if (!geo.data) {
-      const all = topics.payload ?? []
-      const counts = new Map<string, number>()
-      for (const p of promptRows) {
-        const id = p.topicId ?? p.topic?.id
-        if (!id) continue
-        counts.set(id, (counts.get(id) ?? 0) + 1)
-      }
-      return all
-        .map((t) => ({ ...t, promptsCount: counts.get(t.id) ?? t.promptsCount ?? 0 }))
-        .filter((t) => (t.promptsCount ?? 0) > 0)
-        .sort((a, b) => a.name.localeCompare(b.name))
-    }
     const byId = new Map<string, TopicRow>()
     for (const p of promptRows) {
       if (!p.topic) continue
@@ -112,23 +86,9 @@ export function PromptsScreen() {
       }
     }
     return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name))
-  }, [geo.data, topics.payload, promptRows])
+  }, [promptRows])
 
-  useEffect(() => {
-    if (geo.geoMode) return
-    setFilterMeta({
-      options: collectFilterOptions({
-        topics: topicRows,
-        prompts: promptRows,
-        responses: mentions.responses.payload?.responses,
-      }),
-      availability: detectPromptFilterAvailability(promptRows),
-    })
-  }, [geo.geoMode, promptRows, topicRows, mentions, setFilterMeta])
-
-  const filtered = useMemo(() => {
-    return geo.data ? promptRows : filterPrompts(promptRows, filters)
-  }, [geo.data, promptRows, filters])
+  const filtered = promptRows
 
   const tableRows = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -139,6 +99,7 @@ export function PromptsScreen() {
 
   const geoDetail = useApi(
     queryKeys.geo.responses(
+      selectedAccount?.id,
       { ...filters, prompts: drawerPrompt ? [drawerPrompt.id] : [] },
       { take: 50 },
     ),
@@ -146,17 +107,13 @@ export function PromptsScreen() {
       drawerPrompt
         ? getGeoResponses({ ...filters, prompts: [drawerPrompt.id] }, { take: 50 })
         : Promise.resolve(null),
-    { enabled: geo.geoMode && Boolean(drawerPrompt) },
+    { enabled: Boolean(drawerPrompt) },
   )
 
   const detailResponses = useMemo(() => {
     if (!drawerPrompt) return [] as ResponseRow[]
-    if (geo.geoMode) {
-      return (geoDetail.data?.data.responses ?? []) as unknown as ResponseRow[]
-    }
-    const all = mentions.responses.payload?.responses ?? []
-    return filterResponses(all, { ...filters, prompts: [drawerPrompt.id] })
-  }, [drawerPrompt, geo.geoMode, geoDetail.data, mentions, filters])
+    return (geoDetail.data?.data.responses ?? []) as unknown as ResponseRow[]
+  }, [drawerPrompt, geoDetail.data])
 
   useEffect(() => {
     const promptId = searchParams.get('prompt')
@@ -207,15 +164,12 @@ export function PromptsScreen() {
   if (geo.pending) {
     return <PromptsScreenSkeleton />
   }
-  if (geo.geoMode && geo.error) {
+  if (geo.error) {
     return <ErrorState message={geo.error} onRetry={geo.retry} />
-  }
-  if (!geo.geoMode && prompts.error && !promptRows.length) {
-    return <ErrorState message={prompts.error} />
   }
 
   return (
-    <div className={`flex flex-col gap-8${geo.geoMode && geo.loading ? ' opacity-70' : ''}`}>
+    <div className={`flex flex-col gap-8${geo.loading ? ' opacity-70' : ''}`}>
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <TopicFilterCard
           topics={topicRows}
@@ -454,11 +408,11 @@ export function PromptsScreen() {
               <h3 className="mb-3 text-[10px] font-semibold tracking-[0.18em] text-[#8b857c] uppercase">
                 Related responses ({detailResponses.length})
               </h3>
-              {geo.geoMode && geoDetail.loading ? (
+              {geoDetail.loading ? (
                 <p className="border-y border-[#d8d3ca] py-8 text-center text-sm text-[#8b857c]">
                   Loading responses…
                 </p>
-              ) : geo.geoMode && geoDetail.error ? (
+              ) : geoDetail.error ? (
                 <ErrorState message={geoDetail.error} onRetry={geoDetail.retry} />
               ) : detailResponses.length === 0 ? (
                 <EmptyState

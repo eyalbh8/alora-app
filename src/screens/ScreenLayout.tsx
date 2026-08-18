@@ -7,9 +7,7 @@ import {
 } from '../context/AnalyticsFiltersContext'
 import { useGeoMeta } from '../context/GeoMetaContext'
 import { ScreenSubheaderProvider } from '../context/ScreenSubheaderContext'
-import { ErrorState } from '../components/ErrorState'
 import { Skeleton } from '../components/LoadingSpinner'
-import { useSnapshots } from '../context/SnapshotContext'
 
 function ScreenChrome({
   title,
@@ -18,15 +16,11 @@ function ScreenChrome({
   title: string
   variant: FilterBarVariant
 }) {
-  const { loading: snapshotsLoading, error, retry } = useSnapshots()
-  const { geoMode, loading: geoMetaLoading } = useGeoMeta()
+  const { loading: geoMetaLoading } = useGeoMeta()
   const [subheader, setSubheader] = useState<ReactNode>(null)
 
   const isGeoVariant = variant === 'geo'
-  const showLoadingChrome = isGeoVariant
-    ? geoMetaLoading || (!geoMode && snapshotsLoading)
-    : snapshotsLoading
-  const blockOnSnapshotError = !isGeoVariant && Boolean(error) && !snapshotsLoading
+  const showLoadingChrome = isGeoVariant && geoMetaLoading
   const isCrawlerVariant = variant === 'crawlers'
 
   return (
@@ -41,9 +35,7 @@ function ScreenChrome({
         </h1>
         {subheader}
         <FilterBar variant={variant} />
-        {blockOnSnapshotError ? (
-          <ErrorState message={error ?? 'Unable to load snapshots'} onRetry={retry} />
-        ) : showLoadingChrome ? (
+        {showLoadingChrome ? (
           <div className="flex flex-col gap-3">
             <Skeleton className="h-24 w-full" />
             <Skeleton className="h-64 w-full" />

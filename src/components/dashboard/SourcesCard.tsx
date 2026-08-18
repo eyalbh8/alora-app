@@ -6,8 +6,27 @@ interface SourcesCardProps {
   sources: TopSource[]
 }
 
-function faviconUrl(domain: string) {
-  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32`
+function hostLabel(domain: string) {
+  const raw = String(domain || '').trim()
+  try {
+    const url = raw.includes('://') ? new URL(raw) : new URL(`https://${raw}`)
+    return url.hostname.replace(/^www\./i, '')
+  } catch {
+    return raw.replace(/^https?:\/\//i, '').replace(/^www\./i, '').split('/')[0] || raw
+  }
+}
+
+function DomainGlyph({ domain }: { domain: string }) {
+  const host = hostLabel(domain)
+  const letter = (host[0] || '?').toUpperCase()
+  return (
+    <span
+      className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-[#efeae2] text-[10px] font-semibold text-[#6b655e]"
+      title={host}
+    >
+      {letter}
+    </span>
+  )
 }
 
 export function SourcesCard({ sources }: SourcesCardProps) {
@@ -38,15 +57,8 @@ export function SourcesCard({ sources }: SourcesCardProps) {
               <tr key={row.domain} className="border-b border-[#e4dfd6]">
                 <td className="py-3">
                   <div className="flex items-center gap-2">
-                    <img
-                      src={faviconUrl(row.domain)}
-                      alt=""
-                      className="h-5 w-5 rounded object-contain"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
-                    <span className="font-medium text-[#302d29]">{row.domain}</span>
+                    <DomainGlyph domain={row.domain} />
+                    <span className="font-medium text-[#302d29]">{hostLabel(row.domain)}</span>
                   </div>
                 </td>
                 <td className="py-3 text-right font-medium text-[#6b655e]">

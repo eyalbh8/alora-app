@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getAccounts } from '../api/accounts'
 import { useAccountStore } from '../store/useAccountStore'
 import { queryKeys } from '../api/queryKeys'
+import { FirstAccountSetup } from './FirstAccountSetup'
 
 function LoadingScreen() {
   return (
@@ -97,16 +98,7 @@ export function AuthGuard({ children }: PropsWithChildren) {
   }
 
   if (!accounts || accounts.length === 0) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#faf9f7]">
-        <div className="rounded-lg bg-white p-8 shadow-sm">
-          <h2 className="mb-2 text-lg font-semibold text-brand-900">No accounts available</h2>
-          <p className="text-sm text-brand-600">
-            You don't have access to any accounts yet. Please contact your administrator.
-          </p>
-        </div>
-      </div>
-    )
+    return <FirstAccountSetup />
   }
 
   if (!selectedAccount) {

@@ -3,6 +3,7 @@ import type { ResponseRow } from '../../api/types'
 import { getGeoResponseDetail, type GeoResponseDetail } from '../../api/geo'
 import { queryKeys } from '../../api/queryKeys'
 import { useGeoMeta } from '../../context/GeoMetaContext'
+import { useAccountStore } from '../../store/useAccountStore'
 import { useApi } from '../../hooks/useApi'
 import { formatNumber, providerLabel, regionLabel, truncateMiddle } from '../../lib/format'
 import { ProviderIcon } from '../ProviderIcon'
@@ -64,14 +65,12 @@ function BrandAvatar({ name, logo }: { name?: string | null; logo?: string | nul
 
 export function ResponseDrawer({ row, initialTab = 'response', onClose }: ResponseDrawerProps) {
   const { geoMode, meta } = useGeoMeta()
+  const { selectedAccount } = useAccountStore()
   const [tab, setTab] = useState<DrawerTab>(initialTab)
 
   const { data: detailPayload, loading } = useApi<GeoResponseDetail>(
-    queryKeys.geo.responseDetail(row.id),
-    () =>
-      geoMode
-        ? getGeoResponseDetail(row.id)
-        : Promise.resolve({ data: row as GeoResponseDetail['data'], computedAt: '' }),
+    queryKeys.geo.responseDetail(selectedAccount?.id, row.id),
+    () => getGeoResponseDetail(row.id),
     { enabled: geoMode },
   )
 

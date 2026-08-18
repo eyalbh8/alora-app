@@ -5,7 +5,7 @@ export interface Account {
   id: string
   name: string | null
   domain: string | null
-  sourceAccountId: string
+  sourceAccountId: string | null
   account: {
     id: string
     title: string
