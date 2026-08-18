@@ -1,9 +1,10 @@
-import { apiGet } from './client'
+import { apiGet, apiSend } from './client'
 import type {
   CompetitorPerformance,
   GeoFilters,
   ProviderMention,
   PromptTag,
+  PromptTagObject,
   ResponseSource,
   TopSource,
   TrackedRecommendation,
@@ -11,7 +12,7 @@ import type {
 
 /**
  * Client for the /geo/* aggregation endpoints. The BFF proxies these to the
- * live iGEO Public API and returns the same payload shapes the screens use.
+ * live upstream Public API and returns the same payload shapes the screens use.
  */
 
 export interface GeoMeta {
@@ -30,6 +31,7 @@ export interface GeoMeta {
     prompts: Array<{ id: string; text: string }>
     regions: string[]
     tags: string[]
+    tagCatalog?: PromptTagObject[]
     promptTypes: string[]
   }
   competitors: Array<{
@@ -46,6 +48,8 @@ export interface GeoDashboard {
   data: {
     hasPages: boolean
     promptsCount: number
+    overallScore: number | null
+    previousOverallScore: number | null
     providerMentions: ProviderMention[]
     competitorsPerformance: CompetitorPerformance[]
     topSourceDomains: TopSource[]
@@ -179,6 +183,7 @@ export async function getGeoDashboard(filters: GeoFilters): Promise<GeoDashboard
     keys: payload && typeof payload === 'object' ? Object.keys(payload) : [],
     isLive: payload?.isLive,
     promptsCount: payload?.data?.promptsCount,
+    overallScore: payload?.data?.overallScore,
     mentions: payload?.data?.providerMentions?.map((m) => ({
       provider: m.provider,
       count: m.count,
@@ -199,6 +204,29 @@ export function getGeoSentiment(filters: GeoFilters): Promise<GeoSentiment> {
 
 export function getGeoPrompts(filters: GeoFilters): Promise<GeoPrompts> {
   return apiGet<GeoPrompts>(`/geo/prompts?${filtersToQuery(filters)}`)
+}
+
+export function getGeoTags(): Promise<{ tags: PromptTagObject[] }> {
+  return apiGet<{ tags: PromptTagObject[] }>('/geo/tags')
+}
+
+export function createGeoTag(input: { name: string; colorRow?: string }): Promise<{ tag: PromptTagObject }> {
+  return apiSend<{ tag: PromptTagObject }>('/geo/tags', 'POST', input)
+}
+
+export function setGeoPromptTags(
+  promptId: string,
+  tags: PromptTag[],
+): Promise<{ prompt: { id: string; tags: PromptTagObject[] } }> {
+  return apiSend<{ prompt: { id: string; tags: PromptTagObject[] } }>(
+    `/geo/prompts/${encodeURIComponent(promptId)}/tags`,
+    'PATCH',
+    { tags },
+  )
+}
+
+export function deleteGeoTag(tagId: string): Promise<{ ok: boolean }> {
+  return apiSend<{ ok: boolean }>(`/geo/tags/${encodeURIComponent(tagId)}`, 'DELETE')
 }
 
 export function getGeoCompetitors(filters: GeoFilters): Promise<GeoCompetitors> {

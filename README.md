@@ -1,12 +1,12 @@
 # Alora (white-label analytics)
 
-React + Vite + TypeScript app that renders **Alora analytics screens from the live iGEO Public API** (`https://api.igeo.ai`) with **Descope authentication** and **multi-tenant account switching**.
+React + Vite + TypeScript app that renders **Alora analytics screens from the live upstream analytics API** with **Descope authentication** and **multi-tenant account switching**.
 
-The browser never calls iGEO directly. Descope JWT + `X-Alora-Tenant-Id` go to Alora’s BFF, which injects the workspace API key.
+The browser never calls upstream directly. Descope JWT + `X-Alora-Tenant-Id` go to Alora’s BFF, which injects the workspace API key.
 
 ## Screens
 
-| Route | Live iGEO sources |
+| Route | Live upstream sources |
 | --- | --- |
 | `/` Dashboard | `/ui-pages/dashboard`, `/ui-pages/dashboard/top-source-domains` |
 | `/prompts` | `/prompts`, `/prompts/responses` |
@@ -16,19 +16,19 @@ The browser never calls iGEO directly. Descope JWT + `X-Alora-Tenant-Id` go to A
 | `/ai-traffic` | `/traffic/{id}/ai-dashboard-data` |
 | `/ai-crawlers` | `/traffic/{id}/cloudflare/crawler-analytics` |
 
-Filters are applied **server-side** on iGEO (date range, providers, topics, prompts, regions, tags, branded, prompt types).
+Filters are applied **server-side** on upstream (date range, providers, topics, prompts, regions, tags, branded, prompt types).
 
 ## Setup
 
 ```bash
 npm install
-cp .env.example .env   # fill DATABASE_URL, DESCOPE_*, and an iGEO API key
+cp .env.example .env   # fill DATABASE_URL, DESCOPE_*, and an upstream API key
 npm run dev
 ```
 
 Open http://localhost:5173. You'll be redirected to the Descope login flow.
 
-Each tenant needs an iGEO key (`igeo_live_…`) bound to `whitelabel_tenants.source_account_id`. Paste the MCP URL in **Carousel → Connect**, or set `IGEO_API_KEY` as a single-workspace fallback.
+Each tenant needs an upstream key (`live_…`) bound to `whitelabel_tenants.source_account_id`. Paste the MCP URL in **Carousel → Connect**, or set `SOURCE_API_KEY` as a single-workspace fallback.
 
 ### Environment Variables
 
@@ -38,13 +38,13 @@ Each tenant needs an iGEO key (`igeo_live_…`) bound to `whitelabel_tenants.sou
 | `DESCOPE_PROJECT_ID` | **Server-only.** Your Descope project ID for JWT verification. |
 | `VITE_DESCOPE_PROJECT_ID` | **Client.** Same Descope project ID, exposed to the browser for auth. |
 | `VITE_DESCOPE_FLOW_ID` | **Client.** Optional Descope flow ID (defaults to `sign-up-or-in`). |
-| `IGEO_API_BASE` | **Server-only.** Public API origin (default `https://api.igeo.ai`). |
-| `IGEO_API_KEY` / `IGEO_MCP_API_KEY` | **Server-only.** Fallback `igeo_live_` key when a tenant has no stored key. |
-| `IGEO_MCP_URL` | **Server-only.** MCP endpoint for carousel (default `https://api.igeo.ai/mcp`). |
+| `SOURCE_API_BASE` | **Server-only.** Upstream analytics API origin. |
+| `SOURCE_API_KEY` / `MCP_API_KEY` | **Server-only.** Fallback `live_` key when a tenant has no stored key. |
+| `MCP_URL` | **Server-only.** MCP endpoint for carousel (default `${SOURCE_API_BASE}/mcp`). |
 | `WHITELABEL_TENANT_ID` | **Server-only.** Used by sync/backfill scripts only (not browser requests). |
 | `ALLOWED_ORIGIN` | Lambda only — CORS allowlist (optional). |
 
-Never prefix `DATABASE_URL`, `DESCOPE_PROJECT_ID`, or iGEO keys with `VITE_`.
+Never prefix `DATABASE_URL`, `DESCOPE_PROJECT_ID`, or upstream keys with `VITE_`.
 
 ### Database Schema
 
@@ -90,14 +90,14 @@ SELECT id, email, name, is_admin FROM wl_users WHERE email = 'user@example.com';
 ```
 Browser → Descope JWT + X-Alora-Tenant-Id → [Vite middleware (dev) | Lambda (prod)]
         → Postgres (membership + tenant key)
-        → https://api.igeo.ai (Bearer igeo_live_… + X-Workspace-Id)
+        → SOURCE_API_BASE (Bearer live_… + X-Workspace-Id)
 ```
 
 All data endpoints require:
 - **Authentication**: `Authorization: Bearer <Descope JWT>` header
 - **Tenant selection**: `X-Alora-Tenant-Id: <tenant-uuid>` header
 
-The API verifies JWT, checks user membership, then proxies live iGEO reads for that tenant’s `source_account_id`.
+The API verifies JWT, checks user membership, then proxies live upstream reads for that tenant’s `source_account_id`.
 
 Endpoints:
 
@@ -124,14 +124,14 @@ Admins see all enabled tenants; non-admins see only their explicit memberships.
 ```bash
 cd functions/snapshots-api
 npm install --omit=dev
-zip -r snapshots-api.zip index.mjs db.mjs geo.mjs igeoClient.mjs mcpClient.mjs auth.mjs accounts.mjs package.json node_modules
+zip -r snapshots-api.zip index.mjs db.mjs geo.mjs sourceClient.mjs mcpClient.mjs auth.mjs accounts.mjs package.json node_modules
 ```
 
 Create a Lambda (Node.js 20.x), upload the zip, set handler `index.handler`, and env:
 
 - `DATABASE_URL`
-- `IGEO_API_BASE=https://api.igeo.ai`
-- `IGEO_API_KEY` (or store per-tenant keys)
+- `SOURCE_API_BASE`
+- `SOURCE_API_KEY` (or store per-tenant keys)
 - optional `ALLOWED_ORIGIN`
 
 Create a **Function URL** (Auth type: NONE).
@@ -155,5 +155,5 @@ Paste [`amplify-redirects.json`](amplify-redirects.json), replacing `YOUR_LAMBDA
 
 ## Data model
 
-- `whitelabel_tenants` — tenant registry (`source_account_id` = iGEO workspace, optional `igeo_mcp_api_key`)
+- `whitelabel_tenants` — tenant registry (`source_account_id` = upstream workspace, optional `mcp_api_key`)
 - `wl_users` / `wl_user_tenants` — Descope users and memberships

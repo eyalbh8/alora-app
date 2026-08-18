@@ -1,7 +1,7 @@
 # Instagram Carousel Generation - Implementation Complete ✓
 
 ## Overview
-Successfully implemented a full-stack Instagram carousel generation system integrating iGEO MCP, Claude API, OpenAI gpt-image-2, and Figma MCP. The system orchestrates a 6-step automation process from post selection through final Figma assembly.
+Successfully implemented a full-stack Instagram carousel generation system integrating upstream MCP, Claude API, OpenAI gpt-image-2, and Figma MCP. The system orchestrates a 6-step automation process from post selection through final Figma assembly.
 
 ## Components Implemented
 
@@ -9,7 +9,7 @@ Successfully implemented a full-stack Instagram carousel generation system integ
 
 #### 1. Dependencies & Configuration ✓
 - ✅ Installed `@anthropic-ai/sdk` and `openai` packages
-- ✅ Added API keys to `.env` (ANTHROPIC_API_KEY, OPENAI_API_KEY, FIGMA_ACCESS_TOKEN, IGEO_ACCOUNT_ID)
+- ✅ Added API keys to `.env` (ANTHROPIC_API_KEY, OPENAI_API_KEY, FIGMA_ACCESS_TOKEN, SOURCE_ACCOUNT_ID)
 
 #### 2. Database Schema ✓
 - ✅ Created `carousel_generation_schema.sql` with 4 tables:
@@ -19,8 +19,8 @@ Successfully implemented a full-stack Instagram carousel generation system integ
   - `carousel_content_options`: Narrative structure options
 
 #### 3. MCP Integration ✓
-- ✅ `mcpClient.mjs`: iGEO MCP client wrapper
-  - `fetchTodayPosts()`: Fetches Instagram posts from iGEO
+- ✅ `mcpClient.mjs`: upstream MCP client wrapper
+  - `fetchTodayPosts()`: Fetches Instagram posts from upstream
   - `fetchBrandHub()`: Fetches Account brandbook data
   - `fetchBrandHubFromPostgres()`: Postgres fallback for BrandHub
 
@@ -166,11 +166,11 @@ Update `.env` with actual API keys:
 - `ANTHROPIC_API_KEY`: Get from https://console.anthropic.com/
 - `OPENAI_API_KEY`: Get from https://platform.openai.com/
 - `FIGMA_ACCESS_TOKEN`: Get from Figma settings
-- `IGEO_ACCOUNT_ID`: Your iGEO account UUID
+- `SOURCE_ACCOUNT_ID`: Your upstream account UUID
 
 ### 3. MCP Integration
 The current implementation has placeholder MCP calls. To fully integrate:
-- Connect to actual iGEO MCP server in Cursor
+- Connect to actual upstream MCP server in Cursor
 - Update `mcpClient.mjs` to use real MCP tool calls
 - Connect to Figma MCP server for `use_figma` calls
 
@@ -210,7 +210,7 @@ Add the InstagramCarouselScreen to your app router:
 ### Current Limitations
 1. MCP integration is stubbed (placeholders in place)
 2. Figma template fetching needs actual file keys
-3. BrandHub data query needs iGEO account access
+3. BrandHub data query needs upstream account access
 4. No authentication/authorization yet
 
 ### Recommended Enhancements

@@ -1,5 +1,5 @@
 /**
- * Account listing and first-account iGEO connect for authenticated users.
+ * Account listing and first-account upstream connect for authenticated users.
  */
 import { fetchBrandHub, parseMcpConnectionInput } from './mcpClient.mjs'
 
@@ -89,7 +89,7 @@ function mapTenantRow(row) {
 }
 
 /**
- * Create or attach an Alora tenant from a pasted iGEO MCP URL.
+ * Create or attach an Alora tenant from a pasted upstream MCP URL.
  * Used on first login when the user has no account yet.
  *
  * @param {import('pg').Pool} db
@@ -99,7 +99,7 @@ function mapTenantRow(row) {
 export async function connectFirstAccount(db, user, connectionUrl) {
   const { apiKey, workspaceId } = parseMcpConnectionInput(connectionUrl)
   const brand = await fetchBrandHub(workspaceId, apiKey)
-  const title = brand?.title || 'iGEO account'
+  const title = brand?.title || 'Account'
   const domain = Array.isArray(brand?.domains) ? brand.domains[0] || null : null
 
   const existing = await db.query(
@@ -111,7 +111,7 @@ export async function connectFirstAccount(db, user, connectionUrl) {
   if (tenantId) {
     await db.query(
       `UPDATE whitelabel_tenants
-       SET igeo_mcp_api_key = $2,
+       SET mcp_api_key = $2,
            enabled = true,
            name = COALESCE(NULLIF(name, ''), $3),
            domain = COALESCE(NULLIF(domain, ''), $4)
@@ -120,7 +120,7 @@ export async function connectFirstAccount(db, user, connectionUrl) {
     )
   } else {
     const inserted = await db.query(
-      `INSERT INTO whitelabel_tenants (id, name, domain, source_account_id, enabled, igeo_mcp_api_key)
+      `INSERT INTO whitelabel_tenants (id, name, domain, source_account_id, enabled, mcp_api_key)
        VALUES (gen_random_uuid(), $1, $2, $3, true, $4)
        RETURNING id`,
       [title, domain, workspaceId, apiKey],

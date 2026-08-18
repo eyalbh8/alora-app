@@ -1,7 +1,7 @@
 /**
  * Read-only whitelabel snapshot API for AWS Amplify / Lambda Function URL.
  *
- * Browser → Amplify rewrite `/api/snapshots/*` → this function → iGEO Public API
+ * Browser → Amplify rewrite `/api/snapshots/*` → this function → upstream Public API
  * Requires Descope JWT auth; tenant selected via X-Alora-Tenant-Id header.
  */
 import { getPool, loadSnapshots, loadTenant, SCREEN_KEYS } from './db.mjs'
@@ -12,6 +12,10 @@ import {
   geoMentions,
   geoMeta,
   geoPrompts,
+  geoTags,
+  geoCreateTag,
+  geoSetPromptTags,
+  geoDeleteTag,
   geoProviderMentionPrompts,
   geoResponseDetail,
   geoResponses,
@@ -28,7 +32,7 @@ function corsHeaders(requestHeaders = {}) {
   const allowOrigin = allowed === '*' ? origin || '*' : allowed
   return {
     'Access-Control-Allow-Origin': allowOrigin,
-    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Access-Control-Allow-Methods': 'GET,POST,PATCH,DELETE,OPTIONS',
     'Access-Control-Allow-Headers':
       requestHeaders['access-control-request-headers'] || 'Content-Type, Authorization, X-Alora-Tenant-Id',
     'Access-Control-Max-Age': '86400',
@@ -83,7 +87,7 @@ export const handler = async (event) => {
   if (method === 'OPTIONS') {
     return { statusCode: 204, headers: corsHeaders(requestHeaders), body: '' }
   }
-  if (method !== 'GET' && method !== 'POST') {
+  if (!['GET', 'POST', 'PATCH', 'DELETE'].includes(method)) {
     return json(405, { error: 'Method not allowed' }, requestHeaders)
   }
 
@@ -120,7 +124,14 @@ export const handler = async (event) => {
       return json(201, { account }, requestHeaders)
     }
 
-    if (method !== 'GET') {
+    const promptTagsMatch = path.match(/^\/geo\/prompts\/([^/]+)\/tags$/)
+    const deleteTagMatch = path.match(/^\/geo\/tags\/([^/]+)$/)
+    const isTagWrite =
+      (method === 'POST' && path === '/geo/tags') ||
+      (method === 'PATCH' && Boolean(promptTagsMatch)) ||
+      (method === 'DELETE' && Boolean(deleteTagMatch))
+
+    if (method !== 'GET' && !isTagWrite) {
       return json(405, { error: 'Method not allowed' }, requestHeaders)
     }
 
@@ -169,16 +180,33 @@ export const handler = async (event) => {
       return json(200, await geoCrawlers(db, tenantId, q), requestHeaders)
     }
 
-    // GEO aggregation endpoints proxied to the live iGEO Public API.
+    // GEO aggregation endpoints proxied to the live upstream Public API.
     if (path.startsWith('/geo/')) {
       const providerPromptsMatch = path.match(/^\/geo\/provider-mentions\/([^/]+)\/prompts$/)
       const responseDetailMatch = path.match(/^\/geo\/responses\/([^/]+)$/)
+      if (method === 'GET' && path === '/geo/tags') {
+        return json(200, await geoTags(db, tenantId), requestHeaders)
+      }
+      if (method === 'POST' && path === '/geo/tags') {
+        return json(201, await geoCreateTag(db, tenantId, parseJsonBody(event)), requestHeaders)
+      }
+      if (method === 'PATCH' && promptTagsMatch) {
+        return json(
+          200,
+          await geoSetPromptTags(db, tenantId, decodeURIComponent(promptTagsMatch[1]), parseJsonBody(event)),
+          requestHeaders,
+        )
+      }
+      if (method === 'DELETE' && deleteTagMatch) {
+        return json(200, await geoDeleteTag(db, tenantId, decodeURIComponent(deleteTagMatch[1])), requestHeaders)
+      }
       const geoHandlers = {
         '/geo/meta': () => geoMeta(db, tenantId),
         '/geo/dashboard': () => geoDashboard(db, tenantId, q),
         '/geo/mentions': () => geoMentions(db, tenantId, q),
         '/geo/sentiment': () => geoSentiment(db, tenantId, q),
         '/geo/prompts': () => geoPrompts(db, tenantId, q),
+        '/geo/tags': () => geoTags(db, tenantId),
         '/geo/competitors': () => geoCompetitors(db, tenantId, q),
         '/geo/responses': () => geoResponses(db, tenantId, q),
       }

@@ -5,8 +5,7 @@ export function DashboardScreenSkeleton() {
     <div className="flex flex-col gap-14 pb-4">
       <div className="overflow-hidden border border-line border-t-2 border-t-ink bg-bg">
         <div className="px-5 py-5 sm:px-6">
-          <Skeleton className="h-3 w-24" />
-          <Skeleton className="mt-2 h-7 w-52" />
+          <Skeleton className="h-7 w-52" />
           <Skeleton className="mt-2 h-3 w-80 max-w-full" />
         </div>
         <div className="overflow-hidden border-t border-line">
@@ -42,7 +41,7 @@ export function DashboardScreenSkeleton() {
         </div>
       </div>
 
-      <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
+      <div className="grid items-stretch gap-10 lg:grid-cols-2">
         <div>
           <Skeleton className="h-5 w-32" />
           <Skeleton className="mt-1 h-3 w-48" />
@@ -61,8 +60,15 @@ export function DashboardScreenSkeleton() {
         <div>
           <Skeleton className="h-5 w-40" />
           <Skeleton className="mt-1 h-3 w-52" />
-          <div className="mt-5 h-[300px]">
-            <ChartSkeleton />
+          <div className="mt-5 border-t-2 border-ink">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex gap-6 border-b border-line py-3.5">
+                <Skeleton className="h-3 w-12" />
+                <Skeleton className="h-3 flex-1" />
+                <Skeleton className="h-3 w-14" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -133,10 +139,10 @@ export function MentionsScreenSkeleton() {
 export function SentimentScreenSkeleton() {
   return (
     <div className="flex flex-col gap-8 md:gap-10 lg:gap-14">
-      <div className="grid min-w-0 items-center gap-10 lg:grid-cols-[0.9fr_1.4fr]">
-        <div>
-          <Skeleton className="mb-5 h-5 w-48" />
-          <Skeleton className="mx-auto h-[170px] w-[170px] rounded-full lg:mx-0" />
+      <div className="grid min-w-0 items-center gap-10 lg:grid-cols-2">
+        <div className="flex flex-col items-center">
+          <Skeleton className="mb-6 h-5 w-48" />
+          <Skeleton className="h-[220px] w-[220px] rounded-full" />
         </div>
         <div>
           <Skeleton className="h-5 w-36" />

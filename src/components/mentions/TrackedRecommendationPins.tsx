@@ -9,8 +9,6 @@ import {
   recommendationUrl,
 } from '../../lib/trackedRecommendations'
 
-const PIN_PURPLE = '#7a5fb0'
-
 function formatCardDate(iso: string | undefined): string {
   if (!iso) return ''
   try {
@@ -95,23 +93,9 @@ function RecommendationCard({ rec }: { rec: TrackedRecommendation }) {
 
 function RecommendationPinIcon({ count }: { count: number }) {
   return (
-    <svg viewBox="0 0 24 28" className="h-6 w-5" aria-hidden>
-      <path
-        d="M12 0C5.5 0 0 5.3 0 11.8 0 20.2 12 28 12 28s12-7.8 12-16.2C24 5.3 18.5 0 12 0z"
-        fill={PIN_PURPLE}
-      />
-      <text
-        x="12"
-        y="14.5"
-        textAnchor="middle"
-        fill="#fff"
-        fontSize="10"
-        fontWeight="700"
-        fontFamily="ui-sans-serif, system-ui, sans-serif"
-      >
-        {count > 9 ? '9+' : count}
-      </text>
-    </svg>
+    <span className="flex h-8 min-w-8 items-center justify-center bg-button px-1.5 font-mono text-xs font-semibold tabular-nums leading-none text-button-ink">
+      {count > 9 ? '9+' : count}
+    </span>
   )
 }
 
@@ -158,7 +142,7 @@ export function TrackedRecommendationPin({
     >
       <button
         type="button"
-        className="flex items-center justify-center rounded-sm outline-offset-2 focus-visible:outline-2 focus-visible:outline-[#7a5fb0]"
+        className="flex items-center justify-center outline-offset-2 transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-ink"
         aria-expanded={open}
         aria-label={`${items.length} tracked recommendation${items.length === 1 ? '' : 's'}`}
         onClick={() => setOpen((current) => !current)}
@@ -200,7 +184,7 @@ export function TrackedRecommendationAxis({
   if (dates.length === 0 || pinsByDay.size === 0) return null
 
   return (
-    <div className="pointer-events-none absolute bottom-0 left-0 right-2 h-8">
+    <div className="pointer-events-none absolute bottom-0 left-0 right-2 h-10">
       {dates.map((date, index) => {
         const items = pinsByDay.get(date)
         if (!items?.length) return null

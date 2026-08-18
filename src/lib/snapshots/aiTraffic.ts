@@ -222,7 +222,7 @@ function parseGlobalHistorical(
     const explicitProvider = pickString(row, ['provider', 'name', 'llm', 'engine'])
     const nested = row.historicalData
 
-    // iGEO shape: { provider, historicalData: [{ date, value }] }
+    // upstream shape: { provider, historicalData: [{ date, value }] }
     if (explicitProvider && Array.isArray(nested)) {
       const provider = normalizeTrafficProvider(explicitProvider)
       if (isAggregateProvider(explicitProvider, provider)) continue

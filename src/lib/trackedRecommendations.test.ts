@@ -7,7 +7,7 @@ import {
 } from './trackedRecommendations'
 
 describe('trackedRecommendations', () => {
-  it('normalizes alternate iGEO field names', () => {
+  it('normalizes alternate upstream field names', () => {
     const rec = normalizeTrackedRecommendation({
       id: 'r1',
       title: 'Myth Busted: Limassol Specs',

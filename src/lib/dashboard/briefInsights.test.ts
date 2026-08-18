@@ -23,11 +23,17 @@ describe('buildAccountBrief', () => {
       { id: 'rival', name: 'Rival', position: 2, occurrences: 20 },
     ]
 
-    const brief = buildAccountBrief({ promptsCount: 32 }, providers, competitors)
+    const brief = buildAccountBrief(
+      { promptsCount: 32, overallScore: 75, previousOverallScore: 74 },
+      providers,
+      competitors,
+    )
 
     expect(brief.snapshot.totalMentions).toBe(40)
     expect(brief.snapshot.shareOfVoice).toBeCloseTo(66.67, 1)
     expect(brief.snapshot.promptsCount).toBe(32)
+    expect(brief.snapshot.sentiment).toBe(75)
+    expect(brief.snapshot.sentimentDelta).toBe(1)
     expect(brief.wins.map((item) => item.title)).toContain('You lead the category')
     expect(brief.wins.map((item) => item.title)).toContain('ChatGPT is gaining')
   })

@@ -32,7 +32,7 @@ export function SentimentScreen() {
 
   return (
     <div className={`flex flex-col gap-8 md:gap-10 lg:gap-14${geo.loading ? ' opacity-70' : ''}`}>
-      <div className="grid min-w-0 items-center gap-10 lg:grid-cols-[0.9fr_1.4fr]">
+      <div className="grid min-w-0 items-center gap-10 lg:grid-cols-2">
         <CurrentSentimentScore score={overall} />
         <SentimentTrendChart
           historical={filteredHistorical}

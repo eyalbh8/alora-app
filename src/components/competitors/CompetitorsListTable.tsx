@@ -1,5 +1,8 @@
+import { useMemo } from 'react'
 import type { CompetitorPerformance } from '../../api/types'
-import { formatNumber, formatScore } from '../../lib/format'
+import { useGeoMeta } from '../../context/GeoMetaContext'
+import { isAccountCompetitor } from '../../lib/accountCompetitor'
+import { formatNumber } from '../../lib/format'
 import { DeltaBadge } from '../dashboard/DeltaBadge'
 import { useCompetitorHover } from '../../context/CompetitorHoverContext'
 import { BrandLogo } from './BrandLogo'
@@ -31,6 +34,8 @@ function sentimentStyle(score: number | null | undefined) {
 }
 
 function BrandCell({ row }: { row: CompetitorPerformance }) {
+  const { meta } = useGeoMeta()
+  const mine = isAccountCompetitor(row, meta?.account)
   return (
     <div className="flex min-w-0 items-center gap-2.5">
       <BrandLogo
@@ -41,13 +46,7 @@ function BrandCell({ row }: { row: CompetitorPerformance }) {
         site={row.site}
         size="md"
       />
-      <span
-        className={`min-w-0 truncate ${
-          row.isAccount || row.id === 'account'
-            ? 'font-semibold text-ink'
-            : 'font-medium text-ink'
-        }`}
-      >
+      <span className={`min-w-0 truncate ${mine ? 'font-semibold text-ink' : 'font-medium text-ink'}`}>
         {row.name}
       </span>
     </div>
@@ -67,6 +66,18 @@ interface CompetitorsListTableProps {
 export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
   const { hoveredCompetitor, setHoveredCompetitor } = useCompetitorHover()
 
+  const rankedRows = useMemo(
+    () =>
+      [...rows]
+        .sort((a, b) => {
+          const mentionDiff = (b.occurrences ?? 0) - (a.occurrences ?? 0)
+          if (mentionDiff !== 0) return mentionDiff
+          return a.name.localeCompare(b.name)
+        })
+        .map((row, index) => ({ row, rank: index + 1 })),
+    [rows],
+  )
+
   if (rows.length === 0) {
     return (
       <div className="border-y border-line px-6 py-12 text-center">
@@ -85,14 +96,14 @@ export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
         <table className="w-full min-w-0 border-collapse text-sm">
           <thead>
             <tr className="border-b-2 border-ink">
+              <th className="w-8 pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+                Rank
+              </th>
               <th className="min-w-0 pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
                 Brand
               </th>
               <th className="hidden px-3 pb-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted md:table-cell">
                 Shared Topics
-              </th>
-              <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
-                Rank
               </th>
               <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
                 Mentions
@@ -103,7 +114,7 @@ export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => {
+            {rankedRows.map(({ row, rank }) => {
               const sentiment = sentimentStyle(row.sentimentScore)
               const hovered = hoveredCompetitor === row.name
 
@@ -116,6 +127,9 @@ export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
                   onMouseEnter={() => setHoveredCompetitor(row.name)}
                   onMouseLeave={() => setHoveredCompetitor(null)}
                 >
+                  <td className="w-8 py-4 pr-3 text-[13px] tabular-nums text-muted">
+                    {rank}
+                  </td>
                   <td className="min-w-0 py-4 pr-3">
                     <BrandCell row={row} />
                     {row.topics?.length ? (
@@ -126,14 +140,6 @@ export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
                   </td>
                   <td className="hidden max-w-xs px-3 py-4 md:table-cell">
                     <TopicTags topics={row.topics} />
-                  </td>
-                  <td className="px-3 py-4">
-                    <div className="flex items-center justify-end gap-1.5">
-                      {row.avgRankDelta != null && (
-                        <DeltaBadge value={row.avgRankDelta} mode="absolute" invert />
-                      )}
-                      <span className="text-[13px] text-ink">{formatScore(row.avgRank)}</span>
-                    </div>
                   </td>
                   <td className="px-3 py-4">
                     <div className="flex items-center justify-end gap-1.5">

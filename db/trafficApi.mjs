@@ -1,5 +1,5 @@
 /**
- * iGEO traffic API helpers — per-day snapshot fetch paths.
+ * upstream traffic API helpers — per-day snapshot fetch paths.
  *
  * Daily sync stores one snapshot row per SYNC_DAY. Each call covers that day
  * only (previous calendar day is used for changePercent on ai-dashboard-data).

@@ -35,10 +35,10 @@ export function FirstAccountSetup() {
         </div>
         <p className="eyebrow">First-time setup</p>
         <h1 className="screen-title">
-          Connect your first <span className="screen-title__rest">iGEO account</span>
+          Connect your first <span className="screen-title__rest">account</span>
         </h1>
         <p className="mt-4 text-[15px] leading-[1.7] text-muted">
-          You&apos;re signed in. Paste the iGEO MCP URL for this workspace. We&apos;ll save the
+          You&apos;re signed in. Paste the workspace MCP URL. We&apos;ll save the
           API key and workspace id on your first Alora account.
         </p>
 
@@ -50,7 +50,7 @@ export function FirstAccountSetup() {
               type="url"
               autoComplete="off"
               spellCheck={false}
-              placeholder="https://api.igeo.ai/mcp?mcp_token=igeo_live_…&workspace_id=…"
+              placeholder="https://…/mcp?mcp_token=…&workspace_id=…"
               value={connectionUrl}
               onChange={(event) => setConnectionUrl(event.target.value)}
             />

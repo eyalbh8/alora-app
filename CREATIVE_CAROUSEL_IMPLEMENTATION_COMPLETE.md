@@ -340,7 +340,7 @@ All implementation is complete. The system is ready for testing. Follow the test
 
 The system is now ready for:
 1. **Testing** - Follow CREATIVE_CAROUSEL_TESTING_GUIDE.md
-2. **Integration** - Connect to live Instagram post data via iGEO MCP
+2. **Integration** - Connect to live Instagram post data via upstream MCP
 3. **Optimization** - Tune visual quality and performance based on test results
 4. **Deployment** - Deploy to production after validation
 

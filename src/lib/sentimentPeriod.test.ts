@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { averageScore, sentimentPctChange, sentimentPeriodScores } from './sentimentPeriod'
 
 describe('sentimentPeriodScores', () => {
-  it('matches iGEO: full-series current, first-half previous', () => {
+  it('matches upstream: full-series current, first-half previous', () => {
     const historical = [
       { sentimentScore: 73 },
       { sentimentScore: 75 },

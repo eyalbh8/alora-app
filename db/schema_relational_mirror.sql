@@ -1,10 +1,10 @@
 -- =============================================================================
--- Alora White-Label DB: relational mirror of iGEO core entities.
+-- Alora White-Label DB: relational mirror of upstream core entities.
 --
 -- Dimensions (wl_accounts, wl_account_preferences, wl_topics, wl_prompts,
 -- wl_competitors) are fully re-upserted on every daily sync.
 -- Facts (wl_results, wl_prompt_responses) are appended day by day, idempotent
--- upserts keyed by the iGEO UUID.
+-- upserts keyed by the upstream UUID.
 --
 -- whitelabel_tenants / whitelabel_export_runs / whitelabel_screen_snapshots
 -- are kept from the original design. Snapshots now only carry ai_traffic and
@@ -19,13 +19,13 @@
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS wl_accounts (
-  id          uuid PRIMARY KEY,               -- iGEO account id
+  id          uuid PRIMARY KEY,               -- upstream account id
   tenant_id   uuid NOT NULL REFERENCES whitelabel_tenants(id) ON DELETE CASCADE,
   title       text NOT NULL,
   names       text[] NOT NULL DEFAULT '{}',
   domains     text[] NOT NULL DEFAULT '{}',
   logo        text,
-  raw         jsonb,                          -- full account payload from iGEO
+  raw         jsonb,                          -- full account payload from upstream
   synced_at   timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS wl_accounts_tenant_idx ON wl_accounts (tenant_id);
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS wl_account_preferences (
 );
 
 CREATE TABLE IF NOT EXISTS wl_topics (
-  id          uuid PRIMARY KEY,               -- iGEO topic id
+  id          uuid PRIMARY KEY,               -- upstream topic id
   tenant_id   uuid NOT NULL REFERENCES whitelabel_tenants(id) ON DELETE CASCADE,
   account_id  uuid NOT NULL,
   name        text NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS wl_topics (
 CREATE INDEX IF NOT EXISTS wl_topics_account_idx ON wl_topics (account_id);
 
 CREATE TABLE IF NOT EXISTS wl_prompts (
-  id                   uuid PRIMARY KEY,      -- iGEO prompt id
+  id                   uuid PRIMARY KEY,      -- upstream prompt id
   tenant_id            uuid NOT NULL REFERENCES whitelabel_tenants(id) ON DELETE CASCADE,
   account_id           uuid NOT NULL,
   topic_id             uuid,
@@ -75,7 +75,7 @@ CREATE INDEX IF NOT EXISTS wl_prompts_account_idx ON wl_prompts (account_id);
 CREATE INDEX IF NOT EXISTS wl_prompts_topic_idx ON wl_prompts (topic_id);
 
 CREATE TABLE IF NOT EXISTS wl_competitors (
-  id          uuid PRIMARY KEY,               -- iGEO competitor id
+  id          uuid PRIMARY KEY,               -- upstream competitor id
   tenant_id   uuid NOT NULL REFERENCES whitelabel_tenants(id) ON DELETE CASCADE,
   account_id  uuid NOT NULL,
   name        text NOT NULL,
@@ -92,11 +92,11 @@ CREATE INDEX IF NOT EXISTS wl_competitors_account_idx ON wl_competitors (account
 -- Facts
 -- ---------------------------------------------------------------------------
 
--- Mirrors iGEO `results` (see apps/server/prisma/schema.prisma model Results).
+-- Mirrors upstream `results` (see apps/server/prisma/schema.prisma model Results).
 -- One row per (scan, prompt, provider, ranked entity). This is the workhorse
 -- for provider mentions %, industry ranking, sentiment, and source domains.
 CREATE TABLE IF NOT EXISTS wl_results (
-  id                   uuid PRIMARY KEY,      -- iGEO results id
+  id                   uuid PRIMARY KEY,      -- upstream results id
   tenant_id            uuid NOT NULL REFERENCES whitelabel_tenants(id) ON DELETE CASCADE,
   account_id           uuid NOT NULL,
   topic_id             uuid NOT NULL,
@@ -134,11 +134,11 @@ CREATE INDEX IF NOT EXISTS wl_results_topic_idx           ON wl_results (topic_i
 CREATE INDEX IF NOT EXISTS wl_results_company_domain_idx  ON wl_results (company_domain);
 CREATE INDEX IF NOT EXISTS wl_results_day_idx             ON wl_results (account_id, (("timestamp" AT TIME ZONE 'UTC')::date));
 
--- Mirrors iGEO `prompt_responses` minus the heavy raw response text.
+-- Mirrors upstream `prompt_responses` minus the heavy raw response text.
 -- One row per (scan, prompt, provider) LLM response; drives the visibility
 -- chart and per-response listings on the Prompts screen.
 CREATE TABLE IF NOT EXISTS wl_prompt_responses (
-  id             uuid PRIMARY KEY,            -- iGEO prompt_responses id
+  id             uuid PRIMARY KEY,            -- upstream prompt_responses id
   tenant_id      uuid NOT NULL REFERENCES whitelabel_tenants(id) ON DELETE CASCADE,
   account_id     uuid NOT NULL,
   prompt_id      uuid,

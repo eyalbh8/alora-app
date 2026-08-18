@@ -3,7 +3,7 @@ import { buildAiTrafficViewModel } from './aiTraffic'
 
 const range = { startDate: '2026-08-12', endDate: '2026-08-18' }
 
-const igeoPayload = {
+const sourcePayload = {
   hasEvents: true,
   llmProviders: [
     { provider: 'TOTAL', visits: 4, changePercent: 100 },
@@ -41,7 +41,7 @@ const igeoPayload = {
 
 describe('buildAiTrafficViewModel', () => {
   it('fills every day in the selected range and keeps all providers on the chart', () => {
-    const view = buildAiTrafficViewModel(igeoPayload, range, [])
+    const view = buildAiTrafficViewModel(sourcePayload, range, [])
 
     expect(view.chartProviderKeys).toEqual([
       'OPENAI',
@@ -70,8 +70,8 @@ describe('buildAiTrafficViewModel', () => {
     })
   })
 
-  it('parses iGEO top source, page, location, device, and browser cards', () => {
-    const view = buildAiTrafficViewModel(igeoPayload, range, [])
+  it('parses upstream top source, page, location, device, and browser cards', () => {
+    const view = buildAiTrafficViewModel(sourcePayload, range, [])
 
     expect(view.topSources).toEqual([{ label: 'chatgpt.com', value: 4, domain: 'chatgpt.com' }])
     expect(view.topPages).toEqual([{ label: '/', value: 4 }])
@@ -114,7 +114,7 @@ describe('buildAiTrafficViewModel', () => {
     expect(view.providers.find((p) => p.provider === 'OPENAI')?.count).toBe(4)
   })
 
-  it('accepts alternate iGEO field names for breakdown cards', () => {
+  it('accepts alternate upstream field names for breakdown cards', () => {
     const view = buildAiTrafficViewModel(
       {
         sources: [{ domain: 'https://www.chatgpt.com/referrer', count: 4 }],

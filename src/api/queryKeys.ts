@@ -11,6 +11,7 @@ export const queryKeys = {
       ['geo', 'dashboard', accountId, filters] as const,
     prompts: (accountId: string | undefined, filters: GeoFilters) =>
       ['geo', 'prompts', accountId, filters] as const,
+    tags: (accountId?: string) => ['geo', 'tags', accountId] as const,
     mentions: (accountId: string | undefined, filters: GeoFilters) =>
       ['geo', 'mentions', accountId, filters] as const,
     sentiment: (accountId: string | undefined, filters: GeoFilters) =>
@@ -30,5 +31,5 @@ export const queryKeys = {
   traffic: (accountId: string | undefined, filters: GeoFilters) =>
     ['traffic', accountId, filters] as const,
   crawlers: (accountId: string | undefined, filters: GeoFilters) =>
-    ['crawlers', 'igeo-range', accountId, filters] as const,
+    ['crawlers', 'source-range', accountId, filters] as const,
 }

@@ -30,7 +30,7 @@ function pickUrls(obj: Record<string, unknown>): string[] {
   return single ? [single] : []
 }
 
-/** Normalize iGEO chart-data items that may use alternate field names. */
+/** Normalize upstream chart-data items that may use alternate field names. */
 export function normalizeTrackedRecommendation(
   raw: unknown,
   index = 0,

@@ -1,4 +1,4 @@
-/** iGEO Sentiment page: average every historical point, then split the series in half. */
+/** upstream Sentiment page: average every historical point, then split the series in half. */
 
 export function averageScore(scores: number[]): number | null {
   if (!scores.length) return null
@@ -17,7 +17,7 @@ export function sentimentPeriodScores(
   }
 }
 
-/** iGEO uses two decimal places: (75 - 74) / 74 → +1.35%. */
+/** upstream uses two decimal places: (75 - 74) / 74 → +1.35%. */
 export function sentimentPctChange(
   current: number | null,
   previous: number | null,

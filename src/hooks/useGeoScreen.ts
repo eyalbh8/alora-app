@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import type { GeoFilters } from '../api/types'
 import { useAnalyticsFilters, type FilterAvailability } from '../context/AnalyticsFiltersContext'
 import { useGeoMeta } from '../context/GeoMetaContext'
@@ -13,14 +13,19 @@ export function useGeoScreenData<T>(
   queryKey: (accountId: string | undefined, filters: GeoFilters) => readonly unknown[],
   fetcher: (filters: GeoFilters) => Promise<T>,
   availability?: Partial<FilterAvailability>,
+  mapFilters?: (filters: GeoFilters) => GeoFilters,
 ): ApiState<T | null> & { geoMode: boolean; pending: boolean } {
   const { selectedAccount } = useAccountStore()
   const { meta, geoMode, loading: geoMetaLoading } = useGeoMeta()
   const { filters, setFilterMeta } = useAnalyticsFilters()
+  const requestFilters = useMemo(
+    () => (mapFilters ? mapFilters(filters) : filters),
+    [filters, mapFilters],
+  )
 
   const state = useApi<T | null>(
-    queryKey(selectedAccount?.id, filters),
-    () => fetcher(filters),
+    queryKey(selectedAccount?.id, requestFilters),
+    () => fetcher(requestFilters),
     { enabled: geoMode },
   )
 

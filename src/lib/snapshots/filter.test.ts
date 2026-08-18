@@ -106,6 +106,27 @@ describe('filters', () => {
     expect(brandedMatches(true, null)).toBe(true)
   })
 
+  it('filters prompts by nested topic.id when topicId is absent', () => {
+    const rows: Array<{
+      id: string
+      prompt: string
+      topicId?: string | null
+      topic?: { id: string; name: string }
+    }> = [
+      { id: 'p1', prompt: 'A', topic: { id: 't1', name: 'Launch' } },
+      { id: 'p2', prompt: 'B', topic: { id: 't2', name: 'Pricing' } },
+    ]
+    const out = filterPrompts(rows, {
+      topics: ['t1'],
+      prompts: [],
+      regions: [],
+      tags: [],
+      branded: null,
+      promptTypes: [],
+    })
+    expect(out.map((r) => r.id)).toEqual(['p1'])
+  })
+
   it('filters prompts by topic/tags/type', () => {
     const rows = [
       {

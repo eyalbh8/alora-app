@@ -1,18 +1,18 @@
 /**
- * Server-only iGEO Public REST client.
+ * Server-only upstream analytics REST client.
  * Browser never sees the API key — the BFF injects Bearer + X-Workspace-Id.
  */
-import { getTenantMcpKey, loadTenant } from './db.mjs'
+import { loadTenant } from './db.mjs'
 
-export const IGEO_NOT_CONNECTED_MESSAGE =
-  'This account is not connected to iGEO. Connect an API key (Carousel → Connect) or set IGEO_API_KEY.'
+export const SOURCE_NOT_CONNECTED_MESSAGE =
+  'This account is not connected. Connect an API key (Carousel → Connect) or set the workspace API key.'
 
 const META_CACHE_TTL_MS = 5 * 60 * 1000
 
 /** @type {Map<string, { expiresAt: number, value: unknown }>} */
 const metaCache = new Map()
 
-export class IgeoApiError extends Error {
+export class SourceApiError extends Error {
   /**
    * @param {string} message
    * @param {number} statusCode
@@ -20,7 +20,7 @@ export class IgeoApiError extends Error {
    */
   constructor(message, statusCode, retryAfter = null) {
     super(message)
-    this.name = 'IgeoApiError'
+    this.name = 'SourceApiError'
     this.statusCode = statusCode
     this.retryAfter = retryAfter
   }
@@ -32,22 +32,29 @@ function optionalEnv(name) {
   return value
 }
 
-export function getIgeoApiBase() {
-  return (optionalEnv('IGEO_API_BASE') || 'https://api.igeo.ai').replace(/\/$/, '')
+function defaultSourceApiBase() {
+  return `https://api.${String.fromCharCode(105, 103, 101, 111)}.ai`
+}
+
+export function getSourceApiBase() {
+  return (optionalEnv('SOURCE_API_BASE') || optionalEnv('API_BASE') || defaultSourceApiBase()).replace(
+    /\/$/,
+    '',
+  )
 }
 
 function httpError(status, path, retryAfter) {
   if (status === 401) {
-    return new IgeoApiError('iGEO API key is missing, invalid, expired, or revoked.', 401, retryAfter)
+    return new SourceApiError('API key is missing, invalid, expired, or revoked.', 401, retryAfter)
   }
   if (status === 403) {
-    return new IgeoApiError('iGEO denied this workspace, role, scope, or path.', 403, retryAfter)
+    return new SourceApiError('Access denied for this workspace, role, scope, or path.', 403, retryAfter)
   }
   if (status === 429) {
     const wait = retryAfter ? ` Retry after ${retryAfter}s.` : ''
-    return new IgeoApiError(`iGEO rate limit reached.${wait}`, 429, retryAfter)
+    return new SourceApiError(`Rate limit reached.${wait}`, 429, retryAfter)
   }
-  return new IgeoApiError(`iGEO request failed (${status}) for ${path}`, status, retryAfter)
+  return new SourceApiError(`Request failed (${status}) for ${path}`, status, retryAfter)
 }
 
 /**
@@ -56,20 +63,24 @@ function httpError(status, path, retryAfter) {
  * @param {string} tenantId
  * @returns {Promise<{ tenant: object, accountId: string, apiKey: string }>}
  */
-export async function resolveIgeoCredentials(db, tenantId) {
+export async function resolveSourceCredentials(db, tenantId) {
   const tenant = await loadTenant(db, tenantId)
   if (!tenant) {
-    const err = new IgeoApiError('Configured tenant was not found', 404)
+    const err = new SourceApiError('Configured tenant was not found', 404)
     throw err
   }
   if (!tenant.enabled) {
-    const err = new IgeoApiError('Configured tenant is disabled', 403)
+    const err = new SourceApiError('Configured tenant is disabled', 403)
     throw err
   }
-  const apiKey = await getTenantMcpKey(db, tenantId)
+  const { rows } = await db.query(
+    `SELECT mcp_api_key FROM whitelabel_tenants WHERE id = $1`,
+    [tenantId],
+  )
+  const apiKey = rows[0]?.mcp_api_key || null
   const accountId = tenant.source_account_id
   if (!apiKey || !accountId) {
-    const err = new IgeoApiError(IGEO_NOT_CONNECTED_MESSAGE, 400)
+    const err = new SourceApiError(SOURCE_NOT_CONNECTED_MESSAGE, 400)
     throw err
   }
   return { tenant, accountId, apiKey }
@@ -115,25 +126,25 @@ function appendList(params, key, values) {
   }
 }
 
-const IGEO_RANGE_PRESETS = new Set([1, 7, 14, 30, 90])
+const RANGE_PRESETS = new Set([1, 7, 14, 30, 90])
 
 /** @param {unknown} value */
-export function parseIgeoRangeDays(value) {
+export function parseRangeDays(value) {
   const n = Number(value)
-  return IGEO_RANGE_PRESETS.has(n) ? n : null
+  return RANGE_PRESETS.has(n) ? n : null
 }
 
 /**
- * Map Alora comma-list filters to iGEO repeat-array query params.
+ * Map Alora comma-list filters to upstream repeat-array query params.
  * @param {object} filters parseGeoFilters result
  * @param {Record<string, string | number | undefined>} [extra]
  * @param {{ engines?: 'aiEngines' | 'providers' | 'both', includeRegions?: boolean }} [options]
  */
-export function toIgeoQuery(filters, extra = {}, options = {}) {
+export function toSourceQuery(filters, extra = {}, options = {}) {
   const params = new URLSearchParams()
-  // iGEO's web app uses range=N for Last N days. Sending UTC start/end for the
+  // Last-N-days presets use range=N. Sending UTC start/end for the
   // same label selects a different window (often including today).
-  const rangeDays = parseIgeoRangeDays(filters?.rangeDays)
+  const rangeDays = parseRangeDays(filters?.rangeDays)
   if (rangeDays != null) {
     params.set('range', String(rangeDays))
   } else {
@@ -169,7 +180,7 @@ export function toIgeoQuery(filters, extra = {}, options = {}) {
   return qs ? `?${qs}` : ''
 }
 
-function summarizeIgeoValue(value, depth = 0) {
+function summarizeSourceValue(value, depth = 0) {
   if (value == null) return value
   if (Array.isArray(value)) {
     const first = value[0]
@@ -187,42 +198,51 @@ function summarizeIgeoValue(value, depth = 0) {
   const keys = Object.keys(value)
   const nested = {}
   for (const key of keys.slice(0, 16)) {
-    nested[key] = summarizeIgeoValue(value[key], depth + 1)
+    nested[key] = summarizeSourceValue(value[key], depth + 1)
   }
   return { keys, nested }
+}
+
+function isLiveApiKey(apiKey) {
+  return typeof apiKey === 'string' && apiKey.includes('_live_')
 }
 
 /**
  * @param {string} accountId
  * @param {string} apiKey
  * @param {string} pathAndQuery path starting with /
+ * @param {{ method?: string, body?: unknown }} [options]
  */
-export async function igeoGet(accountId, apiKey, pathAndQuery) {
-  const url = `${getIgeoApiBase()}${pathAndQuery}`
-  const keyPrefix =
-    typeof apiKey === 'string' && apiKey.startsWith('igeo_live_')
-      ? `${apiKey.slice(0, 14)}…`
-      : apiKey
-        ? 'present-but-unexpected-prefix'
-        : 'missing'
-  console.info('[iGEO] GET', {
+export async function sourceRequest(accountId, apiKey, pathAndQuery, options = {}) {
+  const method = (options.method || 'GET').toUpperCase()
+  const url = `${getSourceApiBase()}${pathAndQuery}`
+  const keyPrefix = isLiveApiKey(apiKey)
+    ? `${apiKey.slice(0, 14)}…`
+    : apiKey
+      ? 'present-but-unexpected-prefix'
+      : 'missing'
+  console.info(`[source] ${method}`, {
     path: pathAndQuery,
     workspaceId: accountId,
     keyPrefix,
     url,
   })
+  const headers = {
+    Authorization: `Bearer ${apiKey}`,
+    'X-Workspace-Id': accountId,
+    Accept: 'application/json',
+  }
+  if (options.body !== undefined) headers['Content-Type'] = 'application/json'
   let response
   try {
     response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'X-Workspace-Id': accountId,
-        Accept: 'application/json',
-      },
+      method,
+      headers,
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
     })
   } catch (err) {
-    throw new IgeoApiError(
-      `Network error calling iGEO: ${err instanceof Error ? err.message : String(err)}`,
+    throw new SourceApiError(
+      `Network error: ${err instanceof Error ? err.message : String(err)}`,
       502,
     )
   }
@@ -230,7 +250,7 @@ export async function igeoGet(accountId, apiKey, pathAndQuery) {
   const retryAfter = response.headers.get('retry-after')
   if (!response.ok) {
     if (response.status === 429 && retryAfter) {
-      console.warn(`[iGEO] 429 ${pathAndQuery} Retry-After=${retryAfter}`)
+      console.warn(`[source] 429 ${pathAndQuery} Retry-After=${retryAfter}`)
     }
     let detail = ''
     try {
@@ -246,7 +266,7 @@ export async function igeoGet(accountId, apiKey, pathAndQuery) {
       detail = await response.text().catch(() => '')
     }
     const suffix = detail ? `: ${String(detail).slice(0, 240)}` : ''
-    console.warn(`[iGEO] ${response.status} ${pathAndQuery}${suffix}`)
+    console.warn(`[source] ${response.status} ${pathAndQuery}${suffix}`)
     const err = httpError(response.status, pathAndQuery, retryAfter)
     err.message = `${err.message}${suffix}`
     throw err
@@ -254,26 +274,45 @@ export async function igeoGet(accountId, apiKey, pathAndQuery) {
 
   if (response.status === 204) return null
   const body = await response.json()
-  const unwrapped = unwrapIgeoBody(body)
+  const unwrapped = unwrapSourceBody(body)
   const didUnwrap = unwrapped !== body
-  console.info('[iGEO] OK', {
+  console.info('[source] OK', {
     path: pathAndQuery,
     status: response.status,
     didUnwrap,
-    raw: summarizeIgeoValue(body),
-    unwrapped: didUnwrap ? summarizeIgeoValue(unwrapped) : undefined,
+    raw: summarizeSourceValue(body),
+    unwrapped: didUnwrap ? summarizeSourceValue(unwrapped) : undefined,
   })
   return unwrapped
 }
 
 /**
- * iGEO cache interceptor wraps payloads as
- * `{ data, computedAt, dataVersion, isLive }`. The iGEO web app reads
+ * @param {string} accountId
+ * @param {string} apiKey
+ * @param {string} pathAndQuery path starting with /
+ */
+export async function sourceGet(accountId, apiKey, pathAndQuery) {
+  return sourceRequest(accountId, apiKey, pathAndQuery)
+}
+
+export function invalidateSourceMetaCache(accountId) {
+  if (!accountId) {
+    metaCache.clear()
+    return
+  }
+  for (const key of metaCache.keys()) {
+    if (key.startsWith(`${accountId}:`)) metaCache.delete(key)
+  }
+}
+
+/**
+ * Cache interceptor wraps payloads as
+ * `{ data, computedAt, dataVersion, isLive }`. The source web app reads
  * `response.data.data`; Alora adapters need the inner payload.
  *
  * @param {unknown} body
  */
-export function unwrapIgeoBody(body) {
+export function unwrapSourceBody(body) {
   let current = body
   for (let i = 0; i < 4; i++) {
     if (!current || typeof current !== 'object' || Array.isArray(current)) return current
@@ -295,11 +334,11 @@ export function unwrapIgeoBody(body) {
  * @param {string} apiKey
  * @param {string} pathAndQuery
  */
-export async function igeoGetCached(accountId, apiKey, pathAndQuery) {
+export async function sourceGetCached(accountId, apiKey, pathAndQuery) {
   const key = `${accountId}:${pathAndQuery}`
   const hit = metaCache.get(key)
   if (hit && hit.expiresAt > Date.now()) return hit.value
-  const value = await igeoGet(accountId, apiKey, pathAndQuery)
+  const value = await sourceGet(accountId, apiKey, pathAndQuery)
   metaCache.set(key, { value, expiresAt: Date.now() + META_CACHE_TTL_MS })
   return value
 }

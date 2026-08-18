@@ -173,16 +173,16 @@ export function AnalyticsFiltersProvider({ children }: { children: ReactNode }) 
 
   // Drop selections that no longer exist in the current option lists.
   useEffect(() => {
-    const topicIds = new Set(options.topics.map((t) => t.id))
-    const promptIds = new Set(options.prompts.map((p) => p.id))
+    const topicIds = new Set(options.topics.map((t) => String(t.id)))
+    const promptIds = new Set(options.prompts.map((p) => String(p.id)))
     const providerSet = new Set(options.providers)
     const regionSet = new Set(options.regions)
     const tagSet = new Set(options.tags)
     const typeSet = new Set(options.promptTypes)
 
     setProviders((prev) => (prev.length && providerSet.size ? prev.filter((v) => providerSet.has(v)) : prev))
-    setTopics((prev) => (prev.length && topicIds.size ? prev.filter((v) => topicIds.has(v)) : prev))
-    setPrompts((prev) => (prev.length && promptIds.size ? prev.filter((v) => promptIds.has(v)) : prev))
+    setTopics((prev) => (prev.length && topicIds.size ? prev.filter((v) => topicIds.has(String(v))) : prev))
+    setPrompts((prev) => (prev.length && promptIds.size ? prev.filter((v) => promptIds.has(String(v))) : prev))
     setRegions((prev) => (prev.length && regionSet.size ? prev.filter((v) => regionSet.has(v)) : prev))
     setTags((prev) => (prev.length && tagSet.size ? prev.filter((v) => tagSet.has(v)) : prev))
     setPromptTypes((prev) => (prev.length && typeSet.size ? prev.filter((v) => typeSet.has(v)) : prev))

@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv, type Connect, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
@@ -27,10 +28,10 @@ async function handleCarouselRoutes(
   process.env.ANTHROPIC_API_KEY = env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY
   process.env.OPENAI_API_KEY = env.OPENAI_API_KEY || process.env.OPENAI_API_KEY
   if (env.CLAUDE_MODEL) process.env.CLAUDE_MODEL = env.CLAUDE_MODEL
-  if (env.IGEO_MCP_URL) process.env.IGEO_MCP_URL = env.IGEO_MCP_URL
-  if (env.IGEO_MCP_API_KEY) process.env.IGEO_MCP_API_KEY = env.IGEO_MCP_API_KEY
-  if (env.IGEO_API_KEY) process.env.IGEO_API_KEY = env.IGEO_API_KEY
-  if (env.IGEO_API_BASE) process.env.IGEO_API_BASE = env.IGEO_API_BASE
+  if (env.MCP_URL) process.env.MCP_URL = env.MCP_URL
+  if (env.MCP_API_KEY) process.env.MCP_API_KEY = env.MCP_API_KEY
+  if (env.SOURCE_API_KEY) process.env.SOURCE_API_KEY = env.SOURCE_API_KEY
+  if (env.SOURCE_API_BASE) process.env.SOURCE_API_BASE = env.SOURCE_API_BASE
 
   const carouselModulePath = pathToFileURL(
     path.join(__dirname, 'functions/snapshots-api/carouselGeneration.mjs'),
@@ -212,7 +213,7 @@ async function handleCarouselRoutes(
   }
 
   const notConnectedBody = {
-    error: 'This account is not connected to iGEO MCP. Paste the full MCP URL to continue.',
+    error: 'This account is not connected. Paste the full MCP URL to continue.',
     code: 'MCP_NOT_CONNECTED',
   }
 
@@ -251,7 +252,7 @@ async function handleCarouselRoutes(
           apiKeyField === ''
 
         if (disconnect) {
-          await api.setTenantIgeoConnection(db, tenantId, null, null)
+          await api.setTenantSourceConnection(db, tenantId, null, null)
           send(200, { connected: false, keyPrefix: null, workspaceId: sourceAccountId })
           return
         }
@@ -276,7 +277,7 @@ async function handleCarouselRoutes(
         if (sourceAccountId && sourceAccountId.toLowerCase() !== workspaceId) {
           send(400, {
             error:
-              'This MCP URL is for a different iGEO workspace than the selected Alora account.',
+              'This MCP URL is for a different workspace than the selected Alora account.',
           })
           return
         }
@@ -288,12 +289,12 @@ async function handleCarouselRoutes(
           console.error('[carousel/mcp-connection] verify failed:', message)
           send(400, {
             error:
-              'Could not verify this MCP URL with iGEO. Check that the token and workspace_id are correct.',
+              'Could not verify this MCP URL. Check that the token and workspace_id are correct.',
           })
           return
         }
 
-        await api.setTenantIgeoConnection(db, tenantId, apiKey, workspaceId)
+        await api.setTenantSourceConnection(db, tenantId, apiKey, workspaceId)
         send(200, {
           connected: true,
           keyPrefix: mcpClient.maskMcpKey(apiKey),
@@ -309,7 +310,7 @@ async function handleCarouselRoutes(
   }
 
   if (!sourceAccountId) {
-    send(400, { error: 'Tenant has no linked iGEO workspace (source_account_id)' })
+    send(400, { error: 'This account has no linked workspace.' })
     return
   }
 
@@ -415,7 +416,7 @@ async function handleCarouselRoutes(
     return
   }
 
-  // GET /carousel/brand-hub - Fetch the selected account's BrandHub from iGEO MCP
+  // GET /carousel/brand-hub - Fetch the selected account's BrandHub from upstream MCP
   if (pathName === '/brand-hub' && req.method === 'GET') {
     try {
       const tenantKey = await api.getTenantMcpKey(db, tenantId)
@@ -435,7 +436,7 @@ async function handleCarouselRoutes(
     return
   }
 
-  // GET /carousel/posts/today - Fetch Instagram posts from iGEO MCP
+  // GET /carousel/posts/today - Fetch Instagram posts from upstream MCP
   if (pathName === '/posts/today' && req.method === 'GET') {
     try {
       const tenantKey = await api.getTenantMcpKey(db, tenantId)
@@ -566,7 +567,7 @@ interface SnapshotDbModule {
   } | null>
   getTenantMcpKey: (db: unknown, tenantId: string) => Promise<string | null>
   setTenantMcpKey: (db: unknown, tenantId: string, key: string | null) => Promise<void>
-  setTenantIgeoConnection: (
+  setTenantSourceConnection: (
     db: unknown,
     tenantId: string,
     key: string | null,
@@ -605,6 +606,15 @@ interface GeoApiModule {
   geoMentions: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
   geoSentiment: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
   geoPrompts: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
+  geoTags: (db: unknown, tenantId: string) => Promise<unknown>
+  geoCreateTag: (db: unknown, tenantId: string, input: unknown) => Promise<unknown>
+  geoSetPromptTags: (
+    db: unknown,
+    tenantId: string,
+    promptId: string,
+    input: unknown,
+  ) => Promise<unknown>
+  geoDeleteTag: (db: unknown, tenantId: string, tagId: string) => Promise<unknown>
   geoCompetitors: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
   geoResponses: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
   geoResponseDetail: (db: unknown, tenantId: string, responseId: string) => Promise<unknown>
@@ -617,6 +627,23 @@ interface GeoApiModule {
   geoTenantScanDays: (db: unknown, tenantId: string) => Promise<unknown>
   geoTraffic: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
   geoCrawlers: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
+}
+
+function readConnectJsonBody(req: Connect.IncomingMessage): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    let body = ''
+    req.on('data', (chunk) => {
+      body += String(chunk)
+    })
+    req.on('end', () => {
+      try {
+        resolve(body.trim() ? JSON.parse(body) : {})
+      } catch (err) {
+        reject(err)
+      }
+    })
+    req.on('error', reject)
+  })
 }
 
 function snapshotsApiPlugin(env: Record<string, string>): Plugin {
@@ -633,15 +660,17 @@ function snapshotsApiPlugin(env: Record<string, string>): Plugin {
 
 function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHandleFunction {
   let apiPromise: Promise<SnapshotDbModule> | null = null
+  let apiLoadedAt = 0
 
   const loadApi = () => {
-    if (!apiPromise) {
+    const dbFile = path.join(__dirname, 'functions/snapshots-api/db.mjs')
+    const mtime = statSync(dbFile).mtimeMs
+    if (!apiPromise || mtime > apiLoadedAt) {
       process.env.DATABASE_URL = env.DATABASE_URL || process.env.DATABASE_URL
       process.env.DESCOPE_PROJECT_ID = env.DESCOPE_PROJECT_ID || process.env.DESCOPE_PROJECT_ID
-      const modPath = pathToFileURL(
-        path.join(__dirname, 'functions/snapshots-api/db.mjs'),
-      ).href
-      apiPromise = import(modPath) as Promise<SnapshotDbModule>
+      apiLoadedAt = mtime
+      const modPath = pathToFileURL(dbFile).href
+      apiPromise = import(`${modPath}?v=${mtime}`) as Promise<SnapshotDbModule>
     }
     return apiPromise
   }
@@ -663,15 +692,15 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
 
   const loadGeo = () => {
     process.env.DATABASE_URL = env.DATABASE_URL || process.env.DATABASE_URL
-    if (env.IGEO_API_BASE) process.env.IGEO_API_BASE = env.IGEO_API_BASE
-    if (env.IGEO_API_KEY) process.env.IGEO_API_KEY = env.IGEO_API_KEY
-    if (env.IGEO_MCP_API_KEY) process.env.IGEO_MCP_API_KEY = env.IGEO_MCP_API_KEY
+    if (env.SOURCE_API_BASE) process.env.SOURCE_API_BASE = env.SOURCE_API_BASE
+    if (env.SOURCE_API_KEY) process.env.SOURCE_API_KEY = env.SOURCE_API_KEY
+    if (env.MCP_API_KEY) process.env.MCP_API_KEY = env.MCP_API_KEY
     const bust = Date.now()
     const geoPath = pathToFileURL(path.join(__dirname, 'functions/snapshots-api/geo.mjs')).href
     const clientPath = pathToFileURL(
-      path.join(__dirname, 'functions/snapshots-api/igeoClient.mjs'),
+      path.join(__dirname, 'functions/snapshots-api/sourceClient.mjs'),
     ).href
-    // Bust both modules — Node caches igeoClient if only geo.mjs is re-imported.
+    // Bust both modules — Node caches sourceClient if only geo.mjs is re-imported.
     return import(clientPath + `?v=${bust}`).then(
       () => import(`${geoPath}?v=${bust}`) as Promise<GeoApiModule>,
     )
@@ -695,7 +724,7 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
 
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
       'Access-Control-Allow-Headers':
         'Content-Type, Authorization, X-Alora-Tenant-Id, ngrok-skip-browser-warning',
     }
@@ -799,7 +828,7 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
           return
         }
 
-        // Load tenant to get source_account_id (iGEO workspace)
+        // Load tenant to get source_account_id (workspace)
         const tenant = await api.loadTenant(db, tenantId)
         if (!tenant) {
           send(404, { error: 'Tenant not found' })
@@ -816,9 +845,15 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
       const db = api.getPool()
       const url = new URL(req.url, 'http://localhost')
       const pathName = url.pathname.replace(/^\/api\/snapshots/, '') || '/'
-      const isAccountsPost = req.method === 'POST' && pathName === '/accounts'
+      const promptTagsMatch = pathName.match(/^\/geo\/prompts\/([^/]+)\/tags$/)
+      const deleteTagMatch = pathName.match(/^\/geo\/tags\/([^/]+)$/)
+      const isAllowedWrite =
+        (req.method === 'POST' && pathName === '/accounts') ||
+        (req.method === 'POST' && pathName === '/geo/tags') ||
+        (req.method === 'PATCH' && Boolean(promptTagsMatch)) ||
+        (req.method === 'DELETE' && Boolean(deleteTagMatch) && pathName !== '/geo/tags')
 
-      if (req.method !== 'GET' && !isAccountsPost) {
+      if (req.method !== 'GET' && !isAllowedWrite) {
         send(405, { error: 'Method not allowed' })
         return
       }
@@ -950,12 +985,31 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
         const q = Object.fromEntries(url.searchParams.entries())
         const providerPromptsMatch = pathName.match(/^\/geo\/provider-mentions\/([^/]+)\/prompts$/)
         const responseDetailMatch = pathName.match(/^\/geo\/responses\/([^/]+)$/)
+        if (req.method === 'GET' && pathName === '/geo/tags') {
+          send(200, await geo.geoTags(db, tenantId))
+          return
+        }
+        if (req.method === 'POST' && pathName === '/geo/tags') {
+          const input = await readConnectJsonBody(req)
+          send(201, await geo.geoCreateTag(db, tenantId, input))
+          return
+        }
+        if (req.method === 'PATCH' && promptTagsMatch) {
+          const input = await readConnectJsonBody(req)
+          send(200, await geo.geoSetPromptTags(db, tenantId, decodeURIComponent(promptTagsMatch[1]), input))
+          return
+        }
+        if (req.method === 'DELETE' && deleteTagMatch) {
+          send(200, await geo.geoDeleteTag(db, tenantId, decodeURIComponent(deleteTagMatch[1])))
+          return
+        }
         const geoHandlers: Record<string, () => Promise<unknown>> = {
           '/geo/meta': () => geo.geoMeta(db, tenantId),
           '/geo/dashboard': () => geo.geoDashboard(db, tenantId, q),
           '/geo/mentions': () => geo.geoMentions(db, tenantId, q),
           '/geo/sentiment': () => geo.geoSentiment(db, tenantId, q),
           '/geo/prompts': () => geo.geoPrompts(db, tenantId, q),
+          '/geo/tags': () => geo.geoTags(db, tenantId),
           '/geo/competitors': () => geo.geoCompetitors(db, tenantId, q),
           '/geo/responses': () => geo.geoResponses(db, tenantId, q),
         }
@@ -997,7 +1051,7 @@ export default defineConfig(({ mode }) => {
       allowedHosts: true,
       cors: {
         origin: true,
-        methods: ['GET', 'HEAD', 'POST', 'PUT', 'OPTIONS'],
+        methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         allowedHeaders: [
           'Content-Type',
           'Authorization',

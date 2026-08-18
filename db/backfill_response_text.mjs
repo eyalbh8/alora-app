@@ -1,5 +1,5 @@
 /**
- * Backfill wl_prompt_responses.response_text / response_preview from the iGEO
+ * Backfill wl_prompt_responses.response_text / response_preview from the upstream
  * source Postgres (prompt_responses.response). Uses a single bulk UPDATE per batch.
  *
  * Usage:

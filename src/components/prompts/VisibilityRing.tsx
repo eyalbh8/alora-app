@@ -5,7 +5,7 @@ interface VisibilityRingProps {
   size?: number
 }
 
-/** Circular progress ring for visibility percentage (iGEO-style). */
+/** Circular progress ring for visibility percentage. */
 export function VisibilityRing({ value, size = 44 }: VisibilityRingProps) {
   const stroke = 3
   const radius = (size - stroke) / 2

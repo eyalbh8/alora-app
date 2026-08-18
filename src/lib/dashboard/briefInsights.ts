@@ -1,4 +1,5 @@
 import type { CompetitorPerformance, DashboardData, ProviderMention } from '../../api/types'
+import { findAccountCompetitor } from '../accountCompetitor'
 import { providerLabel } from '../format'
 
 export interface BriefSignal {
@@ -32,7 +33,7 @@ export interface AccountBrief {
 }
 
 function accountRow(rows: CompetitorPerformance[]): CompetitorPerformance | null {
-  return rows.find((row) => row.isAccount || row.id.toLowerCase() === 'account') ?? null
+  return findAccountCompetitor(rows)
 }
 
 function signedPoints(value: number): string {
@@ -48,7 +49,7 @@ function providerChanges(rows: ProviderMention[], direction: 'up' | 'down') {
 }
 
 export function buildAccountBrief(
-  payload: Pick<DashboardData, 'promptsCount'>,
+  payload: Pick<DashboardData, 'promptsCount' | 'overallScore' | 'previousOverallScore'>,
   providers: ProviderMention[],
   competitors: CompetitorPerformance[],
 ): AccountBrief {
@@ -160,8 +161,11 @@ export function buildAccountBrief(
       shareOfVoice,
       averageRank: account?.avgRank ?? null,
       rankDelta: account?.avgRankDelta ?? null,
-      sentiment: account?.sentimentScore ?? null,
-      sentimentDelta: account?.sentimentScoreDelta ?? null,
+      sentiment: payload.overallScore ?? account?.sentimentScore ?? null,
+      sentimentDelta:
+        payload.overallScore != null && payload.previousOverallScore != null
+          ? payload.overallScore - payload.previousOverallScore
+          : (account?.sentimentScoreDelta ?? null),
       promptsCount: payload.promptsCount ?? null,
     },
     account,

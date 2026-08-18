@@ -58,7 +58,7 @@ export async function loadTenant(db, tenantId) {
 }
 
 /**
- * Load the iGEO MCP API key stored on this tenant.
+ * Load the upstream MCP API key stored on this tenant.
  * Do not include this column in tenant list / public JSON.
  * @param {import('pg').Pool | import('pg').Client} db
  * @param {string} tenantId
@@ -66,16 +66,16 @@ export async function loadTenant(db, tenantId) {
  */
 export async function getTenantMcpKey(db, tenantId) {
   const { rows } = await db.query(
-    `SELECT igeo_mcp_api_key
+    `SELECT mcp_api_key
      FROM whitelabel_tenants
      WHERE id = $1`,
     [tenantId],
   )
-  return rows[0]?.igeo_mcp_api_key || null
+  return rows[0]?.mcp_api_key || null
 }
 
 /**
- * Save or clear the iGEO MCP API key for this tenant.
+ * Save or clear the upstream MCP API key for this tenant.
  * Pass null to disconnect.
  * @param {import('pg').Pool | import('pg').Client} db
  * @param {string} tenantId
@@ -84,24 +84,24 @@ export async function getTenantMcpKey(db, tenantId) {
 export async function setTenantMcpKey(db, tenantId, key) {
   await db.query(
     `UPDATE whitelabel_tenants
-     SET igeo_mcp_api_key = $2
+     SET mcp_api_key = $2
      WHERE id = $1`,
     [tenantId, key],
   )
 }
 
 /**
- * Persist the per-account iGEO connection: API key plus workspace id.
+ * Persist the per-account upstream connection: API key plus workspace id.
  * workspaceId is written only when the tenant does not already have one.
  * @param {import('pg').Pool | import('pg').Client} db
  * @param {string} tenantId
  * @param {string | null} key
  * @param {string | null} [workspaceId]
  */
-export async function setTenantIgeoConnection(db, tenantId, key, workspaceId = null) {
+export async function setTenantSourceConnection(db, tenantId, key, workspaceId = null) {
   await db.query(
     `UPDATE whitelabel_tenants
-     SET igeo_mcp_api_key = $2,
+     SET mcp_api_key = $2,
          source_account_id = COALESCE(source_account_id, $3)
      WHERE id = $1`,
     [tenantId, key, workspaceId],

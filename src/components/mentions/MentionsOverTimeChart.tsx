@@ -116,7 +116,7 @@ function ChartBody({
       </ResponsiveContainer>
       </div>
       {hasPins && (
-        <div className="relative mt-1 h-8 overflow-visible">
+        <div className="relative mt-1 h-10 overflow-visible">
           <TrackedRecommendationAxis dates={dates} pinsByDay={pinMap} />
         </div>
       )}

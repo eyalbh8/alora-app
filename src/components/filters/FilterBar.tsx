@@ -76,7 +76,8 @@ function MultiSelect({
   const selectionTitle = hasSelection ? values.map(resolveLabel).join(', ') : undefined
 
   const toggle = (value: string) => {
-    onChange(values.includes(value) ? values.filter((v) => v !== value) : [...values, value])
+    const selected = values.some((v) => String(v) === String(value))
+    onChange(selected ? values.filter((v) => String(v) !== String(value)) : [...values, value])
   }
 
   return (
@@ -139,7 +140,7 @@ function MultiSelect({
                 >
                   <input
                     type="checkbox"
-                    checked={values.includes(o.value)}
+                    checked={values.some((v) => String(v) === String(o.value))}
                     onChange={() => toggle(o.value)}
                     className="accent-accent"
                   />
@@ -411,12 +412,14 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
         />
       )}
 
-      {geo && availability.tags && options.tags.length > 0 && (
+      {geo && (
         <MultiSelect
           label="Tags"
           values={tags}
           options={options.tags.map((t) => ({ value: t, label: t }))}
           onChange={setTags}
+          disabled={!availability.tags || options.tags.length === 0}
+          unavailableReason="No tags yet — add them on a prompt"
           searchable
           fullWidth={fullWidth}
         />

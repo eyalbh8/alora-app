@@ -437,10 +437,10 @@ export async function generateInstagramCarousel(
     const tenantKey = await getTenantMcpKey(db, tenantId);
     const apiKey = resolveMcpApiKey(tenantKey);
     if (!apiKey) {
-      throw new Error('This account is not connected to iGEO MCP. Paste the full MCP URL to continue.');
+      throw new Error('This account is not connected. Paste the full MCP URL to continue.');
     }
 
-    // Fetch posts from iGEO MCP to find the selected one
+    // Fetch posts from upstream MCP to find the selected one
     const postsResponse = await fetchTodayPosts(accountId, apiKey);
     console.log(`[Carousel] Fetched ${postsResponse.totalCount} posts from MCP`);
     
@@ -448,7 +448,7 @@ export async function generateInstagramCarousel(
     const selectedPost = postsResponse.posts.find(p => p.id === postId);
     
     if (!selectedPost) {
-      throw new Error(`Post ${postId} not found in iGEO MCP response. Make sure it exists and was generated in the last 14 days.`);
+      throw new Error(`Post ${postId} was not found. Make sure it exists and was generated in the last 14 days.`);
     }
 
     console.log(`[Carousel] Selected post: "${selectedPost.prompt || selectedPost.title || 'Untitled'}"`);

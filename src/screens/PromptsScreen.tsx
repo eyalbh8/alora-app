@@ -8,9 +8,10 @@ import { ResponseDrawer } from '../components/mentions/ResponseDrawer'
 import { DeltaLabel } from '../components/prompts/DeltaLabel'
 import { IntentBadge } from '../components/prompts/IntentBadge'
 import { IntentDistribution } from '../components/prompts/IntentDistribution'
+import { PromptTagsCell } from '../components/prompts/PromptTagsCell'
 import { TopicFilterCard } from '../components/prompts/TopicFilterCard'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
-import { activePrompts } from '../lib/snapshots/filter'
+import { activePrompts, filterPrompts } from '../lib/snapshots/filter'
 import { formatNumber, formatScore, providerLabel } from '../lib/format'
 import { regionFlag, regionShortLabel } from '../lib/regions'
 import { ProviderIcon } from '../components/ProviderIcon'
@@ -19,14 +20,16 @@ import { queryKeys } from '../api/queryKeys'
 import { useApi } from '../hooks/useApi'
 import { useGeoScreenData } from '../hooks/useGeoScreen'
 import { useAccountStore } from '../store/useAccountStore'
-import type { PromptRow, ResponseRow, TopicRow } from '../api/types'
+import type { GeoFilters, PromptRow, PromptTag, ResponseRow, TopicRow } from '../api/types'
 import { sentimentOf } from '../lib/snapshots/normalize'
 
 type SortKey = 'visibility' | 'sentiment' | 'rank'
 type SortDir = 'asc' | 'desc'
 
-function tagLabel(tag: NonNullable<PromptRow['tags']>[number]) {
-  return typeof tag === 'string' ? tag : tag.name
+/** Keep topic chips populated — apply topic/tag filters locally, not on the fetch. */
+function withoutLocalPromptFilters(filters: GeoFilters): GeoFilters {
+  if (filters.topics.length === 0 && filters.tags.length === 0) return filters
+  return { ...filters, topics: [], tags: [] }
 }
 
 function sortRows(rows: PromptRow[], key: SortKey, dir: SortDir): PromptRow[] {
@@ -57,7 +60,7 @@ function sortRows(rows: PromptRow[], key: SortKey, dir: SortDir): PromptRow[] {
 
 export function PromptsScreen() {
   const { selectedAccount } = useAccountStore()
-  const { filters, topics: selectedTopics, setTopics } = useAnalyticsFilters()
+  const { filters, topics: selectedTopics, setTopics, tags: selectedTags } = useAnalyticsFilters()
   const [searchParams, setSearchParams] = useSearchParams()
   const [drawerPrompt, setDrawerPrompt] = useState<PromptRow | null>(null)
   const [drawerResponse, setDrawerResponse] = useState<ResponseRow | null>(null)
@@ -66,24 +69,28 @@ export function PromptsScreen() {
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState<PageSize>(25)
-  const geo = useGeoScreenData(queryKeys.geo.prompts, getGeoPrompts)
+  const [tagOverrides, setTagOverrides] = useState<Record<string, PromptTag[]>>({})
+  const geo = useGeoScreenData(queryKeys.geo.prompts, getGeoPrompts, undefined, withoutLocalPromptFilters)
 
   const promptRows: PromptRow[] = useMemo(() => {
-    return activePrompts((geo.data?.prompts ?? []) as unknown as PromptRow[])
-  }, [geo.data])
+    return activePrompts((geo.data?.prompts ?? []) as unknown as PromptRow[]).map((row) =>
+      tagOverrides[row.id] ? { ...row, tags: tagOverrides[row.id] } : row,
+    )
+  }, [geo.data, tagOverrides])
 
   const topicRows: TopicRow[] = useMemo(() => {
     const byId = new Map<string, TopicRow>()
     for (const p of promptRows) {
-      if (!p.topic) continue
-      const existing = byId.get(p.topic.id)
+      const id = p.topic?.id || p.topicId
+      if (!id) continue
+      const existing = byId.get(id)
       if (existing) {
         existing.promptsCount = (existing.promptsCount ?? 0) + 1
       } else {
-        byId.set(p.topic.id, {
-          id: p.topic.id,
-          name: p.topic.name,
-          state: p.topic.state,
+        byId.set(id, {
+          id,
+          name: p.topic?.name || id,
+          state: p.topic?.state,
           promptsCount: 1,
         })
       }
@@ -91,7 +98,18 @@ export function PromptsScreen() {
     return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name))
   }, [promptRows])
 
-  const filtered = promptRows
+  const filtered = useMemo(
+    () =>
+      filterPrompts(promptRows, {
+        topics: selectedTopics,
+        prompts: [],
+        regions: [],
+        tags: selectedTags,
+        branded: null,
+        promptTypes: [],
+      }),
+    [promptRows, selectedTopics, selectedTags],
+  )
 
   const tableRows = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -144,8 +162,8 @@ export function PromptsScreen() {
 
   const toggleTopic = (topicId: string) => {
     setTopics(
-      selectedTopics.includes(topicId)
-        ? selectedTopics.filter((id) => id !== topicId)
+      selectedTopics.some((id) => String(id) === String(topicId))
+        ? selectedTopics.filter((id) => String(id) !== String(topicId))
         : [...selectedTopics, topicId],
     )
   }
@@ -237,7 +255,7 @@ export function PromptsScreen() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-line">
-                <th className="py-3 pr-6 text-left text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase">
+                <th className="py-3 pr-4 text-left text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase">
                   Prompt
                 </th>
                 <th className="hidden px-4 py-3 text-left text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase md:table-cell">
@@ -248,7 +266,7 @@ export function PromptsScreen() {
                 </th>
                 <th
                   aria-sort={sortKey === 'visibility' ? (sortDir === 'desc' ? 'descending' : 'ascending') : 'none'}
-                  className="px-3 py-3 text-right text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase"
+                  className="px-4 py-3 text-right text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase"
                 >
                   <button
                     type="button"
@@ -261,7 +279,7 @@ export function PromptsScreen() {
                 </th>
                 <th
                   aria-sort={sortKey === 'sentiment' ? (sortDir === 'desc' ? 'descending' : 'ascending') : 'none'}
-                  className="hidden px-3 py-3 text-right text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase sm:table-cell"
+                  className="hidden px-4 py-3 text-right text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase sm:table-cell"
                 >
                   <button
                     type="button"
@@ -274,7 +292,7 @@ export function PromptsScreen() {
                 </th>
                 <th
                   aria-sort={sortKey === 'rank' ? (sortDir === 'desc' ? 'descending' : 'ascending') : 'none'}
-                  className="px-3 py-3 text-right text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase"
+                  className="px-4 py-3 text-right text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase"
                 >
                   <button
                     type="button"
@@ -285,12 +303,15 @@ export function PromptsScreen() {
                     <span aria-hidden="true">{sortKey === 'rank' ? (sortDir === 'desc' ? '↓' : '↑') : '↕'}</span>
                   </button>
                 </th>
+                <th className="px-4 py-3 text-left text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase">
+                  Tags
+                </th>
               </tr>
             </thead>
             <tbody>
               {tableRows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-10">
+                  <td colSpan={7} className="py-10">
                     <EmptyState
                       title="No prompts"
                       message="No prompts match the current filters or search."
@@ -300,7 +321,7 @@ export function PromptsScreen() {
               ) : (
                 pagedRows.map((r) => (
                   <tr key={r.id} className="group border-b border-line transition hover:bg-surface/70">
-                    <td className="max-w-sm py-4 pr-6">
+                    <td className="max-w-sm py-4 pr-4">
                       <button
                         type="button"
                         onClick={() => openPrompt(r)}
@@ -322,11 +343,6 @@ export function PromptsScreen() {
                             {regionFlag(region)} {regionShortLabel(region)}
                           </span>
                         ))}
-                        {r.tags
-                          ?.map(tagLabel)
-                          .filter((tag): tag is string => Boolean(tag))
-                          .slice(0, 2)
-                          .map((tag) => <span key={tag}>#{tag}</span>)}
                       </div>
                     </td>
                     <td className="hidden max-w-40 px-4 py-4 text-xs text-muted md:table-cell">
@@ -335,7 +351,7 @@ export function PromptsScreen() {
                     <td className="hidden px-4 py-4 sm:table-cell">
                       <IntentBadge type={r.type} />
                     </td>
-                    <td className="px-3 py-4 text-right">
+                    <td className="px-4 py-4 text-right">
                       <div className="flex flex-col items-end">
                         <span className="font-display text-base tabular-nums text-ink">
                           {r.avgVisibility != null ? `${formatNumber(r.avgVisibility, 0)}%` : '—'}
@@ -343,7 +359,7 @@ export function PromptsScreen() {
                         <DeltaLabel value={r.visibilityChange} />
                       </div>
                     </td>
-                    <td className="hidden px-3 py-4 text-right sm:table-cell">
+                    <td className="hidden px-4 py-4 text-right sm:table-cell">
                       <div className="flex flex-col items-end">
                         <span className="font-display text-base tabular-nums text-ink">
                           {formatScore(r.avgSentimentScore)}
@@ -351,13 +367,24 @@ export function PromptsScreen() {
                         <DeltaLabel value={r.sentimentChange} />
                       </div>
                     </td>
-                    <td className="px-3 py-4 text-right">
+                    <td className="px-4 py-4 text-right">
                       <div className="flex flex-col items-end">
                         <span className="font-display text-base tabular-nums text-ink">
                           {formatScore(r.avgRank)}
                         </span>
                         <DeltaLabel value={r.rankChange} invert />
                       </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <PromptTagsCell
+                        prompt={r}
+                        onTagsChange={(promptId, tags) => {
+                          setTagOverrides((prev) => ({ ...prev, [promptId]: tags }))
+                          setDrawerPrompt((current) =>
+                            current?.id === promptId ? { ...current, tags } : current,
+                          )
+                        }}
+                      />
                     </td>
                   </tr>
                 ))
@@ -405,6 +432,17 @@ export function PromptsScreen() {
                       {regionFlag(region)} {regionShortLabel(region)}
                     </span>
                   ))}
+                </div>
+                <div className="mt-3">
+                  <PromptTagsCell
+                    prompt={drawerPrompt}
+                    onTagsChange={(promptId, tags) => {
+                      setTagOverrides((prev) => ({ ...prev, [promptId]: tags }))
+                      setDrawerPrompt((current) =>
+                        current?.id === promptId ? { ...current, tags } : current,
+                      )
+                    }}
+                  />
                 </div>
               </div>
               <button

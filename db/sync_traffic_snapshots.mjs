@@ -1,8 +1,8 @@
 /**
- * Refresh ai_traffic JSON snapshot for a single day from iGEO.
+ * Refresh ai_traffic JSON snapshot for a single day from upstream.
  *
  * Usage:
- *   IGEO_API_KEY=... DATABASE_URL=postgresql://... node db/sync_traffic_snapshots.mjs
+ *   SOURCE_API_KEY=... DATABASE_URL=postgresql://... node db/sync_traffic_snapshots.mjs
  *
  * Optional: ACCOUNT_ID, SYNC_DAY (default yesterday UTC)
  */
@@ -15,16 +15,20 @@ const here = path.dirname(fileURLToPath(import.meta.url))
 const require = createRequire(path.join(here, '..', 'functions', 'snapshots-api', 'index.mjs'))
 const pg = require('pg')
 
-const API_BASE = (process.env.API_BASE || 'https://api.igeo.ai').replace(/\/$/, '')
-const API_KEY = process.env.IGEO_API_KEY
+const API_BASE = (process.env.SOURCE_API_BASE || process.env.API_BASE || '').replace(/\/$/, '')
+const API_KEY = process.env.SOURCE_API_KEY
 const ACCOUNT_ID = process.env.ACCOUNT_ID || '44ff27db-fd23-45fe-a37f-2fb13e548314'
 const DATABASE_URL = process.env.DATABASE_URL
 const SYNC_DAY =
   process.env.SYNC_DAY ||
   new Date(Date.now() - 86400000).toISOString().slice(0, 10)
 
+if (!API_BASE) {
+  console.error('FATAL: SOURCE_API_BASE is required')
+  process.exit(1)
+}
 if (!API_KEY) {
-  console.error('FATAL: IGEO_API_KEY is required')
+  console.error('FATAL: SOURCE_API_KEY is required')
   process.exit(1)
 }
 if (!DATABASE_URL) {

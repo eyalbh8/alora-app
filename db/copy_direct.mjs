@@ -1,14 +1,14 @@
 /**
- * Direct DB-to-DB copy: iGEO Postgres -> Alora white-label relational mirror.
+ * Direct DB-to-DB copy: upstream Postgres -> Alora white-label relational mirror.
  *
- * Reads straight from the iGEO database (no API / MCP) and upserts into the
+ * Reads straight from the upstream database (no API / MCP) and upserts into the
  * wl_* tables. Dimensions are fully re-upserted; facts are copied for the
- * last DAYS days (idempotent, keyed by iGEO UUID).
+ * last DAYS days (idempotent, keyed by upstream UUID).
  *
  * Usage:
  *   node db/copy_direct.mjs
  * Optional env:
- *   SRC_DATABASE_URL (default: local tunnel to iGEO on 127.0.0.1:5434)
+ *   SRC_DATABASE_URL (default: local tunnel to upstream on 127.0.0.1:5434)
  *   DST_DATABASE_URL (default: alora-whitelabel RDS)
  *   ACCOUNT_ID (default: 44ff27db-fd23-45fe-a37f-2fb13e548314)
  *   DAYS (default: 3)

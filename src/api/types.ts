@@ -93,6 +93,8 @@ export interface AgentPost {
 export interface DashboardData {
   hasPages?: boolean
   promptsCount?: number
+  overallScore?: number | null
+  previousOverallScore?: number | null
   providerMentions?: ProviderMention[]
   competitorsPerformance?: CompetitorPerformance[]
   agentPosts?: { posts?: AgentPost[]; totalCount?: number }
@@ -326,7 +328,7 @@ export type BrandedFilter = 'AccountIncluded' | 'AccountNotIncluded' | null
 export interface GeoFilters {
   startDate: string
   endDate: string
-  /** iGEO native last-N-days preset. Omit for a custom calendar span. */
+  /** upstream native last-N-days preset. Omit for a custom calendar span. */
   rangeDays?: number | null
   providers: string[]
   topics: string[]

@@ -30,6 +30,7 @@ export function DashboardScreen() {
     envelopeKeys: geo.data && typeof geo.data === 'object' ? Object.keys(geo.data) : [],
     hasInnerData: Boolean(geoPayload),
     promptsCount: geoPayload?.promptsCount,
+    overallScore: geoPayload?.overallScore,
     mentionCount: geoPayload?.providerMentions?.length ?? 0,
     competitorCount: geoPayload?.competitorsPerformance?.length ?? 0,
     sourceCount: geoPayload?.topSourceDomains?.length ?? 0,
@@ -63,10 +64,7 @@ export function DashboardScreen() {
       >
         <section className="overflow-hidden border border-line border-t-2 border-t-ink bg-bg shadow-[0_12px_32px_rgba(16,20,20,0.05)]">
           <header className="px-5 py-5 sm:px-6">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-accent">
-              Selected period
-            </p>
-            <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.02em] text-ink">
+            <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink">
               AI visibility overview
             </h2>
             <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">
@@ -89,6 +87,7 @@ export function DashboardScreen() {
             title="Visibility trend"
             subtitle="How brand presence shifted across the period"
             variant="editorial"
+            framed={false}
             emptyMessage="Not enough history to show a trend yet."
             valueLabel="mentions"
             showLegend

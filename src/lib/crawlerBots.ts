@@ -1,4 +1,4 @@
-/** iGEO-aligned AI crawler bot metadata (icons, labels, normalization). */
+/** AI crawler bot metadata (icons, labels, normalization). */
 
 export const CRAWLER_BOT_ICONS: Record<string, string> = {
   AMAZONBOT: '/static/llm-icons/amazon-color.svg',
@@ -34,7 +34,7 @@ const CRAWLER_BOT_LABELS: Record<string, string> = {
   PETALBOT: 'PetalBot',
 }
 
-/** Known iGEO crawlers — used only as a fallback roster, not a display cap. */
+/** Known upstream crawlers — used only as a fallback roster, not a display cap. */
 export const CRAWLER_BOT_ORDER = [
   'AMAZONBOT',
   'APPLEBOT',
@@ -66,7 +66,7 @@ const ICON_ALIASES: Array<[RegExp, string]> = [
   [/BING|COPILOT/, 'BINGBOT'],
 ]
 
-/** Canonicalize spelling only — do not merge distinct iGEO crawlers. */
+/** Canonicalize spelling only — do not merge distinct upstream crawlers. */
 export function normalizeCrawlerBot(raw: string): string {
   return raw.trim().toUpperCase().replace(/[\s-]+/g, '_')
 }

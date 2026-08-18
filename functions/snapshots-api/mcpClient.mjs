@@ -1,11 +1,11 @@
 /**
- * iGEO MCP Client - HTTP JSON-RPC Caller
- * Connects to iGEO's public MCP endpoint to fetch Instagram posts and BrandHub data.
+ * MCP client — HTTP JSON-RPC caller for Instagram posts and BrandHub data.
  * API keys are passed per request (tenant column, with optional env fallback).
  */
+import { getSourceApiBase } from './sourceClient.mjs'
 
 const MCP_NOT_CONNECTED_MESSAGE =
-  'This account is not connected to iGEO MCP. Paste the full MCP URL to continue.'
+  'This account is not connected. Paste the full MCP URL to continue.'
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -17,7 +17,11 @@ function optionalEnv(name) {
 }
 
 function getMcpUrl() {
-  return optionalEnv('IGEO_MCP_URL') || 'https://api.igeo.ai/mcp'
+  return optionalEnv('MCP_URL') || `${getSourceApiBase()}/mcp`
+}
+
+function isLiveApiKey(key) {
+  return typeof key === 'string' && key.includes('_live_')
 }
 
 /**
@@ -26,7 +30,7 @@ function getMcpUrl() {
  * @returns {string | null}
  */
 export function resolveMcpApiKey(tenantKey) {
-  const fallback = optionalEnv('IGEO_MCP_API_KEY') || optionalEnv('IGEO_API_KEY')
+  const fallback = optionalEnv('MCP_API_KEY') || optionalEnv('SOURCE_API_KEY')
   return tenantKey || fallback || null
 }
 
@@ -36,17 +40,15 @@ export function resolveMcpApiKey(tenantKey) {
  * @returns {string | null}
  */
 export function maskMcpKey(key) {
-  if (!key || typeof key !== 'string' || !key.startsWith('igeo_live_')) {
-    return null
-  }
-  const afterPrefix = key.slice('igeo_live_'.length)
+  if (!isLiveApiKey(key)) return null
+  const afterPrefix = key.split('_live_')[1] || ''
   const visible = afterPrefix.slice(0, 4)
-  return `igeo_live_${visible}…`
+  return visible ? `${visible}…` : null
 }
 
 /**
- * Parse a pasted iGEO MCP connection string.
- * Expected: https://api.igeo.ai/mcp?mcp_token=igeo_live_…&workspace_id=…
+ * Parse a pasted MCP connection string.
+ * Expected: https://…/mcp?mcp_token=…&workspace_id=…
  * Bare keys are rejected so users paste the full URL.
  *
  * @param {string | null | undefined} input
@@ -56,13 +58,13 @@ export function parseMcpConnectionInput(input) {
   const trimmed = typeof input === 'string' ? input.trim() : ''
   if (!trimmed) {
     throw new Error(
-      'Paste the full iGEO MCP URL, including mcp_token and workspace_id.',
+      'Paste the full MCP URL, including mcp_token and workspace_id.',
     )
   }
 
-  if (trimmed.startsWith('igeo_live_')) {
+  if (!trimmed.includes('://') && trimmed.includes('_live_')) {
     throw new Error(
-      'Paste the full MCP URL (not just the key), e.g. https://api.igeo.ai/mcp?mcp_token=…&workspace_id=…',
+      'Paste the full MCP URL (not just the key), including mcp_token and workspace_id.',
     )
   }
 
@@ -71,7 +73,7 @@ export function parseMcpConnectionInput(input) {
     url = new URL(trimmed)
   } catch {
     throw new Error(
-      'Paste a valid MCP URL, e.g. https://api.igeo.ai/mcp?mcp_token=…&workspace_id=…',
+      'Paste a valid MCP URL, including mcp_token and workspace_id.',
     )
   }
 
@@ -86,8 +88,8 @@ export function parseMcpConnectionInput(input) {
     url.searchParams.get('account_id') ||
     ''
 
-  if (!apiKey.startsWith('igeo_live_')) {
-    throw new Error('The MCP URL must include mcp_token=igeo_live_…')
+  if (!isLiveApiKey(apiKey)) {
+    throw new Error('The MCP URL must include a valid mcp_token.')
   }
   if (!UUID_RE.test(workspaceId)) {
     throw new Error('The MCP URL must include a valid workspace_id.')
@@ -110,15 +112,15 @@ export function validateMcpApiKey(apiKey) {
     err.code = 'MCP_NOT_CONNECTED'
     throw err
   }
-  if (!apiKey.startsWith('igeo_live_')) {
-    throw new Error('MCP API key must start with igeo_live_')
+  if (!isLiveApiKey(apiKey)) {
+    throw new Error('This MCP URL does not include a valid API token.')
   }
 }
 
 /**
- * Call an iGEO MCP tool via JSON-RPC 2.0
- * @param {string} accountId - iGEO workspace account UUID
- * @param {string} apiKey - Workspace-scoped igeo_live_ key
+ * Call an MCP tool via JSON-RPC 2.0
+ * @param {string} accountId - workspace account UUID
+ * @param {string} apiKey - workspace-scoped live key
  * @param {string} toolName - MCP tool name (e.g., 'posts', 'api_get')
  * @param {Object} args - Tool arguments
  * @returns {Promise<any>} Parsed result from MCP
@@ -180,10 +182,10 @@ async function callMcpTool(accountId, apiKey, toolName, args = {}) {
 }
 
 /**
- * Fetch Instagram posts from iGEO MCP
+ * Fetch Instagram posts from MCP
  * Uses the 'posts' named tool which maps to GET /accounts/{workspaceId}/agents/posts
  *
- * @param {string} accountId - iGEO Account UUID
+ * @param {string} accountId - Account UUID
  * @param {string} apiKey - Tenant MCP key
  * @param {string} [provider='INSTAGRAM']
  * @returns {Promise<{posts: Array, totalCount: number}>}
@@ -218,18 +220,18 @@ export async function fetchTodayPosts(accountId, apiKey, provider = 'INSTAGRAM')
 }
 
 /**
- * Fetch BrandHub data from the iGEO Public REST API.
+ * Fetch BrandHub data from the upstream analytics REST API.
  * GET /accounts/{accountId} with Bearer + X-Workspace-Id (catalog first request).
  *
- * @param {string} accountId - iGEO Account UUID
+ * @param {string} accountId - Account UUID
  * @param {string} apiKey - Tenant MCP / Public API key
  * @returns {Promise<Object>} BrandHub object with Account fields
  */
 export async function fetchBrandHub(accountId, apiKey) {
   try {
-    const { igeoGet } = await import('./igeoClient.mjs')
-    console.log(`[iGEO] Fetching BrandHub for account ${accountId}`)
-    const account = await igeoGet(accountId, apiKey, `/accounts/${accountId}`)
+    const { sourceGet } = await import('./sourceClient.mjs')
+    console.log(`[source] Fetching BrandHub for account ${accountId}`)
+    const account = await sourceGet(accountId, apiKey, `/accounts/${accountId}`)
 
     // Normalize typography from various possible fields
     const typography = account.typography || account.fonts || {}
@@ -266,7 +268,7 @@ export async function fetchBrandHub(accountId, apiKey) {
       generatePostsOnRecommendation: account.generatePostsOnRecommendation || false,
     }
   } catch (error) {
-    console.error('[iGEO] Error fetching BrandHub:', error.message)
+    console.error('[source] Error fetching BrandHub:', error.message)
     throw new Error(`Failed to fetch BrandHub data: ${error.message}`)
   }
 }
@@ -276,7 +278,7 @@ export async function fetchBrandHub(accountId, apiKey) {
  * Only use if MCP fails and wl_accounts.raw has a full payload
  *
  * @param {Object} db - Postgres pool connection
- * @param {string} accountId - iGEO Account UUID
+ * @param {string} accountId - Account UUID
  * @returns {Promise<Object>} BrandHub object
  */
 export async function fetchBrandHubFromPostgres(db, accountId) {

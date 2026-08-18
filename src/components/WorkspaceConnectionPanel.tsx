@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useMcpConnection, useSaveMcpConnection } from '../api/carouselGeneration'
 import { useAccountStore } from '../store/useAccountStore'
 
-export function IgeoConnectionPanel({ compact = false }: { compact?: boolean }) {
+export function WorkspaceConnectionPanel({ compact = false }: { compact?: boolean }) {
   const selectedAccount = useAccountStore((s) => s.selectedAccount)
   const connection = useMcpConnection()
   const saveMutation = useSaveMcpConnection()
@@ -25,11 +25,11 @@ export function IgeoConnectionPanel({ compact = false }: { compact?: boolean }) 
     <div className={compact ? 'border border-line bg-surface p-4' : 'border border-line bg-surface p-6'}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="eyebrow mb-2">iGEO connection</p>
+          <p className="eyebrow mb-2">Workspace connection</p>
           <p className="mt-1 text-[15px] text-muted">
             {connected
               ? `${accountName} is connected${connection.data?.keyPrefix ? ` (${connection.data.keyPrefix})` : ''}${workspaceId ? ` · ${workspaceId}` : ''}.`
-              : `Paste the iGEO MCP URL for ${accountName}. The key and workspace_id are saved on this Alora account.`}
+              : `Paste the MCP URL for ${accountName}. The key and workspace_id are saved on this Alora account.`}
           </p>
         </div>
         {connected && (
@@ -48,13 +48,13 @@ export function IgeoConnectionPanel({ compact = false }: { compact?: boolean }) 
       {!connected && (
         <form onSubmit={handleSave} className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="form-field min-w-0 flex-1">
-            <label htmlFor="igeo-mcp-url">MCP URL — required</label>
+            <label htmlFor="workspace-mcp-url">MCP URL — required</label>
             <input
-              id="igeo-mcp-url"
+              id="workspace-mcp-url"
               type="url"
               autoComplete="off"
               spellCheck={false}
-              placeholder="https://api.igeo.ai/mcp?mcp_token=igeo_live_…&workspace_id=…"
+              placeholder="https://…/mcp?mcp_token=…&workspace_id=…"
               value={connectionUrl}
               onChange={(event) => setConnectionUrl(event.target.value)}
             />

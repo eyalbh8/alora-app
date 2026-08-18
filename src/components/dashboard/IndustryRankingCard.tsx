@@ -49,6 +49,7 @@ export function IndustryRankingCard({ competitors }: IndustryRankingCardProps) {
       subtitle="Who owns the narrative in AI answers"
       variant="editorial"
       fill
+      framed={false}
       contentClassName="min-w-0 overflow-hidden"
     >
       {isEmpty ? (

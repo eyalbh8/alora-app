@@ -33,6 +33,7 @@ interface BrandVisibilityChartProps {
   heightClassName?: string
   showLegend?: boolean
   paired?: boolean
+  framed?: boolean
 }
 
 export function BrandVisibilityChart({
@@ -46,6 +47,7 @@ export function BrandVisibilityChart({
   heightClassName,
   showLegend = false,
   paired = false,
+  framed = true,
 }: BrandVisibilityChartProps) {
   const { hoveredCompetitor } = useCompetitorHover()
   const days = daysInRange(range)
@@ -95,12 +97,13 @@ export function BrandVisibilityChart({
       title={title}
       subtitle={subtitle}
       variant={variant}
-      fill={paired}
+      fill={paired || variant === 'editorial'}
+      framed={framed}
       contentClassName={
         paired
           ? ''
           : variant === 'editorial'
-            ? (heightClassName ?? 'h-[180px]')
+            ? (heightClassName ?? 'min-h-[180px] flex-1')
             : 'overflow-hidden'
       }
     >
@@ -148,10 +151,11 @@ export function BrandVisibilityChart({
             </div>
           )}
           <div
-            className={paired ? 'shrink-0' : 'min-h-0 flex-1'}
+            className={paired ? 'shrink-0' : 'relative min-h-0 flex-1'}
             style={paired ? { height: PAIRED_PLOT_HEIGHT_PX + PAIRED_XAXIS_HEIGHT_PX } : undefined}
           >
-            <ResponsiveContainer width="100%" height="100%">
+            <div className={paired ? 'h-full' : 'absolute inset-0'}>
+              <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={chartData}
                 margin={
@@ -251,7 +255,8 @@ export function BrandVisibilityChart({
                   )
                 })}
               </LineChart>
-            </ResponsiveContainer>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
       )}

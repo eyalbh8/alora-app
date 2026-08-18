@@ -141,7 +141,7 @@ Rate each carousel on a 1-5 scale for each criterion:
 ANTHROPIC_API_KEY=your_key
 OPENAI_API_KEY=your_key
 FIGMA_ACCESS_TOKEN=your_token
-IGEO_ACCOUNT_ID=your_account_id
+SOURCE_ACCOUNT_ID=your_account_id
 
 # Run database migration
 psql -d your_database -f db/carousel_generation_schema.sql

@@ -5,8 +5,8 @@
 CREATE TABLE IF NOT EXISTS carousel_generations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL REFERENCES whitelabel_tenants(id) ON DELETE CASCADE,
-  account_id UUID NOT NULL, -- iGEO Account ID
-  selected_post_id UUID NOT NULL, -- iGEO post.id
+  account_id UUID NOT NULL, -- upstream Account ID
+  selected_post_id UUID NOT NULL, -- upstream post.id
   post_prompt TEXT NOT NULL,
   post_text TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending', -- pending, running, completed, failed

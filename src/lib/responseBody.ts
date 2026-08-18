@@ -1,4 +1,4 @@
-/** Strip markdown code fences and parse iGEO provider response payloads into readable prose. */
+/** Strip markdown code fences and parse upstream provider response payloads into readable prose. */
 
 function stripLeadingFence(text: string): string {
   return text
@@ -94,7 +94,7 @@ function extractPythonDictText(dictStr: string): string {
 function cleanCitationSuffix(text: string): string {
   return text
     .replace(/\u00a0/g, ' ')
-    // iGEO inline source badges, e.g. "…sentence. Reddit +4" or "…sentence.\u00a0RunRepeat +2"
+    // upstream inline source badges, e.g. "…sentence. Reddit +4" or "…sentence.\u00a0RunRepeat +2"
     .replace(/\s[\u00a0]?[A-Za-z][A-Za-z0-9 .-]{0,40}\s+\+\d+\s*$/g, '')
     .replace(/[ \t]{2,}/g, ' ')
     .trim()
@@ -256,7 +256,7 @@ function previewSource(text: string): string {
   return text.replace(/\*\*Key Points:\*\*\s*/g, '').trim()
 }
 
-/** Turn stored iGEO response blobs into human-readable text for table + drawer. */
+/** Turn stored upstream response blobs into human-readable text for table + drawer. */
 export function formatResponseDisplayText(raw: string | null | undefined): string {
   if (!raw?.trim()) return ''
   const structured = parseStructuredPayload(raw)

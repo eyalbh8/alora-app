@@ -13,25 +13,25 @@ export class SnapshotApiError extends Error {
   }
 }
 
-async function request<T>(path: string): Promise<T> {
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   let response: Response
   try {
     const token = getSessionToken()
     const selectedAccount = useAccountStore.getState().selectedAccount
     
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     }
     
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`
+      headers.Authorization = `Bearer ${token}`
     }
     
     if (selectedAccount?.id) {
       headers['X-Alora-Tenant-Id'] = selectedAccount.id
     }
     
-    response = await fetch(`${API_BASE_PATH}${path}`, { headers })
+    response = await fetch(`${API_BASE_PATH}${path}`, { ...init, headers })
   } catch (err) {
     throw new SnapshotApiError(
       `Network error calling Alora API: ${err instanceof Error ? err.message : String(err)}. Is the dev server running?`,
@@ -54,4 +54,11 @@ async function request<T>(path: string): Promise<T> {
 
 export function apiGet<T>(path: string): Promise<T> {
   return request<T>(path)
+}
+
+export function apiSend<T>(path: string, method: string, body?: unknown): Promise<T> {
+  return request<T>(path, {
+    method,
+    body: body === undefined ? undefined : JSON.stringify(body),
+  })
 }

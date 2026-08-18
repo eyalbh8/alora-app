@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import type { CompetitorPerformance } from '../../api/types'
 import { useCompetitorHover } from '../../context/CompetitorHoverContext'
+import { useGeoMeta } from '../../context/GeoMetaContext'
+import { findAccountCompetitor, isAccountCompetitor } from '../../lib/accountCompetitor'
 import { formatNumber } from '../../lib/format'
 import { SOV_COLORS } from './constants'
 
@@ -18,6 +20,7 @@ interface VoiceSegment {
 
 export function ShareOfVoiceDonut({ competitors }: ShareOfVoiceDonutProps) {
   const { hoveredCompetitor, setHoveredCompetitor } = useCompetitorHover()
+  const { meta } = useGeoMeta()
 
   const segments = useMemo(() => {
     const active = competitors.filter((c) => (c.occurrences ?? 0) > 0)
@@ -26,14 +29,12 @@ export function ShareOfVoiceDonut({ competitors }: ShareOfVoiceDonutProps) {
       name: c.name,
       value: c.occurrences ?? 0,
       color: SOV_COLORS[index % SOV_COLORS.length],
-      isAccount: Boolean(c.isAccount || c.id === 'account'),
+      isAccount: isAccountCompetitor(c, meta?.account),
     })) satisfies VoiceSegment[]
-  }, [competitors])
+  }, [competitors, meta?.account])
 
   const total = segments.reduce((sum, segment) => sum + segment.value, 0)
-  const account =
-    competitors.find((c) => c.isAccount || c.id === 'account') ??
-    competitors.find((c) => (c.occurrences ?? 0) > 0)
+  const account = findAccountCompetitor(competitors, meta?.account)
   const myShare =
     total > 0 && account ? Math.round(((account.occurrences ?? 0) / total) * 100) : 0
 

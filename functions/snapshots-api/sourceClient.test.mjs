@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { parseIgeoRangeDays, toIgeoQuery } from './igeoClient.mjs'
+import { parseRangeDays, toSourceQuery } from './sourceClient.mjs'
 
-describe('toIgeoQuery', () => {
+describe('toSourceQuery', () => {
   it('sends range=N and omits UTC dates for Last N days presets', () => {
-    const q = toIgeoQuery({
+    const q = toSourceQuery({
       startDate: '2026-08-12',
       endDate: '2026-08-18',
       rangeDays: 7,
@@ -21,7 +21,7 @@ describe('toIgeoQuery', () => {
   })
 
   it('keeps explicit UTC dates for a custom calendar span', () => {
-    const q = toIgeoQuery({
+    const q = toSourceQuery({
       startDate: '2026-08-01',
       endDate: '2026-08-07',
       rangeDays: null,
@@ -39,7 +39,7 @@ describe('toIgeoQuery', () => {
   })
 
   it('ignores a non-preset rangeDays value', () => {
-    expect(parseIgeoRangeDays(3)).toBeNull()
-    expect(parseIgeoRangeDays('7')).toBe(7)
+    expect(parseRangeDays(3)).toBeNull()
+    expect(parseRangeDays('7')).toBe(7)
   })
 })

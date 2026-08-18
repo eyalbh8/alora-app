@@ -14,7 +14,7 @@ import {
   type BrandHubData,
   type CarouselGenerationSummary,
 } from '../api/carouselGeneration'
-import { IgeoConnectionPanel } from '../components/IgeoConnectionPanel'
+import { WorkspaceConnectionPanel } from '../components/WorkspaceConnectionPanel'
 
 function isFigmaFileUrl(value: unknown): value is string {
   return (
@@ -124,7 +124,7 @@ export default function InstagramCarouselScreen() {
         </div>
 
         <div className="mb-8">
-          <IgeoConnectionPanel compact />
+          <WorkspaceConnectionPanel compact />
         </div>
 
         {/* Phase Indicator */}
@@ -444,16 +444,16 @@ function SelectPostPhase({
   if (error) {
     const notConnected =
       (error as Error & { code?: string }).code === 'MCP_NOT_CONNECTED' ||
-      error.message.toLowerCase().includes('not connected to igeo mcp')
+      error.message.toLowerCase().includes('not connected')
 
     return (
       <div className="p-8 text-center">
         {notConnected ? (
           <>
-            <p className="text-ink font-medium">Connect iGEO to load posts</p>
+            <p className="text-ink font-medium">Connect a workspace to load posts</p>
             <p className="mt-2 text-sm text-muted-dark">
-              Paste the full iGEO MCP URL in the panel above. It looks like
-              https://api.igeo.ai/mcp?mcp_token=…&workspace_id=…
+              Paste the full MCP URL in the panel above. It looks like
+              https://…/mcp?mcp_token=…&workspace_id=…
             </p>
           </>
         ) : (
@@ -474,7 +474,7 @@ function SelectPostPhase({
         <div className="text-muted-dark mb-4">📭</div>
         <p className="text-muted">No Instagram posts found from the last 14 days.</p>
         <p className="mt-2 text-sm text-muted-dark">
-          Generate some posts in iGEO first, then come back here.
+          Generate some posts first, then come back here.
         </p>
       </div>
     )
@@ -547,11 +547,11 @@ function ReviewPhase({
           </div>
         </div>
 
-        {/* BrandHub Summary from iGEO MCP */}
+        {/* BrandHub Summary */}
         <div>
           <h3 className="text-sm font-medium text-ink mb-2">BrandHub Guidelines</h3>
           <div className="bg-paper-soft rounded-lg p-4">
-            {brandHubLoading && <p className="text-sm text-muted-dark">Loading BrandHub from iGEO…</p>}
+            {brandHubLoading && <p className="text-sm text-muted-dark">Loading BrandHub…</p>}
             {brandHubError && (
               <p className="text-sm text-red-600">Could not load BrandHub: {brandHubError.message}</p>
             )}

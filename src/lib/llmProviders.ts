@@ -1,4 +1,4 @@
-/** iGEO-aligned LLM provider metadata (icons, labels, normalization). */
+/** LLM provider metadata (icons, labels, normalization). */
 
 export const LLM_PROVIDER_ICONS: Record<string, string> = {
   GEMINI: '/static/llm-icons/gemini-color.svg',

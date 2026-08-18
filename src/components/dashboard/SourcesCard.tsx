@@ -26,6 +26,7 @@ export function SourcesCard({ sources }: SourcesCardProps) {
       title="Citation landscape"
       subtitle="Domains shaping AI answers in your category"
       variant="editorial"
+      framed={false}
       contentClassName="overflow-x-auto"
     >
       {isEmpty ? (

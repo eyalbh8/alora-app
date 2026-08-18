@@ -13,25 +13,25 @@ export function CurrentSentimentScore({ score }: CurrentSentimentScoreProps) {
       : `conic-gradient(${SENTIMENT_TEAL} 0% ${value}%, ${SENTIMENT_TEAL_LIGHT} ${value}% 100%)`
 
   return (
-    <section aria-labelledby="current-sentiment-title">
-      <h2 id="current-sentiment-title" className="mb-5 text-[19px] font-semibold text-ink">
+    <section aria-labelledby="current-sentiment-title" className="flex flex-col items-center">
+      <h2 id="current-sentiment-title" className="mb-6 text-[19px] font-semibold text-ink">
         Current Sentiment Score
       </h2>
       <div
-        className="mx-auto flex h-[170px] w-[170px] items-center justify-center rounded-full lg:mx-0"
+        className="flex h-[220px] w-[220px] items-center justify-center rounded-full"
         style={{ background: ringBackground }}
         role="img"
         aria-label={value == null ? 'No current sentiment score' : `Current sentiment score: ${value} out of 100`}
       >
-        <div className="flex h-[126px] w-[126px] flex-col items-center justify-center rounded-full bg-bg">
+        <div className="flex h-[164px] w-[164px] flex-col items-center justify-center rounded-full bg-bg">
           {value == null ? (
-            <span className="font-display text-[28px] font-semibold text-muted-dark">—</span>
+            <span className="font-display text-[36px] font-semibold text-muted-dark">—</span>
           ) : (
             <>
-              <span className="font-display text-[28px] font-semibold tracking-tight text-ink">
+              <span className="font-display text-[36px] font-semibold tracking-tight text-ink">
                 {formatNumber(value, 0)}
               </span>
-              <span className="mt-0.5 text-[11px] text-muted">/ 100</span>
+              <span className="mt-0.5 text-[12px] text-muted">/ 100</span>
             </>
           )}
         </div>

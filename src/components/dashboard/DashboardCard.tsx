@@ -9,6 +9,7 @@ interface DashboardCardProps {
   contentClassName?: string
   variant?: 'card' | 'editorial'
   fill?: boolean
+  framed?: boolean
 }
 
 export function DashboardCard({
@@ -19,14 +20,15 @@ export function DashboardCard({
   contentClassName = 'overflow-auto',
   variant = 'card',
   fill = false,
+  framed = true,
 }: DashboardCardProps) {
   if (variant === 'editorial') {
     return (
       <section
-        className={`min-w-0 border border-line bg-surface p-[22px] ${fill ? 'flex h-full flex-col' : ''} ${className}`}
+        className={`min-w-0 ${framed ? 'border border-line bg-surface p-[22px]' : ''} ${fill ? 'flex h-full flex-col' : ''} ${className}`}
       >
         <header className={`mb-5 shrink-0 ${PAIRED_SECTION_HEADER_MIN_CLASS}`}>
-          <p className="eyebrow mb-2">{title}</p>
+          <h2 className="text-[19px] font-semibold text-ink">{title}</h2>
           {subtitle && <p className="mt-0.5 text-[13px] text-muted">{subtitle}</p>}
         </header>
         <div className={`${fill ? 'flex min-h-0 flex-1 flex-col' : ''} ${contentClassName}`}>
@@ -42,7 +44,7 @@ export function DashboardCard({
       style={{ height: DASHBOARD_CARD_HEIGHT, minHeight: DASHBOARD_CARD_HEIGHT }}
     >
       <div className="shrink-0 border-b border-line px-5 py-4">
-        <p className="eyebrow mb-0">{title}</p>
+        <h2 className="text-[19px] font-semibold text-ink">{title}</h2>
         {subtitle && <p className="mt-1 text-[13px] text-muted">{subtitle}</p>}
       </div>
       <div className={`min-h-0 flex-1 ${contentClassName}`}>{children}</div>

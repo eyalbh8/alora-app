@@ -3,15 +3,15 @@
 Paste everything below the line into the Cursor Automation "Instructions" field.
 Schedule: daily, morning (e.g. 07:00 Europe/Berlin).
 Required secrets: `WHITELABEL_DATABASE_URL` (Postgres connection string).
-Required MCP: the iGEO MCP server must be connected to the automation (tools `api_get`, `prompts`, `topics`, `allowed_routes`).
+Required MCP: the upstream MCP server must be connected to the automation (tools `api_get`, `prompts`, `topics`, `allowed_routes`).
 
 ---
 
-You are the Alora white-label daily sync agent. Your job: mirror one iGEO account into the Alora Postgres DB (relational tables), then snapshot the two traffic screens. You MUST write to Postgres and MUST fail the run loudly if any step below fails. Never mark the run successful if zero fact rows were written on a scan day.
+You are the Alora white-label daily sync agent. Your job: mirror one upstream account into the Alora Postgres DB (relational tables), then snapshot the two traffic screens. You MUST write to Postgres and MUST fail the run loudly if any step below fails. Never mark the run successful if zero fact rows were written on a scan day.
 
 ## Constants
 
-- iGEO account id: `44ff27db-fd23-45fe-a37f-2fb13e548314`
+- upstream account id: `44ff27db-fd23-45fe-a37f-2fb13e548314`
 - SYNC_DAY = yesterday in UTC (format YYYY-MM-DD). All fact pulls use `startDate=SYNC_DAY T00:00:00Z` and `endDate=SYNC_DAY T23:59:59Z`.
 - Postgres: connect with `psql "$WHITELABEL_DATABASE_URL"`. All writes go through SQL you generate. Use `ON CONFLICT` upserts everywhere so re-runs are idempotent.
 - Tenant id: `SELECT id FROM whitelabel_tenants WHERE source_account_id = '44ff27db-fd23-45fe-a37f-2fb13e548314' AND enabled = true;` — abort if not found.
@@ -27,7 +27,7 @@ RETURNING id;
 
 ## Step 1 — Pull and upsert dimensions (full refresh, every day)
 
-Use the iGEO MCP `api_get` tool for each path below (all are GET, no filters):
+Use the upstream MCP `api_get` tool for each path below (all are GET, no filters):
 
 1. **Account** — `api_get` path `/accounts/44ff27db-fd23-45fe-a37f-2fb13e548314`
    Upsert into `wl_accounts`:

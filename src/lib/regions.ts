@@ -1,4 +1,4 @@
-/** Common country names iGEO may send instead of ISO codes. */
+/** Common country names upstream may send instead of ISO codes. */
 const COUNTRY_NAME_TO_CODE: Record<string, string> = {
   cyprus: 'CY',
   israel: 'IL',

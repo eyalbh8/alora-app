@@ -10,8 +10,9 @@ import type {
 } from '../../api/types'
 import { providerOf, sentimentOf } from './normalize'
 
-function norm(value: string | null | undefined): string {
-  return (value ?? '').trim().toLowerCase()
+function norm(value: string | number | null | undefined): string {
+  if (value == null) return ''
+  return String(value).trim().toLowerCase()
 }
 
 /** Normalize a tag string or `{ name, tagId }` object to a display/filter id. */

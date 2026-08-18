@@ -1,4 +1,4 @@
-/** LLM providers shown on the iGEO AI Traffic screen, in display order. */
+/** LLM providers shown on the upstream AI Traffic screen, in display order. */
 export const AI_TRAFFIC_PROVIDER_ORDER = [
   'OPENAI',
   'ANTHROPIC',

@@ -71,7 +71,7 @@ function logoDevUrl(opts: { domain?: string | null; name?: string | null }): str
   return `https://img.logo.dev/name/${encodeURIComponent(name)}?${params}`
 }
 
-/** Ordered logo URL candidates — stored mark, then logo.dev (same as iGEO). */
+/** Ordered logo URL candidates — stored mark, then logo.dev (same as upstream). */
 export function brandLogoCandidates(row: BrandLogoSource, meta?: BrandLogoMeta | null): string[] {
   const out: string[] = []
   const seen = new Set<string>()

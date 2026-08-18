@@ -185,7 +185,7 @@ export function DateRangePicker({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 flex overflow-hidden border border-line bg-paper-soft">
+        <div className="absolute left-0 top-full z-50 mt-1 flex overflow-hidden border border-line bg-paper-soft lg:left-auto lg:right-0">
           <div className="flex w-44 flex-col border-r border-line py-2">
             {TIME_PRESET_OPTIONS.map(({ days, label }) => (
               <button

@@ -121,33 +121,115 @@ export async function verifyToken(authHeader) {
   return { userId, email, name: name || null }
 }
 
-/**
- * Upsert user record in wl_users on first authenticated request.
- * @param {import('pg').Pool} db
- * @param {{userId: string, email: string, name?: string}} user
- * @returns {Promise<{id: string, email: string, name: string|null, isAdmin: boolean}>}
- */
-export async function upsertUser(db, user) {
-  const existing = await db.query(`SELECT COUNT(*)::int AS count FROM wl_users`)
-  const isFirstUser = existing.rows[0]?.count === 0
-
-  const result = await db.query(
-    `INSERT INTO wl_users (id, email, name, is_admin)
-     VALUES ($1, $2, $3, $4)
-     ON CONFLICT (id) DO UPDATE
-       SET email = EXCLUDED.email,
-           name = COALESCE(EXCLUDED.name, wl_users.name),
-           updated_at = now()
-     RETURNING id, email, name, is_admin`,
-    [user.userId, user.email, user.name || null, isFirstUser],
-  )
-  const row = result.rows[0]
+function mapUserRow(row) {
   return {
     id: row.id,
     email: row.email,
     name: row.name,
     isAdmin: row.is_admin,
   }
+}
+
+/**
+ * Run fn in a transaction. Uses a dedicated pool client so BEGIN/COMMIT stay on one connection.
+ * @param {import('pg').Pool | import('pg').PoolClient} db
+ * @param {(client: import('pg').Pool | import('pg').PoolClient) => Promise<T>} fn
+ * @returns {Promise<T>}
+ * @template T
+ */
+async function withTransaction(db, fn) {
+  const client = typeof db.connect === 'function' ? await db.connect() : db
+  const shouldRelease = client !== db
+  try {
+    await client.query('BEGIN')
+    const result = await fn(client)
+    await client.query('COMMIT')
+    return result
+  } catch (err) {
+    try {
+      await client.query('ROLLBACK')
+    } catch {
+      // ignore rollback failure
+    }
+    throw err
+  } finally {
+    if (shouldRelease) client.release()
+  }
+}
+
+/**
+ * Upsert user record in wl_users on first authenticated request.
+ * Pre-provisioned users (inserted by email before first login) are claimed:
+ * their pending id is replaced with the Descope id and memberships are kept.
+ * @param {import('pg').Pool} db
+ * @param {{userId: string, email: string, name?: string}} user
+ * @returns {Promise<{id: string, email: string, name: string|null, isAdmin: boolean}>}
+ */
+export async function upsertUser(db, user) {
+  const email = user.email ? String(user.email).trim().toLowerCase() : null
+  if (!email) {
+    throw new Error('User email is required')
+  }
+
+  const existing = await db.query(`SELECT COUNT(*)::int AS count FROM wl_users`)
+  const isFirstUser = existing.rows[0]?.count === 0
+
+  return withTransaction(db, async (client) => {
+    const byId = await client.query(
+      `SELECT id, email, name, is_admin FROM wl_users WHERE id = $1`,
+      [user.userId],
+    )
+    if (byId.rows[0]) {
+      const result = await client.query(
+        `UPDATE wl_users
+         SET email = $2,
+             name = COALESCE($3, name),
+             updated_at = now()
+         WHERE id = $1
+         RETURNING id, email, name, is_admin`,
+        [user.userId, email, user.name || null],
+      )
+      return mapUserRow(result.rows[0])
+    }
+
+    const byEmail = await client.query(
+      `SELECT id, is_admin FROM wl_users WHERE lower(email) = $1`,
+      [email],
+    )
+    if (byEmail.rows[0]) {
+      const oldId = byEmail.rows[0].id
+      const isAdmin = byEmail.rows[0].is_admin
+      // Insert first (temp email) so membership FKs can move, then drop the pending row.
+      await client.query(
+        `INSERT INTO wl_users (id, email, name, is_admin)
+         VALUES ($1, $2, $3, $4)`,
+        [user.userId, `${user.userId}@descope.pending`, user.name || null, isAdmin],
+      )
+      await client.query(`UPDATE wl_user_tenants SET user_id = $1 WHERE user_id = $2`, [
+        user.userId,
+        oldId,
+      ])
+      await client.query(`DELETE FROM wl_users WHERE id = $1`, [oldId])
+      const result = await client.query(
+        `UPDATE wl_users
+         SET email = $2,
+             name = COALESCE($3, name),
+             updated_at = now()
+         WHERE id = $1
+         RETURNING id, email, name, is_admin`,
+        [user.userId, email, user.name || null],
+      )
+      return mapUserRow(result.rows[0])
+    }
+
+    const result = await client.query(
+      `INSERT INTO wl_users (id, email, name, is_admin)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, email, name, is_admin`,
+      [user.userId, email, user.name || null, isFirstUser],
+    )
+    return mapUserRow(result.rows[0])
+  })
 }
 
 /**

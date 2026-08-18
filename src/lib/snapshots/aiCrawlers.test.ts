@@ -4,7 +4,7 @@ import { buildAiCrawlersViewModel } from './aiCrawlers'
 const range = { startDate: '2026-08-12', endDate: '2026-08-18' }
 
 describe('buildAiCrawlersViewModel', () => {
-  it('keeps distinct iGEO crawlers and sorts cards by volume descending', () => {
+  it('keeps distinct upstream crawlers and sorts cards by volume descending', () => {
     const view = buildAiCrawlersViewModel(
       {
         totalRequests: 25305,

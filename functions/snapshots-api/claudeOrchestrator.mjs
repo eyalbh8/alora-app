@@ -243,7 +243,7 @@ export async function runStep1_CarouselPlan(input) {
   const minSlides = carouselProfile?.content?.minSlides || 3;
   const maxSlides = carouselProfile?.content?.maxSlides || 5;
 
-  const systemPrompt = `You are a senior Instagram growth strategist for iGEO Content Studio.
+  const systemPrompt = `You are a senior Instagram growth strategist for Alora Content Studio.
 Create the viral carousel plan that best answers the target prompt, informed by the brand's audience, personality, tone, industry context, and editorial guidelines.
 
 Consider the brand's target audience, voice characteristics, and content guidelines when selecting the template and crafting slide structure.
@@ -427,7 +427,7 @@ export async function runStep2_VisualStyleDirection(input) {
   
   console.log(`[Step 2] Selected ${selectedStyles.length} visual styles:`, selectedStyles.map(s => s.name).join(', '));
 
-  const systemPrompt = `You are a creative director for iGEO, inspired by sophisticated, social-native Instagram editorial aesthetics like @mayven_____.
+  const systemPrompt = `You are a creative director for Alora, inspired by sophisticated, social-native Instagram editorial aesthetics like @mayven_____.
 
 YOU HAVE ACCESS TO A VISUAL STYLES LIBRARY with pre-designed creative approaches. Use these styles as your creative palette.
 
@@ -649,7 +649,7 @@ Output shape:
 export async function runStep3_ChooseTemplates(input) {
   const { step1Output, step2Output, templates, carouselProfile, generationId, tenantId, accountId } = input;
 
-  const systemPrompt = `You are an Instagram art director for iGEO.
+  const systemPrompt = `You are an Instagram art director for Alora.
 Using Step 1's plan and Step 2's visual direction, choose the best template(s) from the templates catalog.
 Templates define typography and text placement zones - visuals come from Step 2.
 
@@ -698,9 +698,9 @@ export async function runStep4_ApplyBrandHub(input) {
     accountId,
   } = input;
 
-  const systemPrompt = `You are the brand systems designer for iGEO Brand Hub (Brandbook).
+  const systemPrompt = `You are the brand systems designer for Alora Brand Hub (Brandbook).
 Merge the real Account BrandHub fields with Step 2 visual direction and post text into a production-ready design brief.
-Preserve BrandHub facts exactly — same data iGEO agents inject.
+Preserve BrandHub facts exactly.
 
 CRITICAL: Return valid JSON only (no markdown fences, no commentary outside the JSON).`;
 
@@ -713,7 +713,7 @@ ${JSON.stringify(step2Output, null, 2)}
 Step 3 templates:
 ${JSON.stringify(step3Output, null, 2)}
 
-BrandHub (iGEO Account):
+BrandHub (Account):
 ${JSON.stringify(brandHub, null, 2)}
 
 Post text:
@@ -766,7 +766,7 @@ Output shape:
 export async function runStep5_FormatCaption(input) {
   const { step4Output, generationId, tenantId, accountId } = input;
 
-  const systemPrompt = `You are an Instagram copywriting expert for iGEO.
+  const systemPrompt = `You are an Instagram copywriting expert for Alora.
 Transform the caption into Instagram-optimized text: add strategic emojis, include "link in bio" CTA, mark @mentions and #hashtags.
 Preserve all factual content and brand voice from Step 4.
 
@@ -1744,7 +1744,7 @@ export async function runStep8_FigmaAssembly(input) {
   const { step2Output, step3Output, step4Output, step5Output, step6Output, step7Output, carouselProfile, generationId, tenantId, accountId } = input;
   const format = resolveInstagramFormat(carouselProfile?.format || step7Output?.format);
 
-  const systemPrompt = `You are a Figma production designer for iGEO.
+  const systemPrompt = `You are a Figma production designer for Alora.
 Build a specification for assembling the carousel: upload visuals, overlay text, apply brand colors.
 The spec will be used to call Figma MCP tools.
 

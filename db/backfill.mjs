@@ -1,13 +1,13 @@
 /**
- * One-time backfill: mirror iGEO account data into the Alora white-label DB.
+ * One-time backfill: mirror upstream account data into the Alora white-label DB.
  *
  * Pulls dimensions (account, preferences, topics, prompts, competitors) and
  * up to DAYS days of facts (results via /findings/export, prompt responses),
  * plus ai_traffic / ai_crawlers JSON snapshots. Idempotent upserts throughout.
  *
  * Usage:
- *   IGEO_API_KEY=... DATABASE_URL=postgresql://... node db/backfill.mjs
- * Optional env: ACCOUNT_ID, DAYS (default 90), API_BASE (default https://api.igeo.ai)
+ *   SOURCE_API_KEY=... DATABASE_URL=postgresql://... node db/backfill.mjs
+ * Optional env: ACCOUNT_ID, DAYS (default 90), SOURCE_API_BASE / API_BASE
  */
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
@@ -18,13 +18,14 @@ const here = path.dirname(fileURLToPath(import.meta.url))
 const require = createRequire(path.join(here, '..', 'functions', 'snapshots-api', 'index.mjs'))
 const pg = require('pg')
 
-const API_BASE = (process.env.API_BASE || 'https://api.igeo.ai').replace(/\/$/, '')
-const API_KEY = process.env.IGEO_API_KEY
+const API_BASE = (process.env.SOURCE_API_BASE || process.env.API_BASE || '').replace(/\/$/, '')
+const API_KEY = process.env.SOURCE_API_KEY
 const ACCOUNT_ID = process.env.ACCOUNT_ID || '44ff27db-fd23-45fe-a37f-2fb13e548314'
 const DAYS = Number(process.env.DAYS || 90)
 const DATABASE_URL = process.env.DATABASE_URL
 
-if (!API_KEY) exit('IGEO_API_KEY is required')
+if (!API_BASE) exit('SOURCE_API_BASE is required')
+if (!API_KEY) exit('SOURCE_API_KEY is required')
 if (!DATABASE_URL) exit('DATABASE_URL is required')
 
 function exit(msg) {
@@ -199,7 +200,7 @@ async function main() {
     )
     if (page?.__error) {
       resultsBlocked = true
-      console.warn('results export endpoint unavailable — deploy igeo-app first, then re-run')
+      console.warn('results export endpoint unavailable — deploy source-app first, then re-run')
       break
     }
     const rows = page.results ?? []
@@ -326,7 +327,7 @@ async function main() {
 
   console.log('\nBackfill complete:', JSON.stringify(counts, null, 2))
   if (resultsBlocked) {
-    console.warn('\nNOTE: wl_results is EMPTY — deploy the igeo-app /findings/export endpoint and re-run this script.')
+    console.warn('\nNOTE: wl_results is EMPTY — deploy the source-app /findings/export endpoint and re-run this script.')
   }
   await pool.end()
 }

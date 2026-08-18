@@ -86,7 +86,7 @@ export interface BrandHubData {
 }
 
 /**
- * Load whether this Alora account has a saved iGEO MCP key (masked only).
+ * Load whether this Alora account has a saved upstream MCP key (masked only).
  */
 export function useMcpConnection() {
   const selectedAccountId = useAccountStore((s) => s.selectedAccount?.id)
@@ -113,7 +113,7 @@ export function useMcpConnection() {
 }
 
 /**
- * Save or disconnect the iGEO MCP connection for the selected account.
+ * Save or disconnect the upstream MCP connection for the selected account.
  * Pass the full MCP URL, or null to disconnect.
  */
 export function useSaveMcpConnection() {
@@ -153,7 +153,7 @@ export function useSaveMcpConnection() {
 }
 
 /**
- * Load the selected account's BrandHub directly from iGEO MCP.
+ * Load the selected account's BrandHub directly from upstream MCP.
  */
 export function useBrandHub(enabled = true) {
   const selectedAccountId = useAccountStore((s) => s.selectedAccount?.id)
@@ -231,7 +231,7 @@ interface GenerateCarouselResponse {
 }
 
 /**
- * Fetch Instagram posts from iGEO MCP (last 14 days)
+ * Fetch Instagram posts from upstream MCP (last 14 days)
  */
 export function useTodayInstagramPosts(enabled = true) {
   const selectedAccountId = useAccountStore((s) => s.selectedAccount?.id)

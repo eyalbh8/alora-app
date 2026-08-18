@@ -28,7 +28,7 @@ export function daysInRange(range: DateRange): number {
   return differenceInCalendarDays(parseISO(range.endDate), parseISO(range.startDate)) + 1
 }
 
-/** Previous period of equal length, ending the day before startDate (iGEO semantics). */
+/** Previous period of equal length, ending the day before startDate (semantics). */
 export function previousPeriodRange(range: DateRange): DateRange {
   const start = parseISO(range.startDate)
   const spanDays = daysInRange(range)

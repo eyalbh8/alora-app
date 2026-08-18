@@ -1,4 +1,4 @@
-/** Fixed height for overview dashboard cards (matches iGEO overview2). */
+/** Fixed height for overview dashboard cards (matches upstream overview2). */
 export const DASHBOARD_CARD_HEIGHT = '420px'
 
 /** Shared geometry so Market position rows line up with Visibility trend grid. */
