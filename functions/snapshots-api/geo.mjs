@@ -466,7 +466,11 @@ export async function geoMentions(db, tenantId, rawQuery) {
     accountPath(accountId, '/prompts/responses/chart-data', q),
   )
   return {
-    data: { providers: chart?.providers ?? [] },
+    data: {
+      providers: chart?.providers ?? [],
+      trackedRecommendations: asArray(chart?.trackedRecommendations),
+      posts: asArray(chart?.posts),
+    },
     isLive: true,
     computedAt: nowIso(),
   }

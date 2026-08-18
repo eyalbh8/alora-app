@@ -6,6 +6,7 @@ import type {
   PromptTag,
   ResponseSource,
   TopSource,
+  TrackedRecommendation,
 } from './types'
 
 /**
@@ -54,7 +55,11 @@ export interface GeoDashboard {
 }
 
 export interface GeoMentions {
-  data: { providers: ProviderMention[] }
+  data: {
+    providers: ProviderMention[]
+    trackedRecommendations?: TrackedRecommendation[]
+    posts?: unknown[]
+  }
   computedAt: string
 }
 

@@ -18,7 +18,7 @@ export function CurrentSentimentScore({ score }: CurrentSentimentScoreProps) {
         Current Sentiment Score
       </h2>
       <div
-        className="flex h-[170px] w-[170px] items-center justify-center rounded-full"
+        className="mx-auto flex h-[170px] w-[170px] items-center justify-center rounded-full lg:mx-0"
         style={{ background: ringBackground }}
         role="img"
         aria-label={value == null ? 'No current sentiment score' : `Current sentiment score: ${value} out of 100`}

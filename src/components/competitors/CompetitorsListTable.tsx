@@ -32,7 +32,7 @@ function sentimentStyle(score: number | null | undefined) {
 
 function BrandCell({ row }: { row: CompetitorPerformance }) {
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex min-w-0 items-center gap-2.5">
       <BrandLogo
         id={row.id}
         name={row.name}
@@ -42,11 +42,11 @@ function BrandCell({ row }: { row: CompetitorPerformance }) {
         size="md"
       />
       <span
-        className={
+        className={`min-w-0 truncate ${
           row.isAccount || row.id === 'account'
             ? 'font-semibold text-[#101414]'
             : 'font-medium text-slate-800'
-        }
+        }`}
       >
         {row.name}
       </span>
@@ -82,13 +82,13 @@ export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
         Competitors List
       </h2>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] border-collapse text-sm">
+        <table className="w-full min-w-0 border-collapse text-sm">
           <thead>
             <tr className="border-b-2 border-[#101414]">
-              <th className="pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+              <th className="min-w-0 pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                 Brand
               </th>
-              <th className="px-3 pb-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+              <th className="hidden px-3 pb-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 md:table-cell">
                 Shared Topics
               </th>
               <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
@@ -116,10 +116,15 @@ export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
                   onMouseEnter={() => setHoveredCompetitor(row.name)}
                   onMouseLeave={() => setHoveredCompetitor(null)}
                 >
-                  <td className="py-4 pr-3">
+                  <td className="min-w-0 py-4 pr-3">
                     <BrandCell row={row} />
+                    {row.topics?.length ? (
+                      <p className="mt-1.5 truncate text-[10px] text-slate-500 md:hidden">
+                        {row.topics.join(', ')}
+                      </p>
+                    ) : null}
                   </td>
-                  <td className="max-w-xs px-3 py-4">
+                  <td className="hidden max-w-xs px-3 py-4 md:table-cell">
                     <TopicTags topics={row.topics} />
                   </td>
                   <td className="px-3 py-4">

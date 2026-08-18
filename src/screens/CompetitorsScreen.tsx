@@ -35,8 +35,8 @@ export function CompetitorsScreen() {
 
   return (
     <CompetitorHoverProvider>
-      <div className={`flex flex-col gap-12${geo.loading ? ' opacity-70' : ''}`}>
-        <div className="grid gap-10 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
+      <div className={`flex flex-col gap-8 md:gap-10 lg:gap-14${geo.loading ? ' opacity-70' : ''}`}>
+        <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
           <ShareOfVoiceDonut competitors={ranking} />
           <BrandVisibilityChart
             competitors={chartCompetitors}

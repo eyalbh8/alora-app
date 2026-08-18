@@ -1,14 +1,16 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 export interface ApiState<T> {
   data: T | null
   loading: boolean
+  fetching: boolean
   error: string | null
   retry: () => void
 }
 
 export interface UseApiOptions {
   enabled?: boolean
+  keepPreviousData?: boolean
 }
 
 /**
@@ -20,17 +22,19 @@ export function useApi<T>(
   fetcher: () => Promise<T>,
   options: UseApiOptions = {},
 ): ApiState<T> {
-  const { enabled = true } = options
+  const { enabled = true, keepPreviousData: keepPrev = false } = options
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey,
     queryFn: fetcher,
     enabled,
+    placeholderData: keepPrev ? keepPreviousData : undefined,
   })
 
   return {
     data: data ?? null,
     loading: isLoading,
+    fetching: isFetching,
     error: error instanceof Error ? error.message : error ? String(error) : null,
     retry: () => {
       void refetch()

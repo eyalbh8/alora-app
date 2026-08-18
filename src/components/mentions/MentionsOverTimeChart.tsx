@@ -8,15 +8,18 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import type { ProviderMention } from '../../api/types'
+import type { ProviderMention, TrackedRecommendation } from '../../api/types'
 import { daysInRange, shortDateLabel, type DateRange } from '../../lib/dates'
 import { mergeProviderSeries } from '../../lib/snapshots/merge'
+import { groupRecommendationsByDay } from '../../lib/trackedRecommendations'
 import { ProviderSeriesTooltip } from '../ProviderSeriesTooltip'
 import { MENTIONS_CHART_HEIGHT, MENTIONS_PROVIDER_ORDER, mentionsProviderColor } from './constants'
+import { TrackedRecommendationAxis } from './TrackedRecommendationPins'
 
 interface MentionsOverTimeChartProps {
   providers: ProviderMention[]
   range: DateRange
+  trackedRecommendations?: TrackedRecommendation[]
 }
 
 function ExpandIcon() {
@@ -43,17 +46,26 @@ function ChartBody({
   chartRows,
   providerKeys,
   yMax,
+  pinsByDay,
   expanded = false,
 }: {
   chartRows: Record<string, string | number>[]
   providerKeys: string[]
   yMax: number
+  pinsByDay: Map<string, TrackedRecommendation[]>
   expanded?: boolean
 }) {
+  const hasPins = pinsByDay.size > 0
+  const dates = chartRows.map((row) => String(row.rawDate ?? ''))
+
   return (
-    <div style={{ height: expanded ? 480 : MENTIONS_CHART_HEIGHT }}>
+    <div className="relative overflow-visible">
+      <div style={{ height: expanded ? 480 : MENTIONS_CHART_HEIGHT }}>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartRows} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>
+        <LineChart
+          data={chartRows}
+          margin={{ top: 12, right: 8, left: 0, bottom: 0 }}
+        >
           <XAxis
             dataKey="date"
             axisLine={{ stroke: '#eae6de' }}
@@ -62,7 +74,7 @@ function ChartBody({
             interval="preserveStartEnd"
             minTickGap={28}
           />
-          <YAxis hide domain={[0, yMax]} allowDecimals={false} />
+          <YAxis hide width={0} domain={[0, yMax]} allowDecimals={false} />
           <ReferenceLine y={0} stroke="#eae6de" />
           <Tooltip
             cursor={{ stroke: '#d8d2c7', strokeWidth: 1 }}
@@ -101,15 +113,25 @@ function ChartBody({
           ))}
         </LineChart>
       </ResponsiveContainer>
+      </div>
+      {hasPins && (
+        <div className="relative mt-1 h-8 overflow-visible">
+          <TrackedRecommendationAxis dates={dates} pinsByDay={pinsByDay} />
+        </div>
+      )}
     </div>
   )
 }
 
-export function MentionsOverTimeChart({ providers, range }: MentionsOverTimeChartProps) {
+export function MentionsOverTimeChart({
+  providers,
+  range,
+  trackedRecommendations = [],
+}: MentionsOverTimeChartProps) {
   const [expanded, setExpanded] = useState(false)
   const days = daysInRange(range)
 
-  const { chartRows, providerKeys, yMax } = useMemo(() => {
+  const { chartRows, providerKeys, yMax, pinsByDay } = useMemo(() => {
     const series = mergeProviderSeries(providers)
     const keys: string[] = MENTIONS_PROVIDER_ORDER.filter((provider) =>
       providers.some(
@@ -146,8 +168,9 @@ export function MentionsOverTimeChart({ providers, range }: MentionsOverTimeChar
       chartRows: rows,
       providerKeys: keys,
       yMax: maxValue > 0 ? Math.ceil(maxValue * 1.08) : 10,
+      pinsByDay: groupRecommendationsByDay(trackedRecommendations, new Set(dates)),
     }
-  }, [providers, days])
+  }, [providers, days, trackedRecommendations])
 
   const hasData = chartRows.length > 0 && providerKeys.length > 0
   const periodLabel = days === 1 ? 'Selected day' : `Last ${days} days`
@@ -177,7 +200,12 @@ export function MentionsOverTimeChart({ providers, range }: MentionsOverTimeChar
 
         <div className="mt-4">
           {hasData ? (
-            <ChartBody chartRows={chartRows} providerKeys={providerKeys} yMax={yMax} />
+            <ChartBody
+              chartRows={chartRows}
+              providerKeys={providerKeys}
+              yMax={yMax}
+              pinsByDay={pinsByDay}
+            />
           ) : (
             <div
               className="flex items-center justify-center border-b border-[#eae6de] text-sm text-[#9a938a]"
@@ -224,6 +252,7 @@ export function MentionsOverTimeChart({ providers, range }: MentionsOverTimeChar
               chartRows={chartRows}
               providerKeys={providerKeys}
               yMax={yMax}
+              pinsByDay={pinsByDay}
               expanded
             />
           </section>

@@ -4,40 +4,33 @@ import { SentimentResponsesTable } from '../components/sentiment/SentimentRespon
 import { SentimentTrendChart } from '../components/sentiment/SentimentTrendChart'
 import { SentimentScreenSkeleton } from '../components/ScreenSkeletons'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
-import { getGeoResponses, getGeoSentiment } from '../api/geo'
+import { getGeoSentiment } from '../api/geo'
 import { queryKeys } from '../api/queryKeys'
 import { useGeoScreenData } from '../hooks/useGeoScreen'
-import type { GeoFilters, ResponseRow } from '../api/types'
-
-async function fetchSentimentAndResponses(filters: GeoFilters) {
-  const [sentiment, responses] = await Promise.all([
-    getGeoSentiment(filters),
-    getGeoResponses(filters, { take: 50 }),
-  ])
-  return { sentiment, responses }
-}
+import { usePaginatedResponses } from '../hooks/usePaginatedResponses'
 
 export function SentimentScreen() {
   const { filters } = useAnalyticsFilters()
-  const geo = useGeoScreenData(queryKeys.geo.sentimentAndResponses, fetchSentimentAndResponses)
+  const geo = useGeoScreenData(queryKeys.geo.sentiment, getGeoSentiment)
+  const responses = usePaginatedResponses()
 
-  const filteredResponses: ResponseRow[] = (geo.data?.responses.data.responses ??
-    []) as unknown as ResponseRow[]
-  const filteredHistorical = geo.data?.sentiment.data.historical ?? []
-  const overall = geo.data?.sentiment.data.overallScore ?? null
-  const previousOverall = geo.data?.sentiment.data.previousOverallScore ?? null
-  const responsesTotal = geo.data?.responses.data.total
+  const filteredHistorical = geo.data?.data.historical ?? []
+  const overall = geo.data?.data.overallScore ?? null
+  const previousOverall = geo.data?.data.previousOverallScore ?? null
 
-  if (geo.pending) {
+  if (geo.pending || responses.pending) {
     return <SentimentScreenSkeleton />
   }
   if (geo.error) {
     return <ErrorState message={geo.error} onRetry={geo.retry} />
   }
+  if (responses.error && responses.rows.length === 0) {
+    return <ErrorState message={responses.error} onRetry={responses.retry} />
+  }
 
   return (
-    <div className={`flex flex-col gap-12${geo.loading ? ' opacity-70' : ''}`}>
-      <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.4fr]">
+    <div className={`flex flex-col gap-8 md:gap-10 lg:gap-14${geo.loading ? ' opacity-70' : ''}`}>
+      <div className="grid min-w-0 items-center gap-10 lg:grid-cols-[0.9fr_1.4fr]">
         <CurrentSentimentScore score={overall} />
         <SentimentTrendChart
           historical={filteredHistorical}
@@ -48,9 +41,20 @@ export function SentimentScreen() {
       </div>
 
       <SentimentResponsesTable
-        rows={filteredResponses}
-        total={responsesTotal}
+        rows={responses.rows}
+        total={responses.total}
         emptyMessage="No sentiment responses match the filters."
+        loading={responses.fetching && !responses.pending}
+        pagination={{
+          pageSize: responses.pageSize,
+          onPageSizeChange: responses.setPageSize,
+          pageStart: responses.pageStart,
+          pageEnd: responses.pageEnd,
+          total: responses.total,
+          currentPage: responses.page,
+          totalPages: responses.totalPages,
+          onPageChange: responses.setPage,
+        }}
       />
     </div>
   )

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import type { ResponseRow } from '../../api/types'
-import { formatNumber } from '../../lib/format'
+import { formatNumber, providerLabel } from '../../lib/format'
 import { ProviderIcon } from '../ProviderIcon'
+import { TablePagination, type TablePaginationProps } from '../TablePagination'
 import { ResponseDrawer } from '../mentions/ResponseDrawer'
 import { responsePreviewText, responseSentiment } from '../mentions/responseHelpers'
 
@@ -9,12 +10,16 @@ interface SentimentResponsesTableProps {
   rows: ResponseRow[]
   total?: number
   emptyMessage?: string
+  loading?: boolean
+  pagination?: TablePaginationProps
 }
 
 export function SentimentResponsesTable({
   rows,
   total,
   emptyMessage,
+  loading = false,
+  pagination,
 }: SentimentResponsesTableProps) {
   const [selectedRow, setSelectedRow] = useState<(ResponseRow & { raw?: unknown }) | null>(null)
 
@@ -33,14 +38,14 @@ export function SentimentResponsesTable({
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
+          <div className={`overflow-x-auto${loading ? ' opacity-70' : ''}`}>
+            <table className="w-full min-w-0 border-collapse text-sm">
               <thead>
                 <tr className="border-b-2 border-[#101414]">
-                  <th className="min-w-[320px] pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9a938a]">
+                  <th className="min-w-0 pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9a938a]">
                     Response
                   </th>
-                  <th className="min-w-44 px-3 pb-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9a938a]">
+                  <th className="hidden min-w-0 px-3 pb-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9a938a] sm:table-cell">
                     Model
                   </th>
                   <th className="pb-2.5 pl-3 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9a938a]">
@@ -69,7 +74,7 @@ export function SentimentResponsesTable({
                       }}
                       aria-label={`Open response from ${provider}`}
                     >
-                      <td className="max-w-[460px] py-4 pr-3 text-[13px] leading-relaxed text-[#3a352e]">
+                      <td className="min-w-0 py-4 pr-3 text-[13px] leading-relaxed text-[#3a352e]">
                         {preview ? (
                           <p className="line-clamp-2" title={preview}>
                             {preview.length > 180 ? `${preview.slice(0, 179)}…` : preview}
@@ -77,8 +82,11 @@ export function SentimentResponsesTable({
                         ) : (
                           <span className="text-[#9a938a]">Click to view response</span>
                         )}
+                        <p className="mt-1.5 text-[10px] text-[#8b857c] sm:hidden">
+                          {providerLabel(provider)}
+                        </p>
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-[13px] text-[#5c554c]">
+                      <td className="hidden whitespace-nowrap px-3 py-4 text-[13px] text-[#5c554c] sm:table-cell">
                         <ProviderIcon provider={provider} showLabel />
                       </td>
                       <td className="whitespace-nowrap py-4 pl-3 text-right text-[13px] font-medium text-[#5c554c]">
@@ -92,12 +100,14 @@ export function SentimentResponsesTable({
           </div>
         )}
 
-        {rows.length > 0 && total != null && (
+        {pagination ? (
+          <TablePagination {...pagination} />
+        ) : rows.length > 0 && total != null ? (
           <p className="mt-2.5 text-xs text-[#9a938a]">
             {rows.length.toLocaleString()}
             {total > rows.length ? ` of ${total.toLocaleString()}` : ''} responses
           </p>
-        )}
+        ) : null}
       </section>
 
       {selectedRow && (

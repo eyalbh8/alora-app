@@ -35,7 +35,7 @@ export function MentionsSummary({ providers, range }: MentionsSummaryProps) {
       <h2 id="llm-mentions-heading" className="text-[19px] font-semibold text-[#101414]">
         LLM Mentions
       </h2>
-      <p className="mt-5 font-serif text-[52px] font-semibold leading-none tracking-tight text-[#101414]">
+      <p className="mt-5 font-serif text-[40px] font-semibold leading-none tracking-tight text-[#101414] sm:text-[52px]">
         {formatNumber(total, 0)}
       </p>
       <p className="mt-2 text-xs text-[#9a938a]">Total mentions, {periodLabel}</p>

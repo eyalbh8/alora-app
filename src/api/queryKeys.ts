@@ -11,10 +11,10 @@ export const queryKeys = {
       ['geo', 'dashboard', accountId, filters] as const,
     prompts: (accountId: string | undefined, filters: GeoFilters) =>
       ['geo', 'prompts', accountId, filters] as const,
-    mentionsAndResponses: (accountId: string | undefined, filters: GeoFilters) =>
-      ['geo', 'mentionsAndResponses', accountId, filters] as const,
-    sentimentAndResponses: (accountId: string | undefined, filters: GeoFilters) =>
-      ['geo', 'sentimentAndResponses', accountId, filters] as const,
+    mentions: (accountId: string | undefined, filters: GeoFilters) =>
+      ['geo', 'mentions', accountId, filters] as const,
+    sentiment: (accountId: string | undefined, filters: GeoFilters) =>
+      ['geo', 'sentiment', accountId, filters] as const,
     competitors: (accountId: string | undefined, filters: GeoFilters) =>
       ['geo', 'competitors', accountId, filters] as const,
     responses: (

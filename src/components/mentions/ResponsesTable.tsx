@@ -4,6 +4,7 @@ import { useGeoMeta } from '../../context/GeoMetaContext'
 import { formatNumber } from '../../lib/format'
 import { EmptyState } from '../EmptyState'
 import { ProviderIcon } from '../ProviderIcon'
+import { TablePagination, type TablePaginationProps } from '../TablePagination'
 import { ResponseDrawer } from './ResponseDrawer'
 import {
   citationCount,
@@ -18,6 +19,8 @@ interface ResponsesTableProps {
   total?: number
   emptyMessage?: string
   variant?: 'default' | 'editorial'
+  loading?: boolean
+  pagination?: TablePaginationProps
 }
 
 function SentimentBadge({
@@ -75,6 +78,8 @@ export function ResponsesTable({
   total,
   emptyMessage,
   variant = 'default',
+  loading = false,
+  pagination,
 }: ResponsesTableProps) {
   const { meta } = useGeoMeta()
   const [selectedRow, setSelectedRow] = useState<(ResponseRow & { raw?: unknown }) | null>(null)
@@ -125,11 +130,11 @@ export function ResponsesTable({
           </h2>
         )}
         <div
-          className={
+          className={`${
             editorial
               ? 'overflow-hidden'
               : 'overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm'
-          }
+          }${loading ? ' opacity-70' : ''}`}
         >
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -148,8 +153,12 @@ export function ResponsesTable({
                       editorial
                         ? 'px-3 pb-2.5 text-[10px] tracking-[0.08em] text-[#9a938a]'
                         : 'px-4 py-3 text-xs tracking-wide text-slate-500'
-                    } ${header === 'Response' ? 'min-w-[320px] pl-0 text-left' : ''} ${
+                    } ${header === 'Response' ? 'min-w-0 pl-0 text-left' : ''} ${
                       editorial && header === 'Sentiment' ? 'pr-0' : ''
+                    } ${
+                      editorial && (header === 'Rank' || header === 'Citations')
+                        ? 'hidden md:table-cell'
+                        : ''
                     } ${
                       header === 'Rank' || header === 'Citations' || header === 'Sentiment'
                         ? editorial
@@ -184,7 +193,7 @@ export function ResponsesTable({
                     }
                     onClick={() => setSelectedRow(extended)}
                   >
-                    <td className={`max-w-xl ${editorial ? 'py-3.5 pr-3' : 'px-4 py-3'}`}>
+                    <td className={`min-w-0 max-w-xl ${editorial ? 'py-3.5 pr-3' : 'px-4 py-3'}`}>
                       {preview ? (
                         <p
                           className={`line-clamp-2 leading-relaxed ${
@@ -212,7 +221,7 @@ export function ResponsesTable({
                     <td
                       className={`tabular-nums ${
                         editorial
-                          ? 'px-3 py-3.5 text-right text-[13px] text-[#5c554c]'
+                          ? 'hidden px-3 py-3.5 text-right text-[13px] text-[#5c554c] md:table-cell'
                           : 'px-4 py-3 text-center text-sm font-medium text-[#101414]'
                       }`}
                     >
@@ -240,7 +249,7 @@ export function ResponsesTable({
                         )}
                       </div>
                     </td>}
-                    <td className={editorial ? 'px-3 py-3.5 text-right' : 'px-4 py-3 text-center'}>
+                    <td className={editorial ? 'hidden px-3 py-3.5 text-right md:table-cell' : 'px-4 py-3 text-center'}>
                       <span
                         className={`inline-flex items-center justify-center gap-1 ${
                           editorial ? 'text-[13px] text-[#5c554c]' : 'text-sm text-slate-600'
@@ -274,14 +283,16 @@ export function ResponsesTable({
           </table>
         </div>
 
-        {total != null && (
+        {pagination ? (
+          <TablePagination {...pagination} />
+        ) : total != null ? (
           <div className={editorial ? 'pt-3' : 'border-t border-slate-100 px-4 py-2.5'}>
             <span className={editorial ? 'text-xs text-[#9a938a]' : 'text-xs text-slate-400'}>
               {rows.length.toLocaleString()}
               {total > rows.length ? ` of ${total.toLocaleString()}` : ''} responses
             </span>
           </div>
-        )}
+        ) : null}
       </div>
       </section>
 

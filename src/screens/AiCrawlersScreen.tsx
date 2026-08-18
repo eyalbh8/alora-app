@@ -58,7 +58,7 @@ export function AiCrawlersScreen() {
   }
 
   return (
-    <div className="flex flex-col gap-12">
+    <div className="flex flex-col gap-8 md:gap-10 lg:gap-14">
       <CrawlerEntryCardsRow
         totalEntries={viewModel?.totalEntries ?? 0}
         totalChange={viewModel?.totalChange ?? null}

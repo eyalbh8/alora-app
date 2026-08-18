@@ -112,11 +112,10 @@ export default function InstagramCarouselScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div>
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
             Instagram Carousel Generator
           </h1>
           <p className="mt-2 text-sm text-gray-600">
@@ -137,7 +136,7 @@ export default function InstagramCarouselScreen() {
                 className={`flex items-center ${idx < 3 ? 'flex-1' : ''}`}
               >
                 <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full sm:h-10 sm:w-10 ${
                     phase === p
                       ? 'bg-blue-600 text-white'
                       : idx < ['select', 'review', 'progress', 'results'].indexOf(phase)
@@ -147,11 +146,11 @@ export default function InstagramCarouselScreen() {
                 >
                   {idx + 1}
                 </div>
-                <span className="ml-2 text-sm font-medium text-gray-700 capitalize">
+                <span className="ml-2 hidden text-sm font-medium text-gray-700 capitalize sm:inline">
                   {p}
                 </span>
                 {idx < 3 && (
-                  <div className="flex-1 h-1 mx-4 bg-gray-300">
+                  <div className="mx-2 h-1 flex-1 bg-gray-300 sm:mx-4">
                     <div
                       className={`h-full ${
                         idx < ['select', 'review', 'progress', 'results'].indexOf(phase)
@@ -295,7 +294,6 @@ export default function InstagramCarouselScreen() {
             )
           )}
         </div>
-      </div>
     </div>
   )
 }
@@ -495,20 +493,20 @@ function SelectPostPhase({
             className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition"
             onClick={() => onSelect(post)}
           >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 flex-1">
                 <h3 className="font-medium text-gray-900">{post.prompt}</h3>
                 <p className="mt-1 text-sm text-gray-600 line-clamp-2">
                   {post.body}
                 </p>
-                <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
                   <span>Topic: {post.topic}</span>
                   <span>
                     Created: {new Date(post.createdAt).toLocaleDateString()}
                   </span>
                 </div>
               </div>
-              <button className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+              <button className="self-start rounded-md bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700 sm:ml-4">
                 Select
               </button>
             </div>
@@ -980,7 +978,7 @@ function ResultsPhase({
               Raw Visual Assets ({status.image_urls.length})
             </h3>
             <p className="text-xs text-gray-500 mb-2">These are the generated backgrounds before Figma assembly</p>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {status.image_urls.map((url: string, idx: number) => (
                 <div key={idx} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                   <img
@@ -1001,7 +999,7 @@ function ResultsPhase({
               Final Carousel Slides ({exportedSlideUrls.length})
             </h3>
             <p className="text-xs text-gray-500 mb-2">Exported from Figma with text overlays and branding</p>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {exportedSlideUrls.map((slide: { slideIndex: number; url: string }) => (
                 <div key={slide.slideIndex} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                   <img

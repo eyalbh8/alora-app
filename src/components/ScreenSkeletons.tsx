@@ -85,8 +85,8 @@ export function DashboardScreenSkeleton() {
 
 export function MentionsScreenSkeleton() {
   return (
-    <div className="flex flex-col gap-12">
-      <div className="grid gap-10 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
+    <div className="flex flex-col gap-8 md:gap-10 lg:gap-14">
+      <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
         <div>
           <Skeleton className="h-5 w-32" />
           <Skeleton className="mt-5 h-[52px] w-20" />
@@ -132,11 +132,11 @@ export function MentionsScreenSkeleton() {
 
 export function SentimentScreenSkeleton() {
   return (
-    <div className="flex flex-col gap-12">
-      <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.4fr]">
+    <div className="flex flex-col gap-8 md:gap-10 lg:gap-14">
+      <div className="grid min-w-0 items-center gap-10 lg:grid-cols-[0.9fr_1.4fr]">
         <div>
           <Skeleton className="mb-5 h-5 w-48" />
-          <Skeleton className="h-[170px] w-[170px] rounded-full" />
+          <Skeleton className="mx-auto h-[170px] w-[170px] rounded-full lg:mx-0" />
         </div>
         <div>
           <Skeleton className="h-5 w-36" />
@@ -192,7 +192,7 @@ export function PromptsScreenSkeleton() {
         </div>
       </div>
       <div>
-        <div className="flex items-end justify-between border-b-2 border-[#101414] pb-4">
+        <div className="flex flex-col gap-3 border-b-2 border-[#101414] pb-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Skeleton className="mb-1 h-2.5 w-20" />
             <Skeleton className="h-7 w-40" />
@@ -216,8 +216,8 @@ export function PromptsScreenSkeleton() {
 
 export function CompetitorsScreenSkeleton() {
   return (
-    <div className="flex flex-col gap-12">
-      <div className="grid gap-10 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
+    <div className="flex flex-col gap-8 md:gap-10 lg:gap-14">
+      <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
         <div>
           <Skeleton className="h-5 w-32" />
           <div className="mt-4 flex items-end gap-3">
@@ -295,7 +295,7 @@ export function AiTrafficScreenSkeleton() {
 
 export function AiCrawlersScreenSkeleton() {
   return (
-    <div className="flex flex-col gap-12">
+    <div className="flex flex-col gap-8 md:gap-10 lg:gap-14">
       <div className="grid grid-cols-2 overflow-hidden border-y border-b-[#eae6de] border-t-[#101414] md:grid-cols-3 xl:grid-cols-6">
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="border-b border-r border-[#eae6de] px-4 py-5 xl:border-b-0">

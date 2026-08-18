@@ -170,16 +170,20 @@ export interface PromptsPayload {
   prompts?: PromptRow[]
 }
 
+export interface TrackedRecommendation {
+  id: string
+  recommendationTitle?: string
+  urls?: string[]
+  totalAppearances?: number
+  createdAt?: string
+  type?: string
+  imageUrl?: string
+}
+
 export interface MentionsChartData {
   posts?: unknown[]
   providers?: ProviderMention[]
-  trackedRecommendations?: Array<{
-    id: string
-    recommendationTitle?: string
-    urls?: string[]
-    totalAppearances?: number
-    createdAt?: string
-  }>
+  trackedRecommendations?: TrackedRecommendation[]
 }
 
 export interface MentionsChartPayload {
