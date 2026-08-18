@@ -648,14 +648,25 @@ export async function geoTraffic(db, tenantId, rawQuery) {
   const { accountId, apiKey } = await creds(db, tenantId)
   const prev = previousPeriod(f)
   const params = new URLSearchParams({
-    startDate: toStartIso(f.startDate),
-    endDate: toEndIso(f.endDate),
     prevStartDate: toStartIso(prev.startDate),
     prevEndDate: toEndIso(prev.endDate),
     granularity: 'daily',
   })
+  const rangeDays = f.rangeDays ?? resolveCrawlerRangeDays(f)
+  if (rangeDays != null) {
+    params.set('range', String(rangeDays))
+  } else {
+    params.set('startDate', toStartIso(f.startDate))
+    params.set('endDate', toEndIso(f.endDate))
+  }
   if (f.providers.length) params.set('providers', f.providers.join(','))
   if (f.regions.length) params.set('countries', f.regions.join(','))
+  console.info('[geo/traffic]', {
+    startDate: f.startDate,
+    endDate: f.endDate,
+    rangeDays,
+    igeoQuery: params.toString(),
+  })
   return igeoGet(accountId, apiKey, `/traffic/${accountId}/ai-dashboard-data?${params.toString()}`)
 }
 

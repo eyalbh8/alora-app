@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { AiTrafficSettings } from '../components/ai-traffic/AiTrafficSettings'
 import { AiTrafficTabs, type AiTrafficTab } from '../components/ai-traffic/AiTrafficTabs'
 import { LlmVisitTrendsChart } from '../components/ai-traffic/LlmVisitTrendsChart'
+import { TrafficBreakdownCards } from '../components/ai-traffic/TrafficBreakdownCards'
 import { TrafficEntryCardsRow } from '../components/ai-traffic/TrafficEntryCardsRow'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
@@ -33,7 +34,7 @@ export function AiTrafficScreen() {
 
   const viewModel = useMemo(() => {
     if (!payload) return null
-    return buildAiTrafficViewModel(payload, filters, [])
+    return buildAiTrafficViewModel(payload, filters, filters.providers)
   }, [payload, filters])
 
   if (loading && !payload) {
@@ -61,6 +62,13 @@ export function AiTrafficScreen() {
         chartRows={viewModel?.chartRows ?? []}
         providerKeys={viewModel?.chartProviderKeys ?? []}
         range={{ startDate: filters.startDate, endDate: filters.endDate }}
+      />
+      <TrafficBreakdownCards
+        topSources={viewModel?.topSources ?? []}
+        topPages={viewModel?.topPages ?? []}
+        topLocations={viewModel?.topLocations ?? []}
+        topDevices={viewModel?.topDevices ?? []}
+        topBrowsers={viewModel?.topBrowsers ?? []}
       />
     </div>
   )

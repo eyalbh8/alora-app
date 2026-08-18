@@ -289,6 +289,22 @@ export function AiTrafficScreenSkeleton() {
           <Skeleton className="h-[260px] w-full" />
         </div>
       </div>
+      <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 5 }).map((_, sectionIndex) => (
+          <div key={sectionIndex}>
+            <Skeleton className="h-5 w-36" />
+            <Skeleton className="mt-2 h-3 w-56" />
+            <div className="mt-[18px] space-y-3">
+              {Array.from({ length: 3 }).map((_, rowIndex) => (
+                <div key={rowIndex} className="flex justify-between">
+                  <Skeleton className="h-3 w-28" />
+                  <Skeleton className="h-3 w-8" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

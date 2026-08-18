@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import {
+  Area,
+  AreaChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -57,14 +57,22 @@ function ChartBody({
   }))
 
   return (
-    <div className={`relative ${expanded ? 'h-[480px]' : 'h-full min-h-[260px]'}`}>
+    <div className={`relative ${expanded ? 'h-[480px]' : 'h-[220px] sm:h-[280px]'}`}>
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <span className="select-none font-serif text-5xl font-semibold tracking-tight text-[#f0ede8]">
           Alora
         </span>
       </div>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={formattedRows} margin={{ top: 10, right: 8, left: -8, bottom: 0 }}>
+        <AreaChart data={formattedRows} margin={{ top: 10, right: 8, left: -8, bottom: 0 }}>
+          <defs>
+            {providerKeys.map((p) => (
+              <linearGradient key={p} id={`traffic-fill-${p}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={trafficProviderColor(p)} stopOpacity={0.18} />
+                <stop offset="100%" stopColor={trafficProviderColor(p)} stopOpacity={0} />
+              </linearGradient>
+            ))}
+          </defs>
           <CartesianGrid vertical={false} stroke="#eae6de" />
           <XAxis
             dataKey="date"
@@ -99,13 +107,14 @@ function ChartBody({
             }}
           />
           {providerKeys.map((p) => (
-            <Line
+            <Area
               key={p}
               type="monotone"
               dataKey={p}
               name={p}
               stroke={trafficProviderColor(p)}
               strokeWidth={2}
+              fill={`url(#traffic-fill-${p})`}
               dot={
                 formattedRows.length === 1
                   ? { r: 4, fill: trafficProviderColor(p), strokeWidth: 0 }
@@ -114,7 +123,7 @@ function ChartBody({
               activeDot={{ r: 3, strokeWidth: 0 }}
             />
           ))}
-        </LineChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   )
@@ -124,7 +133,7 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
   const [expanded, setExpanded] = useState(false)
   const days = daysInRange(range)
 
-  const { yMax, hasData } = useMemo(() => {
+  const { yMax, hasValues } = useMemo(() => {
     const values = chartRows.flatMap((row) =>
       providerKeys.map((p) => (typeof row[p] === 'number' ? (row[p] as number) : 0)),
     )
@@ -134,10 +143,11 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
 
     return {
       yMax: Math.max(tickStep, Math.ceil(computedMax / tickStep) * tickStep),
-      hasData: chartRows.length > 0 && providerKeys.length > 0,
+      hasValues: values.some((value) => value > 0),
     }
   }, [chartRows, providerKeys])
 
+  const hasChart = chartRows.length > 0
   const legendKeys =
     providerKeys.length > 0
       ? providerKeys
@@ -170,7 +180,7 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
               ))}
             </div>
           </div>
-          {hasData && (
+          {hasValues && (
             <button
               type="button"
               onClick={() => setExpanded(true)}
@@ -183,9 +193,9 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
           )}
         </div>
 
-        <div className="min-h-[280px] flex-1">
-          {!hasData ? (
-            <div className="flex h-full min-h-[280px] items-center justify-center border-y border-[#eae6de] px-6 text-sm text-[#9a938a]">
+        <div>
+          {!hasChart ? (
+            <div className="flex h-[220px] items-center justify-center border-y border-[#eae6de] px-6 text-sm text-[#9a938a] sm:h-[280px]">
               No visit trend data for the selected period.
             </div>
           ) : (
@@ -199,7 +209,7 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
         </div>
       </section>
 
-      {expanded && hasData && (
+      {expanded && hasValues && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           onClick={() => setExpanded(false)}

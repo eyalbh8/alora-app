@@ -37,10 +37,6 @@ const NAV = [
     to: '/ai-crawlers',
     label: 'AI Crawlers',
   },
-  {
-    to: '/carousel',
-    label: 'Carousel',
-  },
 ]
 
 export function Layout() {

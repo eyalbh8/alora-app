@@ -365,7 +365,10 @@ export function mergeAiTraffic(snapshots: ScreenSnapshot[]) {
     ? {
         hasEvents: payloads.some((p) => p.hasEvents),
         preferences: latest.payload?.preferences,
-        llmProviders: [],
+        llmProviders: latest.payload?.llmProviders ?? [],
+        totalEntries: latest.payload?.totalEntries,
+        totalChange: latest.payload?.totalChange,
+        changePercents: latest.payload?.changePercents,
         historicalData: mergeTrafficHistorical(payloads),
         topSources: latest.payload?.topSources ?? [],
         topPages: latest.payload?.topPages ?? [],
