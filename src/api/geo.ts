@@ -207,12 +207,13 @@ export function getGeoCompetitors(filters: GeoFilters): Promise<GeoCompetitors> 
 
 export function getGeoResponses(
   filters: GeoFilters,
-  pagination: { skip?: number; take?: number } = {},
+  pagination: { skip?: number; take?: number; sentiment?: boolean } = {},
 ): Promise<GeoResponses> {
   return apiGet<GeoResponses>(
     `/geo/responses?${filtersToQuery(filters, {
       skip: pagination.skip ?? 0,
       take: pagination.take ?? 50,
+      ...(pagination.sentiment ? { sentiment: 1 } : {}),
     })}`,
   )
 }

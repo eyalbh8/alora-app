@@ -8,15 +8,17 @@ import { getGeoSentiment } from '../api/geo'
 import { queryKeys } from '../api/queryKeys'
 import { useGeoScreenData } from '../hooks/useGeoScreen'
 import { usePaginatedResponses } from '../hooks/usePaginatedResponses'
+import { sentimentPeriodScores } from '../lib/sentimentPeriod'
 
 export function SentimentScreen() {
   const { filters } = useAnalyticsFilters()
   const geo = useGeoScreenData(queryKeys.geo.sentiment, getGeoSentiment)
-  const responses = usePaginatedResponses()
+  const responses = usePaginatedResponses({ sentiment: true })
 
   const filteredHistorical = geo.data?.data.historical ?? []
-  const overall = geo.data?.data.overallScore ?? null
-  const previousOverall = geo.data?.data.previousOverallScore ?? null
+  const fromHistory = sentimentPeriodScores(filteredHistorical)
+  const overall = fromHistory.current ?? geo.data?.data.overallScore ?? null
+  const previousOverall = fromHistory.previous ?? geo.data?.data.previousOverallScore ?? null
 
   if (geo.pending || responses.pending) {
     return <SentimentScreenSkeleton />

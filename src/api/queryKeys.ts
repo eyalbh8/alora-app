@@ -20,7 +20,7 @@ export const queryKeys = {
     responses: (
       accountId: string | undefined,
       filters: GeoFilters,
-      pagination?: { skip?: number; take?: number }
+      pagination?: { skip?: number; take?: number; sentiment?: boolean }
     ) => ['geo', 'responses', accountId, filters, pagination] as const,
     responseDetail: (accountId: string | undefined, id: string) =>
       ['geo', 'response', accountId, id] as const,

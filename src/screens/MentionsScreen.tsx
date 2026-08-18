@@ -13,7 +13,7 @@ import { collectTrackedRecommendations } from '../lib/trackedRecommendations'
 export function MentionsScreen() {
   const { filters } = useAnalyticsFilters()
   const geo = useGeoScreenData(queryKeys.geo.mentions, getGeoMentions)
-  const responses = usePaginatedResponses()
+  const responses = usePaginatedResponses({ sentiment: true })
 
   const filteredProviders = geo.data?.data.providers ?? []
   const trackedRecommendations = collectTrackedRecommendations(

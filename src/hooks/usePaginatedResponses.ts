@@ -8,7 +8,7 @@ import { useGeoMeta } from '../context/GeoMetaContext'
 import { useAccountStore } from '../store/useAccountStore'
 import { useApi } from './useApi'
 
-export function usePaginatedResponses() {
+export function usePaginatedResponses(options?: { sentiment?: boolean }) {
   const { selectedAccount } = useAccountStore()
   const { geoMode } = useGeoMeta()
   const { filters } = useAnalyticsFilters()
@@ -20,7 +20,7 @@ export function usePaginatedResponses() {
   }, [filters, pageSize])
 
   const skip = (page - 1) * pageSize
-  const pagination = { skip, take: pageSize }
+  const pagination = { skip, take: pageSize, sentiment: options?.sentiment }
 
   const state = useApi(
     queryKeys.geo.responses(selectedAccount?.id, filters, pagination),

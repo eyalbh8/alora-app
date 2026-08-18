@@ -119,28 +119,6 @@ function tagName(tag) {
   return null
 }
 
-function sentimentScore(breakdown) {
-  const mixedSplit = (breakdown.mixed ?? 0) * 0.5
-  const positive = (breakdown.positive ?? 0) + mixedSplit
-  const negative = (breakdown.negative ?? 0) + mixedSplit
-  const total =
-    (breakdown.positive ?? 0) +
-    (breakdown.negative ?? 0) +
-    (breakdown.neutral ?? 0) +
-    (breakdown.mixed ?? 0)
-  return total > 0 ? Math.round(50 + ((positive - negative) / total) * 50) : null
-}
-
-function emptyBreakdown() {
-  return { positive: 0, negative: 0, neutral: 0, mixed: 0 }
-}
-
-function mapFeel(feel) {
-  const key = String(feel || '').toLowerCase()
-  if (key === 'positive' || key === 'negative' || key === 'neutral' || key === 'mixed') return key
-  return null
-}
-
 function mapResponseRow(row, { list = false } = {}) {
   const countries = Array.isArray(row.countries)
     ? row.countries
@@ -503,57 +481,32 @@ export async function geoMentions(db, tenantId, rawQuery) {
 export async function geoSentiment(db, tenantId, rawQuery) {
   const f = parseGeoFilters(rawQuery)
   const { accountId, apiKey } = await creds(db, tenantId)
-  // iGEO GetAccountPromptResponsesDto: take max is 100. 200 returns 400 Validation Error.
-  const listQ = toIgeoQueryWithRange(f, { take: 100, skip: 0, listOnly: 'true' }, { engines: 'providers' })
   const histQ = toIgeoQueryWithRange(f, { granularity: 'daily' }, { engines: 'providers' })
+  const historicalRaw = await igeoGet(
+    accountId,
+    apiKey,
+    accountPath(accountId, '/prompts/responses/sentiment/historical', histQ),
+  )
 
-  const [list, historicalRaw] = await Promise.all([
-    optionalIgeo(accountId, apiKey, accountPath(accountId, '/prompts/responses/sentiment', listQ)),
-    igeoGet(accountId, apiKey, accountPath(accountId, '/prompts/responses/sentiment/historical', histQ)),
-  ])
-
-  const responses = list?.responses ?? asArray(list)
-  const grouped = new Map()
-  const scores = []
-  for (const row of responses) {
-    if (typeof row.sentimentScore === 'number') scores.push(row.sentimentScore)
-    const topic = typeof row.topic === 'string' ? row.topic : row.topic?.name ?? 'Unknown'
-    const provider = row.provider || 'ALL'
-    const key = `${topic}|${provider}`
-    if (!grouped.has(key)) {
-      grouped.set(key, {
-        topic,
-        provider,
-        breakdown: emptyBreakdown(),
-      })
-    }
-    const feelKey = mapFeel(row.sentiment ?? row.feel ?? row.sentimentLabel)
-    if (feelKey) grouped.get(key).breakdown[feelKey] += 1
-  }
-  const summary = [...grouped.values()].map((g) => ({
-    ...g,
-    score: sentimentScore(g.breakdown),
-  }))
-
-  const historical = (Array.isArray(historicalRaw) ? historicalRaw : []).map((row) => ({
-    date: toIsoDay(row.date) || String(row.date),
-    provider: row.provider || 'ALL',
-    sentimentScore: Number(row.sentimentScore) || 0,
-  }))
-  const historicalScores = historical
+  const historical = (Array.isArray(historicalRaw) ? historicalRaw : asArray(historicalRaw)).map(
+    (row) => ({
+      date: toIsoDay(row.date) || String(row.date),
+      provider: row.provider || 'ALL',
+      sentimentScore: Number(row.sentimentScore) || 0,
+    }),
+  )
+  // iGEO Sentiment page: current = mean of every historical point; previous = first half.
+  const periodScores = historical
     .map((row) => row.sentimentScore)
     .filter((value) => Number.isFinite(value))
-  const historicalAverage = historicalScores.length
-    ? Math.round(historicalScores.reduce((sum, value) => sum + value, 0) / historicalScores.length)
-    : null
-  const overallScore = scores.length
-    ? Math.round(scores.reduce((sum, value) => sum + value, 0) / scores.length)
-    : historicalAverage
-  const previousOverallScore = historicalAverage
+  const mean = (values) =>
+    values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : null
+  const overallScore = mean(periodScores)
+  const previousOverallScore = mean(periodScores.slice(0, Math.floor(periodScores.length / 2)))
 
   return {
     data: {
-      summary,
+      summary: [],
       overallScore,
       previousOverallScore,
       historical,
@@ -627,8 +580,12 @@ export async function geoResponses(db, tenantId, rawQuery) {
   const { accountId, apiKey } = await creds(db, tenantId)
   const skip = Math.max(0, Number(rawQuery.skip) || 0)
   const take = Math.min(100, Math.max(1, Number(rawQuery.take) || 50))
-  const q = toIgeoQueryWithRange(f, { skip, take }, { engines: 'providers' })
-  const result = await igeoGet(accountId, apiKey, accountPath(accountId, '/prompts/responses', q))
+  const q = toIgeoQueryWithRange(f, { skip, take, listOnly: 'true' }, { engines: 'providers' })
+  const path =
+    rawQuery.sentiment === '1' || rawQuery.sentiment === 'true'
+      ? '/prompts/responses/sentiment'
+      : '/prompts/responses'
+  const result = await igeoGet(accountId, apiKey, accountPath(accountId, path, q))
   const responses = (result?.responses ?? asArray(result)).map((row) =>
     mapResponseRow(row, { list: true }),
   )

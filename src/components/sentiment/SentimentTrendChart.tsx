@@ -9,6 +9,7 @@ import {
 } from 'recharts'
 import { daysInRange, shortDateLabel, type DateRange } from '../../lib/dates'
 import { formatNumber } from '../../lib/format'
+import { sentimentPctChange } from '../../lib/sentimentPeriod'
 import { SENTIMENT_DIVIDER, SENTIMENT_TEAL } from './constants'
 
 interface HistoricalPoint {
@@ -36,9 +37,10 @@ function ExpandIcon() {
   )
 }
 
-function pctChange(current: number | null, previous: number | null): number | null {
-  if (current == null || previous == null || previous <= 0) return null
-  return Math.round(((current - previous) / previous) * 100)
+function formatPctDelta(delta: number): string {
+  const abs = Math.abs(delta)
+  const body = Number.isInteger(abs) ? String(abs) : abs.toFixed(2)
+  return `${delta >= 0 ? '+' : '−'}${body}% This period`
 }
 
 function aggregateDailySentiment(historical: HistoricalPoint[]) {
@@ -76,8 +78,7 @@ function PeriodStat({
           <span
             className={`text-xs font-medium ${delta >= 0 ? 'text-brand-700' : 'text-red-600'}`}
           >
-            {delta >= 0 ? '+' : ''}
-            {delta}% This period
+            {formatPctDelta(delta)}
           </span>
         )}
       </div>
@@ -141,7 +142,7 @@ export function SentimentTrendChart({
 }: SentimentTrendChartProps) {
   const [expanded, setExpanded] = useState(false)
   const days = daysInRange(range)
-  const delta = pctChange(currentScore, previousScore)
+  const delta = sentimentPctChange(currentScore, previousScore)
 
   const chartRows = useMemo(() => {
     const daily = aggregateDailySentiment(historical)
