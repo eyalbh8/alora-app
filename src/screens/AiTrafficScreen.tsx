@@ -1,6 +1,4 @@
-import { useMemo, useState } from 'react'
-import { AiTrafficSettings } from '../components/ai-traffic/AiTrafficSettings'
-import { AiTrafficTabs, type AiTrafficTab } from '../components/ai-traffic/AiTrafficTabs'
+import { useMemo } from 'react'
 import { LlmVisitTrendsChart } from '../components/ai-traffic/LlmVisitTrendsChart'
 import { TrafficBreakdownCards } from '../components/ai-traffic/TrafficBreakdownCards'
 import { TrafficEntryCardsRow } from '../components/ai-traffic/TrafficEntryCardsRow'
@@ -8,7 +6,6 @@ import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
 import { AiTrafficScreenSkeleton } from '../components/ScreenSkeletons'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
-import { useScreenSubheader } from '../context/ScreenSubheaderContext'
 import { useAccountStore } from '../store/useAccountStore'
 import { getTraffic } from '../api/traffic'
 import { queryKeys } from '../api/queryKeys'
@@ -18,13 +15,6 @@ import { buildAiTrafficViewModel } from '../lib/snapshots/aiTraffic'
 export function AiTrafficScreen() {
   const { selectedAccount } = useAccountStore()
   const { filters } = useAnalyticsFilters()
-  const [activeTab, setActiveTab] = useState<AiTrafficTab>('traffic')
-
-  const tabBar = useMemo(
-    () => <AiTrafficTabs active={activeTab} onChange={setActiveTab} />,
-    [activeTab],
-  )
-  useScreenSubheader(tabBar)
 
   const { data: payload, loading, error, retry } = useApi(
     queryKeys.traffic(selectedAccount?.id, filters),
@@ -45,10 +35,6 @@ export function AiTrafficScreen() {
   }
   if (!payload) {
     return <EmptyState title="No AI traffic data" message="No traffic events for the selected range." />
-  }
-
-  if (activeTab === 'settings') {
-    return <AiTrafficSettings preferences={payload.preferences} />
   }
 
   return (

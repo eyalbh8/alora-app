@@ -297,9 +297,10 @@ export function buildAiTrafficViewModel(
         : (globalHistory.get(provider) ?? [])
 
     const countFromHistory = history.reduce((sum, h) => sum + h.value, 0)
+    const hasPositiveHistory = history.some((h) => h.value > 0)
     // Prefer daily history summed for the selected range — llmProviders[].visits is the
     // full snapshot window (typically 90d), not the UI date filter.
-    const count = history.length > 0 ? countFromHistory : (existing?.count ?? 0)
+    const count = hasPositiveHistory ? countFromHistory : (existing?.count ?? 0)
 
     return {
       provider,
@@ -321,7 +322,9 @@ export function buildAiTrafficViewModel(
   ) as Record<string, unknown> | undefined
 
   const summedProviderCounts = filteredProviders.reduce((sum, p) => sum + p.count, 0)
-  const hasRangeHistory = filteredProviders.some((p) => p.historicalData.length > 0)
+  const hasRangeHistory = filteredProviders.some((p) =>
+    p.historicalData.some((h) => h.value > 0),
+  )
 
   const totalEntries =
     typeof payload.totalEntries === 'number' && !hasRangeHistory

@@ -89,6 +89,31 @@ describe('buildAiTrafficViewModel', () => {
     ])
   })
 
+  it('falls back to provider visits when historical points are all zero', () => {
+    const view = buildAiTrafficViewModel(
+      {
+        llmProviders: [
+          { provider: 'OPENAI', visits: 4, changePercent: 100 },
+          { provider: 'TOTAL', visits: 4, changePercent: 100 },
+        ],
+        historicalData: [
+          {
+            provider: 'OPENAI',
+            historicalData: [
+              { date: '2026-08-12', value: 0 },
+              { date: '2026-08-18', value: 0 },
+            ],
+          },
+        ],
+      },
+      range,
+      [],
+    )
+
+    expect(view.totalEntries).toBe(4)
+    expect(view.providers.find((p) => p.provider === 'OPENAI')?.count).toBe(4)
+  })
+
   it('accepts alternate iGEO field names for breakdown cards', () => {
     const view = buildAiTrafficViewModel(
       {

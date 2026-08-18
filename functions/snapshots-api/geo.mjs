@@ -63,7 +63,12 @@ function unwrapPayload(value) {
     if (!current || typeof current !== 'object' || Array.isArray(current)) break
     if (
       current.data != null &&
-      (current.computedAt != null || current.isLive != null || current.dataVersion != null)
+      typeof current.data === 'object' &&
+      (current.computedAt != null ||
+        current.isLive != null ||
+        current.dataVersion != null ||
+        Array.isArray(current.data.llmProviders) ||
+        current.data.historicalData != null)
     ) {
       current = current.data
       continue
@@ -647,27 +652,35 @@ export async function geoTraffic(db, tenantId, rawQuery) {
   const f = parseGeoFilters(rawQuery)
   const { accountId, apiKey } = await creds(db, tenantId)
   const prev = previousPeriod(f)
+  // ai-dashboard-data expects an explicit UTC window. `range=N` (used by crawlers)
+  // returns an empty series on this endpoint.
   const params = new URLSearchParams({
+    startDate: toStartIso(f.startDate),
+    endDate: toEndIso(f.endDate),
     prevStartDate: toStartIso(prev.startDate),
     prevEndDate: toEndIso(prev.endDate),
     granularity: 'daily',
   })
-  const rangeDays = f.rangeDays ?? resolveCrawlerRangeDays(f)
-  if (rangeDays != null) {
-    params.set('range', String(rangeDays))
-  } else {
-    params.set('startDate', toStartIso(f.startDate))
-    params.set('endDate', toEndIso(f.endDate))
-  }
   if (f.providers.length) params.set('providers', f.providers.join(','))
   if (f.regions.length) params.set('countries', f.regions.join(','))
+  const payload = await igeoGet(
+    accountId,
+    apiKey,
+    `/traffic/${accountId}/ai-dashboard-data?${params.toString()}`,
+  )
+  const rec = payload && typeof payload === 'object' ? payload : {}
   console.info('[geo/traffic]', {
     startDate: f.startDate,
     endDate: f.endDate,
-    rangeDays,
     igeoQuery: params.toString(),
+    keys: Object.keys(rec),
+    llmProviders: Array.isArray(rec.llmProviders) ? rec.llmProviders.length : typeof rec.llmProviders,
+    historicalData: Array.isArray(rec.historicalData)
+      ? rec.historicalData.length
+      : typeof rec.historicalData,
+    hasEvents: rec.hasEvents ?? null,
   })
-  return igeoGet(accountId, apiKey, `/traffic/${accountId}/ai-dashboard-data?${params.toString()}`)
+  return payload
 }
 
 export async function geoCrawlers(db, tenantId, rawQuery) {
