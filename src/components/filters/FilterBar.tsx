@@ -10,6 +10,9 @@ import { CrawlerIcon } from '../ai-crawlers/CrawlerIcon'
 import { ProviderIcon } from '../ProviderIcon'
 import { getCrawlerBotDisplayName } from '../../lib/crawlerBots'
 
+const FILTER_CHIP_BASE =
+  'inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[11px] font-medium leading-[1.7] tracking-[0.1em] uppercase transition-colors'
+
 function filterChipClass(disabled: boolean, active: boolean, open: boolean): string {
   if (disabled) return 'cursor-not-allowed border-line bg-surface text-muted-dark'
   if (active) return 'border-ink bg-surface text-ink hover:border-ink'
@@ -91,7 +94,7 @@ function MultiSelect({
           setOpen((o) => !o)
           if (open) setQuery('')
         }}
-        className={`inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[11px] font-medium tracking-[0.1em] uppercase transition-colors ${
+        className={`${FILTER_CHIP_BASE} ${
           fullWidth ? 'w-full justify-between' : ''
         } ${filterChipClass(Boolean(disabled), hasSelection, open)}`}
       >
@@ -163,36 +166,75 @@ function MultiSelect({
   )
 }
 
-function ChipSelect({
+function SingleSelect({
   label,
-  disabled,
-  title,
-  active,
-  children,
+  value,
+  options,
+  onChange,
   fullWidth = false,
 }: {
   label: string
-  disabled?: boolean
-  title?: string
-  active?: boolean
-  children?: React.ReactNode
+  value: string
+  options: Array<{ value: string; label: string }>
+  onChange: (next: string) => void
   fullWidth?: boolean
 }) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const hasSelection = value !== ''
+  const selectedLabel = options.find((o) => o.value === value)?.label
+
+  useEffect(() => {
+    if (!open) return
+    const onDocClick = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
+  }, [open])
+
   return (
-    <label
-      className={`relative inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[11px] font-medium tracking-[0.1em] uppercase transition-colors ${
-        fullWidth ? 'w-full justify-between' : ''
-      } ${filterChipClass(Boolean(disabled), Boolean(active), false)}`}
-      title={title}
-    >
-      <span>{label}</span>
-      {!disabled && (
+    <div ref={rootRef} className={`relative ${fullWidth ? 'w-full' : ''}`}>
+      <button
+        type="button"
+        title={hasSelection ? selectedLabel : undefined}
+        onClick={() => setOpen((o) => !o)}
+        className={`${FILTER_CHIP_BASE} ${
+          fullWidth ? 'w-full justify-between' : ''
+        } ${filterChipClass(false, hasSelection, open)}`}
+      >
+        <span>{label}</span>
         <svg className="h-3 w-3 shrink-0 opacity-60" viewBox="0 0 12 12" fill="currentColor" aria-hidden>
           <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
         </svg>
+      </button>
+
+      {open && (
+        <div
+          className={`absolute left-0 top-full z-50 mt-1 border border-line bg-paper-soft py-1 ${
+            fullWidth ? 'w-full max-w-none' : 'min-w-[220px] max-w-[320px]'
+          }`}
+        >
+          {options.map((o) => (
+            <button
+              key={o.value || 'all'}
+              type="button"
+              onClick={() => {
+                onChange(o.value)
+                setOpen(false)
+              }}
+              className={`flex w-full cursor-pointer items-center px-3 py-1.5 text-left text-[13px] hover:bg-surface ${
+                o.value === value ? 'text-ink' : 'text-muted'
+              }`}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
       )}
-      {!disabled && children}
-    </label>
+    </div>
   )
 }
 
@@ -369,43 +411,30 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
         />
       )}
 
+      {geo && availability.tags && options.tags.length > 0 && (
+        <MultiSelect
+          label="Tags"
+          values={tags}
+          options={options.tags.map((t) => ({ value: t, label: t }))}
+          onChange={setTags}
+          searchable
+          fullWidth={fullWidth}
+        />
+      )}
+
       {geo && (
         <>
-          <MultiSelect
-            label="Tags"
-            values={tags}
-            options={options.tags.map((t) => ({ value: t, label: t }))}
-            onChange={setTags}
-            disabled={!availability.tags || options.tags.length === 0}
-            unavailableReason="Not available in snapshot"
-            searchable
+          <SingleSelect
+            label="Branded"
+            value={branded ?? ''}
+            options={[
+              { value: '', label: 'All' },
+              { value: 'AccountIncluded', label: 'Me in prompt' },
+              { value: 'AccountNotIncluded', label: 'Not in prompt' },
+            ]}
+            onChange={(next) => setBranded((next || null) as BrandedFilter)}
             fullWidth={fullWidth}
           />
-
-          <ChipSelect
-            label="Branded"
-            active={branded != null}
-            fullWidth={fullWidth}
-            title={
-              branded === 'AccountIncluded'
-                ? 'Me in prompt'
-                : branded === 'AccountNotIncluded'
-                  ? 'Not in prompt'
-                  : undefined
-            }
-          >
-            <select
-              className="absolute inset-0 cursor-pointer opacity-0"
-              value={branded ?? ''}
-              onChange={(e) =>
-                setBranded((e.target.value || null) as BrandedFilter)
-              }
-            >
-              <option value="">All</option>
-              <option value="AccountIncluded">Me in prompt</option>
-              <option value="AccountNotIncluded">Not in prompt</option>
-            </select>
-          </ChipSelect>
 
           <MultiSelect
             label="Prompt types"
@@ -454,7 +483,7 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
           <button
             type="button"
             onClick={() => setSheetOpen(true)}
-            className={`inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[11px] font-medium tracking-[0.1em] uppercase transition-colors ${filterChipClass(false, activeCount > 0, sheetOpen)}`}
+            className={`${FILTER_CHIP_BASE} ${filterChipClass(false, activeCount > 0, sheetOpen)}`}
           >
             <span>Filters</span>
             {activeCount > 0 && (
