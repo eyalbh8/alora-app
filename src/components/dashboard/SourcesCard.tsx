@@ -52,7 +52,7 @@ export function SourcesCard({ sources }: SourcesCardProps) {
                   <td className="min-w-0 py-3">
                     <div className="flex min-w-0 items-center gap-2.5">
                       <span className="card-number shrink-0">
-                        // {String(index + 1).padStart(2, '0')}
+                        {String(index + 1).padStart(2, '0')}
                       </span>
                       <BrandLogo name={host} domain={host} size="md" shape="rounded" />
                       <span className="min-w-0 truncate font-medium text-ink" title={host}>

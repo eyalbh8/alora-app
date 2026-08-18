@@ -533,11 +533,19 @@ p {
   color: var(--muted);
   text-decoration: none;
   padding: 11px 10px;
+  border-left: 2px solid transparent;
 }
 
-.app-sidebar__links a:hover,
-.app-sidebar__links a.is-active {
+.app-sidebar__links a:hover {
   color: var(--ink);
+  background: var(--paper-soft);
+}
+
+.app-sidebar__links a.is-active {
+  color: var(--button-ink);
+  background: var(--button);
+  border-left-color: var(--accent);
+  font-weight: 600;
 }
 
 .app-sidebar__close {

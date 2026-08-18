@@ -50,7 +50,7 @@ function BreakdownCard({ title, subtitle, columnLabel, rows, kind }: BreakdownCa
               >
                 <div className="flex min-w-0 items-center gap-2.5">
                   <span className="card-number shrink-0">
-                    // {String(index + 1).padStart(2, '0')}
+                    {String(index + 1).padStart(2, '0')}
                   </span>
                   {showLeading && (
                     <span className="flex h-5 w-5 shrink-0 items-center justify-center">

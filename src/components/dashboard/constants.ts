@@ -1,7 +1,7 @@
 /** Fixed height for overview dashboard cards (matches iGEO overview2). */
 export const DASHBOARD_CARD_HEIGHT = '420px'
 
-/** Shared geometry so Market position rows line up with Visibility trajectory grid. */
+/** Shared geometry so Market position rows line up with Visibility trend grid. */
 export const PAIRED_BRAND_COUNT = 5
 export const PAIRED_SECTION_HEADER_MIN_CLASS = 'min-h-[3.25rem]'
 export const PAIRED_LEGEND_HEIGHT_PX = 36

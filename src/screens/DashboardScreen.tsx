@@ -86,10 +86,10 @@ export function DashboardScreen() {
           <BrandVisibilityChart
             competitors={top5ByOccurrences}
             range={filters}
-            title="Visibility trajectory"
+            title="Visibility trend"
             subtitle="How brand presence shifted across the period"
             variant="editorial"
-            emptyMessage="Not enough history to show a trajectory yet."
+            emptyMessage="Not enough history to show a trend yet."
             valueLabel="mentions"
             showLegend
             paired

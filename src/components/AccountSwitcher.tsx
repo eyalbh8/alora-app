@@ -116,7 +116,7 @@ export function AccountSwitcher({ onNavigate }: { onNavigate?: () => void }) {
                     className="flex w-full items-center gap-3 border-b border-line px-4 py-3 text-left last:border-b-0 hover:bg-paper-soft"
                   >
                     <span className="card-number">
-                      // {String(index + 1).padStart(2, '0')}
+                      {String(index + 1).padStart(2, '0')}
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[15px] text-ink">{accountTitle}</div>

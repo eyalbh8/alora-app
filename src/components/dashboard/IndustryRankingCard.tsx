@@ -110,7 +110,7 @@ export function IndustryRankingCard({ competitors }: IndustryRankingCardProps) {
                     <td className="min-w-0 border-b border-line pr-2">
                       <div className="flex min-w-0 items-center gap-1.5">
                         <span className="card-number w-8 shrink-0">
-                          // {String(row.position ?? index + 1).padStart(2, '0')}
+                          {String(row.position ?? index + 1).padStart(2, '0')}
                         </span>
                         <BrandCell row={row} />
                       </div>
