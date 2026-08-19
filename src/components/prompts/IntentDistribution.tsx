@@ -42,7 +42,7 @@ export function IntentDistribution({ prompts }: { prompts: PromptRow[] }) {
       ) : (
         <>
           <div
-            className="flex h-2 overflow-hidden bg-[rgba(227, 220, 200, 0.12)]"
+            className="flex h-2 overflow-hidden bg-line"
             role="img"
             aria-label={segments.map((segment) => `${segment.label} ${segment.pct}%`).join(', ')}
           >
@@ -53,7 +53,7 @@ export function IntentDistribution({ prompts }: { prompts: PromptRow[] }) {
                   className="h-full transition-all"
                   style={{
                     width: `${s.pct}%`,
-                    backgroundColor: INTENT_BAR_COLORS[s.type] ?? '#a79f8c',
+                    backgroundColor: INTENT_BAR_COLORS[s.type] ?? '#6b6b6b',
                   }}
                   title={`${s.label} ${s.pct}%`}
                 />
@@ -65,7 +65,7 @@ export function IntentDistribution({ prompts }: { prompts: PromptRow[] }) {
               <li key={s.type} className="flex items-center gap-2 text-xs text-muted">
                 <span
                   className="h-2 w-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: INTENT_BAR_COLORS[s.type] ?? '#a79f8c' }}
+                  style={{ backgroundColor: INTENT_BAR_COLORS[s.type] ?? '#6b6b6b' }}
                 />
                 <span>{s.label}</span>
                 <span className="font-display text-sm text-ink">{s.pct}%</span>

@@ -187,7 +187,7 @@ export function ResponsesTable({
                     key={row.id}
                     className={
                       editorial
-                        ? 'cursor-pointer border-b border-line transition-colors hover:bg-[#1a1a1a]/70'
+                        ? 'cursor-pointer border-b border-line transition-colors hover:bg-paper-soft/70'
                         : 'cursor-pointer border-b border-line transition hover:bg-paper-soft'
                     }
                     onClick={() => setSelectedRow(extended)}
@@ -196,7 +196,7 @@ export function ResponsesTable({
                       {preview ? (
                         <p
                           className={`line-clamp-2 leading-relaxed ${
-                            editorial ? 'text-[13px] text-[#e3dcc8]' : 'text-sm text-accent'
+                            editorial ? 'text-[13px] text-ink' : 'text-sm text-accent'
                           }`}
                           title={preview}
                         >

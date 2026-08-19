@@ -21,7 +21,7 @@ export function VisibilityRing({ value, size = 44 }: VisibilityRingProps) {
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="rgba(227, 220, 200, 0.12)"
+          stroke="rgba(17, 17, 17, 0.12)"
           strokeWidth={stroke}
         />
         {pct != null && (

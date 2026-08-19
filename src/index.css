@@ -1,28 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0d0d0d;
-  --ink: #e3dcc8;
-  --ink-soft: #bfb7a3;
-  --ink-ghost: rgba(227, 220, 200, 0.16);
-  --surface: #141414;
-  --paper: #141414;
-  --paper-soft: #1a1a1a;
-  --white: #e3dcc8;
-  --muted: #bfb7a3;
-  --muted-dark: #a79f8c;
-  --accent: #42ca80;
+  --bg: #ffffff;
+  --ink: #111111;
+  --ink-soft: #3d3d3d;
+  --ink-ghost: rgba(17, 17, 17, 0.32);
+  --surface: #ffffff;
+  --paper: #ffffff;
+  --paper-soft: #f4f4f2;
+  --white: #ffffff;
+  --muted: #4a4a4a;
+  --muted-dark: #6b6b6b;
+  --accent: #1a8a4a;
   --accent-bright: #42ca80;
-  --accent-muted: #42ca80;
-  --accent-sage: #42ca80;
-  --line: rgba(227, 220, 200, 0.12);
-  --line-dark: rgba(227, 220, 200, 0.12);
-  --blue: #141414;
-  --button: #e3dcc8;
-  --button-ink: #121212;
-  --error: #e07a6a;
-  --error-surface: #2a1614;
-  --error-link: #f0b4aa;
+  --accent-muted: #1a8a4a;
+  --accent-sage: #1a8a4a;
+  --line: rgba(17, 17, 17, 0.12);
+  --line-dark: rgba(17, 17, 17, 0.12);
+  --blue: #ffffff;
+  --button: #111111;
+  --button-ink: #ffffff;
+  --error: #c44d3d;
+  --error-surface: #fdecea;
+  --error-link: #9a3428;
   --display: "Geist", system-ui, sans-serif;
   --serif: "Geist", system-ui, sans-serif;
   --sans: "Inter", system-ui, sans-serif;
@@ -32,22 +32,22 @@
 }
 
 @theme {
-  --color-bg: #0d0d0d;
-  --color-surface: #141414;
-  --color-paper: #141414;
-  --color-paper-soft: #1a1a1a;
-  --color-ink: #e3dcc8;
-  --color-ink-soft: #bfb7a3;
-  --color-ink-ghost: rgba(227, 220, 200, 0.16);
-  --color-muted: #bfb7a3;
-  --color-muted-dark: #a79f8c;
-  --color-accent: #42ca80;
-  --color-line: rgba(227, 220, 200, 0.12);
-  --color-button: #e3dcc8;
-  --color-button-ink: #121212;
-  --color-error: #e07a6a;
-  --color-error-surface: #2a1614;
-  --color-error-link: #f0b4aa;
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-paper: #ffffff;
+  --color-paper-soft: #f4f4f2;
+  --color-ink: #111111;
+  --color-ink-soft: #3d3d3d;
+  --color-ink-ghost: rgba(17, 17, 17, 0.32);
+  --color-muted: #4a4a4a;
+  --color-muted-dark: #6b6b6b;
+  --color-accent: #1a8a4a;
+  --color-line: rgba(17, 17, 17, 0.12);
+  --color-button: #111111;
+  --color-button-ink: #ffffff;
+  --color-error: #c44d3d;
+  --color-error-surface: #fdecea;
+  --color-error-link: #9a3428;
 
   --font-sans: "Inter", "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Geist", system-ui, sans-serif;
@@ -67,7 +67,7 @@
 html {
   scroll-behavior: smooth;
   background: var(--bg);
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
@@ -87,7 +87,7 @@ body::before {
   inset: 0;
   pointer-events: none;
   z-index: 250;
-  opacity: 0.045;
+  opacity: 0.018;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -181,7 +181,7 @@ p {
   position: fixed;
   inset: 0 0 auto;
   z-index: 100;
-  background: rgba(13, 13, 13, 0.86);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(18px);
 }
 
@@ -267,7 +267,7 @@ p {
 }
 
 .nav-assessment:hover {
-  background: #f0ead8;
+  background: #2a2a2a;
   color: var(--button-ink);
 }
 
@@ -324,8 +324,8 @@ p {
 }
 
 .button--primary:hover {
-  background: #f0ead8;
-  border-color: #f0ead8;
+  background: #2a2a2a;
+  border-color: #2a2a2a;
 }
 
 .button--outline {
@@ -414,7 +414,7 @@ p {
 }
 
 .form-field select {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 .form-field textarea {
@@ -594,7 +594,7 @@ p {
     position: fixed;
     inset: 0;
     z-index: 90;
-    background: rgba(13, 13, 13, 0.55);
+    background: rgba(17, 17, 17, 0.35);
     border: 0;
     cursor: pointer;
   }
@@ -610,7 +610,7 @@ p {
     min-height: 64px;
     padding: 0 20px;
     border-bottom: 1px solid var(--line);
-    background: rgba(13, 13, 13, 0.86);
+    background: rgba(255, 255, 255, 0.88);
     backdrop-filter: blur(18px);
     position: sticky;
     top: 0;

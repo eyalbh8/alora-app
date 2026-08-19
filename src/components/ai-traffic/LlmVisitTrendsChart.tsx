@@ -12,6 +12,7 @@ import { daysInRange, shortDateLabel, type DateRange } from '../../lib/dates'
 import { providerLabel } from '../../lib/format'
 import { ProviderIcon } from '../ProviderIcon'
 import { ProviderSeriesTooltip } from '../ProviderSeriesTooltip'
+import { CHART_AXIS, CHART_GRID } from '../dashboard/constants'
 import { AI_TRAFFIC_CHART_HEIGHT, trafficProviderColor } from './constants'
 
 interface LlmVisitTrendsChartProps {
@@ -59,7 +60,7 @@ function ChartBody({
   return (
     <div className={`relative ${expanded ? 'h-[480px]' : 'h-[220px] sm:h-[280px]'}`}>
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <span className="select-none font-display text-5xl font-semibold tracking-tight text-[#e3dcc8]">
+        <span className="select-none font-display text-5xl font-semibold tracking-tight text-ink-ghost">
           Alora
         </span>
       </div>
@@ -73,17 +74,17 @@ function ChartBody({
               </linearGradient>
             ))}
           </defs>
-          <CartesianGrid vertical={false} stroke="rgba(227, 220, 200, 0.12)" />
+          <CartesianGrid vertical={false} stroke={CHART_GRID} />
           <XAxis
             dataKey="date"
-            tick={{ fill: '#a79f8c', fontSize: 11 }}
+            tick={{ fill: CHART_AXIS, fontSize: 11 }}
             tickLine={false}
-            axisLine={{ stroke: '#bdb6ad' }}
+            axisLine={{ stroke: CHART_AXIS }}
             interval={days <= 7 ? 0 : 'preserveStartEnd'}
           />
           <YAxis
             domain={[0, yMax]}
-            tick={{ fill: '#a79f8c', fontSize: 11 }}
+            tick={{ fill: CHART_AXIS, fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             width={38}
@@ -184,7 +185,7 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
             <button
               type="button"
               onClick={() => setExpanded(true)}
-              className="p-1.5 text-muted transition hover:bg-[#1a1a1a] hover:text-ink"
+              className="p-1.5 text-muted transition hover:bg-paper-soft hover:text-ink"
               title="Expand chart"
               aria-label="Expand chart"
             >
@@ -240,7 +241,7 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
-                className="border border-[rgba(227, 220, 200, 0.12)] px-3 py-1.5 text-sm text-muted transition hover:bg-[#1a1a1a]"
+                className="border border-line px-3 py-1.5 text-sm text-muted transition hover:bg-paper-soft"
               >
                 Close
               </button>

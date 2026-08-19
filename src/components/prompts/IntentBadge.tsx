@@ -35,7 +35,7 @@ export function IntentBadge({ type }: { type: string | null | undefined }) {
 export const INTENT_ORDER = ['COMMERCIAL', 'NAVIGATIONAL', 'TRANSACTIONAL', 'INFORMATIONAL'] as const
 
 export const INTENT_BAR_COLORS: Record<string, string> = {
-  COMMERCIAL: '#e3dcc8',
+  COMMERCIAL: '#111111',
   NAVIGATIONAL: '#7a5fb0',
   TRANSACTIONAL: '#d9793d',
   INFORMATIONAL: '#42ca80',

@@ -13,6 +13,7 @@ import { daysInRange, shortDateLabel, type DateRange } from '../../lib/dates'
 import { mergeProviderSeries } from '../../lib/snapshots/merge'
 import { groupRecommendationsByDay } from '../../lib/trackedRecommendations'
 import { ProviderSeriesTooltip } from '../ProviderSeriesTooltip'
+import { CHART_AXIS, CHART_GRID } from '../dashboard/constants'
 import { MENTIONS_CHART_HEIGHT, MENTIONS_PROVIDER_ORDER, mentionsProviderColor } from './constants'
 import { TrackedRecommendationAxis } from './TrackedRecommendationPins'
 
@@ -69,16 +70,16 @@ function ChartBody({
         >
           <XAxis
             dataKey="date"
-            axisLine={{ stroke: 'rgba(227, 220, 200, 0.12)' }}
+            axisLine={{ stroke: CHART_GRID }}
             tickLine={false}
-            tick={{ fill: '#a79f8c', fontSize: 10 }}
+            tick={{ fill: CHART_AXIS, fontSize: 10 }}
             interval="preserveStartEnd"
             minTickGap={28}
           />
           <YAxis hide width={0} domain={[0, yMax]} allowDecimals={false} />
-          <ReferenceLine y={0} stroke="rgba(227, 220, 200, 0.12)" />
+          <ReferenceLine y={0} stroke={CHART_GRID} />
           <Tooltip
-            cursor={{ stroke: 'rgba(227, 220, 200, 0.12)', strokeWidth: 1 }}
+            cursor={{ stroke: CHART_GRID, strokeWidth: 1 }}
             content={({ active, payload }) => {
               const raw = payload?.[0]?.payload?.rawDate
               return (
@@ -106,7 +107,7 @@ function ChartBody({
               activeDot={{
                 r: 3,
                 fill: mentionsProviderColor(provider),
-                stroke: '#0d0d0d',
+                stroke: '#ffffff',
                 strokeWidth: 1,
               }}
               isAnimationActive={false}

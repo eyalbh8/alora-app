@@ -103,7 +103,7 @@ export function IndustryRankingCard({ competitors }: IndustryRankingCardProps) {
                 return (
                   <tr
                     key={row.id}
-                    className={hovered ? 'bg-[#1a1a1a]' : ''}
+                    className={hovered ? 'bg-paper-soft' : ''}
                     style={{ height: PAIRED_ROW_HEIGHT_PX }}
                     onMouseEnter={() => setHoveredCompetitor(row.name)}
                     onMouseLeave={() => setHoveredCompetitor(null)}

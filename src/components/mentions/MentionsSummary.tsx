@@ -49,7 +49,7 @@ export function MentionsSummary({ providers, range }: MentionsSummaryProps) {
               role="listitem"
             >
               <ProviderIcon provider={provider.provider} size="sm" />
-              <span className="min-w-0 flex-1 text-[13px] text-[#e3dcc8]">
+              <span className="min-w-0 flex-1 text-[13px] text-ink">
                 {providerLabel(provider.provider)}
               </span>
               <span className="font-display text-[15px] font-semibold tabular-nums text-ink">

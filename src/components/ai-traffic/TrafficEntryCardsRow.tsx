@@ -39,12 +39,12 @@ function EntryCard({ title, value, change, periodText, provider }: EntryCardProp
         {provider ? (
           <>
             <ProviderIcon provider={provider} size="sm" />
-            <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#a79f8c]">
+            <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-dark">
               {providerLabel(provider)}
             </span>
           </>
         ) : (
-          <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#a79f8c]">
+          <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-dark">
             {title}
           </span>
         )}

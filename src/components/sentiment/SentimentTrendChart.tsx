@@ -102,7 +102,7 @@ function ChartBody({
             dataKey="date"
             axisLine={{ stroke: SENTIMENT_DIVIDER }}
             tickLine={false}
-            tick={{ fontSize: 10, fill: '#a79f8c' }}
+            tick={{ fontSize: 10, fill: '#6b6b6b' }}
             interval="preserveStartEnd"
             dy={8}
           />

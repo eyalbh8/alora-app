@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Alora">
-  <rect width="64" height="64" fill="#0d0d0d"/>
-  <rect x="14" y="14" width="36" height="36" fill="none" stroke="#e3dcc8" stroke-width="3"/>
-  <rect x="20" y="42" width="24" height="3" fill="#e3dcc8"/>
+  <rect width="64" height="64" fill="#ffffff"/>
+  <rect x="14" y="14" width="36" height="36" fill="none" stroke="#111111" stroke-width="3"/>
+  <rect x="20" y="42" width="24" height="3" fill="#111111"/>
 </svg>

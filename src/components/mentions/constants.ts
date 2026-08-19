@@ -1,11 +1,11 @@
 import { PROVIDER_ORDER } from '../dashboard/constants'
 
-/** Dark-safe provider palette used by the Mentions summary and trend chart. */
+/** Provider palette used by the Mentions summary and trend chart. */
 export const MENTIONS_PROVIDER_COLORS: Record<string, string> = {
-  OPENAI: '#e3dcc8',
-  CHATGPT: '#e3dcc8',
-  CHAT_GPT: '#e3dcc8',
-  GPT: '#e3dcc8',
+  OPENAI: '#111111',
+  CHATGPT: '#111111',
+  CHAT_GPT: '#111111',
+  GPT: '#111111',
   PERPLEXITY: '#42ca80',
   GEMINI: '#7a5fb0',
   BD_GOOGLE_AI_MODE: '#2f6fb0',
@@ -13,7 +13,7 @@ export const MENTIONS_PROVIDER_COLORS: Record<string, string> = {
   GOOGLE_AI_OVERVIEW: '#d99b3d',
   ANTHROPIC: '#d9793d',
   CLAUDE: '#d9793d',
-  GROK: '#bfb7a3',
+  GROK: '#5c5c5c',
   BD_COPILOT: '#2f6fb0',
   COPILOT: '#2f6fb0',
   MICROSOFT_COPILOT: '#2f6fb0',
@@ -21,7 +21,7 @@ export const MENTIONS_PROVIDER_COLORS: Record<string, string> = {
 
 export function mentionsProviderColor(provider: string): string {
   const key = provider.toUpperCase().replace(/\s+/g, '_')
-  return MENTIONS_PROVIDER_COLORS[key] ?? '#a79f8c'
+  return MENTIONS_PROVIDER_COLORS[key] ?? '#6b6b6b'
 }
 
 /** Providers shown in mention charts, in display order. */

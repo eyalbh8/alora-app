@@ -15,7 +15,9 @@ import { daysInRange, type DateRange } from '../../lib/dates'
 import { BrandLogo } from '../competitors/BrandLogo'
 import { DashboardCard } from './DashboardCard'
 import {
+  CHART_AXIS,
   CHART_COLORS,
+  CHART_GRID,
   PAIRED_BRAND_COUNT,
   PAIRED_LEGEND_HEIGHT_PX,
   PAIRED_PLOT_HEIGHT_PX,
@@ -169,14 +171,14 @@ export function BrandVisibilityChart({
                 <CartesianGrid
                   strokeDasharray={variant === 'card' ? '3 3' : undefined}
                   vertical={false}
-                  stroke={variant === 'editorial' ? 'rgba(227, 220, 200, 0.12)' : 'rgba(227, 220, 200, 0.12)'}
+                  stroke={CHART_GRID}
                   syncWithTicks
                 />
                 <XAxis
                   dataKey="label"
-                  axisLine={{ stroke: variant === 'editorial' ? 'rgba(227, 220, 200, 0.12)' : '#a79f8c' }}
+                  axisLine={{ stroke: variant === 'editorial' ? CHART_GRID : CHART_AXIS }}
                   tickLine={false}
-                  tick={{ fontSize: 11, fill: variant === 'editorial' ? '#a79f8c' : undefined }}
+                  tick={{ fontSize: 11, fill: variant === 'editorial' ? CHART_AXIS : undefined }}
                   interval="preserveStartEnd"
                   height={paired ? PAIRED_XAXIS_HEIGHT_PX : undefined}
                   tickMargin={paired ? 4 : undefined}
@@ -186,7 +188,7 @@ export function BrandVisibilityChart({
                   ticks={paired ? yTicks : showLegend ? yTicks.slice(0, -1) : yTicks}
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 11, fill: variant === 'editorial' ? '#a79f8c' : undefined }}
+                  tick={{ fontSize: 11, fill: variant === 'editorial' ? CHART_AXIS : undefined }}
                   width={36}
                 />
                 <Tooltip

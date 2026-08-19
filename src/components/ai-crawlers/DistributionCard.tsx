@@ -38,7 +38,7 @@ function DistributionRowItem({
           {formatNumber(row.value, 0)}
         </span>
       </div>
-      <div className="h-0.5 w-full bg-[rgba(227, 220, 200, 0.12)]">
+      <div className="h-0.5 w-full bg-line">
         <div
           className={`h-full ${accent === 'light' ? 'bg-accent' : 'bg-accent'}`}
           style={{ width: `${widthPct}%` }}

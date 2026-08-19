@@ -10,6 +10,7 @@ import {
 } from 'recharts'
 import { daysInRange, shortDateLabel, type DateRange } from '../../lib/dates'
 import { formatNumber } from '../../lib/format'
+import { CHART_AXIS, CHART_GRID } from '../dashboard/constants'
 
 interface CrawlerVolumeChartProps {
   chartRows: Array<{ date: string; rawDate: string; value: number }>
@@ -53,19 +54,19 @@ function ChartBody({
     <div className={expanded ? 'h-[480px]' : 'h-[220px] sm:h-[260px]'}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={formattedRows} margin={{ top: 8, right: 4, left: -12, bottom: 0 }}>
-          <CartesianGrid vertical={false} stroke="rgba(227, 220, 200, 0.12)" />
+          <CartesianGrid vertical={false} stroke={CHART_GRID} />
           <XAxis
             dataKey="date"
-            axisLine={{ stroke: 'rgba(227, 220, 200, 0.12)' }}
+            axisLine={{ stroke: CHART_GRID }}
             tickLine={false}
-            tick={{ fontSize: 11, fill: '#a79f8c' }}
+            tick={{ fontSize: 11, fill: CHART_AXIS }}
             interval="preserveStartEnd"
           />
           <YAxis
             domain={[0, yMax]}
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 10, fill: '#a79f8c' }}
+            tick={{ fontSize: 10, fill: CHART_AXIS }}
             width={40}
             allowDecimals={false}
           />
@@ -76,9 +77,9 @@ function ChartBody({
               return typeof raw === 'string' ? raw : ''
             }}
             contentStyle={{
-              background: '#1a1a1a',
-              color: '#e3dcc8',
-              border: '1px solid rgba(227, 220, 200, 0.12)',
+              background: '#ffffff',
+              color: '#111111',
+              border: `1px solid ${CHART_GRID}`,
               borderRadius: 0,
               fontSize: 12,
             }}

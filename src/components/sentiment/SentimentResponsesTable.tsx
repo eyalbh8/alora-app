@@ -32,7 +32,7 @@ export function SentimentResponsesTable({
 
         {rows.length === 0 ? (
           <div className="border-y border-line py-12 text-center">
-            <p className="text-sm font-medium text-[#e3dcc8]">No responses</p>
+            <p className="text-sm font-medium text-ink">No responses</p>
             <p className="mt-1 text-sm text-muted">
               {emptyMessage ?? 'No sentiment responses match the filters.'}
             </p>
@@ -74,7 +74,7 @@ export function SentimentResponsesTable({
                       }}
                       aria-label={`Open response from ${provider}`}
                     >
-                      <td className="min-w-0 py-4 pr-3 text-[13px] leading-relaxed text-[#e3dcc8]">
+                      <td className="min-w-0 py-4 pr-3 text-[13px] leading-relaxed text-ink">
                         {preview ? (
                           <p className="line-clamp-2" title={preview}>
                             {preview.length > 180 ? `${preview.slice(0, 179)}…` : preview}

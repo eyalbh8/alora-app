@@ -9,7 +9,7 @@ interface DeltaLabelProps {
 /** Compact +/- delta shown below a metric value. */
 export function DeltaLabel({ value, percent = true, invert = false }: DeltaLabelProps) {
   if (value === null || value === undefined || Number.isNaN(value)) {
-    return <span className="text-[10px] text-[#a79f8c]">—</span>
+    return <span className="text-[10px] text-muted-dark">—</span>
   }
   if (value === 0) {
     return <span className="text-[10px] text-muted-dark">0{percent ? '%' : ''}</span>

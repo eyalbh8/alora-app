@@ -7,12 +7,12 @@ export const AI_TRAFFIC_PROVIDER_ORDER = [
   'BD_COPILOT',
 ] as const
 
-/** Dark-safe provider palette used by the AI Traffic trend chart. */
+/** Provider palette used by the AI Traffic trend chart. */
 export const AI_TRAFFIC_PROVIDER_COLORS: Record<string, string> = {
-  OPENAI: '#e3dcc8',
-  CHATGPT: '#e3dcc8',
-  CHAT_GPT: '#e3dcc8',
-  GPT: '#e3dcc8',
+  OPENAI: '#111111',
+  CHATGPT: '#111111',
+  CHAT_GPT: '#111111',
+  GPT: '#111111',
   ANTHROPIC: '#d9793d',
   CLAUDE: '#d9793d',
   PERPLEXITY: '#42ca80',
@@ -24,7 +24,7 @@ export const AI_TRAFFIC_PROVIDER_COLORS: Record<string, string> = {
 
 export function trafficProviderColor(provider: string): string {
   const key = provider.toUpperCase().replace(/\s+/g, '_')
-  return AI_TRAFFIC_PROVIDER_COLORS[key] ?? '#a79f8c'
+  return AI_TRAFFIC_PROVIDER_COLORS[key] ?? '#6b6b6b'
 }
 
 export const AI_TRAFFIC_CHART_HEIGHT = '420px'

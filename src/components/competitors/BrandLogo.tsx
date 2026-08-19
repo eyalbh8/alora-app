@@ -65,11 +65,11 @@ export function BrandLogo({
   const imageClass = badge
     ? 'rounded-full border border-line bg-surface p-1.5 shadow-[0_2px_10px_rgba(15,23,42,0.08)] ring-2 ring-white'
     : shape === 'rounded'
-      ? 'rounded-md bg-surface object-contain p-0.5 ring-1 ring-[rgba(227, 220, 200, 0.12)]'
+      ? 'rounded-md bg-surface object-contain p-0.5 ring-1 ring-line'
       : 'rounded-full bg-surface object-cover'
   const fallbackClass =
     shape === 'rounded'
-      ? 'rounded-md bg-[#1a1a1a] text-muted ring-1 ring-[rgba(227, 220, 200, 0.12)]'
+      ? 'rounded-md bg-paper-soft text-muted ring-1 ring-line'
       : 'rounded-full bg-paper-soft text-muted'
 
   if (candidates.length === 0 || index >= candidates.length) {
