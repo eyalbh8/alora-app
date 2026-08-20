@@ -1,5 +1,11 @@
-import { useEffect, useRef, useState, type ComponentType, type SVGProps } from 'react'
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ComponentType,
+  type SVGProps,
+} from "react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Activity,
   Bot,
@@ -10,63 +16,63 @@ import {
   Quote,
   Store,
   Users,
-} from 'lucide-react'
-import { AccountSwitcher } from './AccountSwitcher'
+} from "lucide-react";
+import { AccountSwitcher } from "./AccountSwitcher";
 
 const NAV: Array<{
-  to: string
-  label: string
-  end?: boolean
-  icon: ComponentType<SVGProps<SVGSVGElement>>
+  to: string;
+  label: string;
+  end?: boolean;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
 }> = [
-  { to: '/', label: 'Dashboard', end: true, icon: LayoutDashboard },
-  { to: '/prompts', label: 'Prompts', icon: MessageSquareText },
-  { to: '/mentions', label: 'Mentions', icon: Quote },
-  { to: '/citations', label: 'Citations', icon: Link2 },
-  { to: '/sentiment', label: 'Sentiment', icon: Heart },
-  { to: '/competitors', label: 'Competitors', icon: Users },
-  { to: '/marketplace', label: 'Marketplace', icon: Store },
-  { to: '/ai-traffic', label: 'AI Traffic', icon: Activity },
-  { to: '/ai-crawlers', label: 'AI Crawlers', icon: Bot },
-]
+  { to: "/", label: "Dashboard", end: true, icon: LayoutDashboard },
+  { to: "/prompts", label: "Prompts", icon: MessageSquareText },
+  { to: "/mentions", label: "Mentions", icon: Quote },
+  { to: "/citations", label: "Citations", icon: Link2 },
+  { to: "/sentiment", label: "Sentiment", icon: Heart },
+  { to: "/competitors", label: "Competitors", icon: Users },
+  { to: "/marketplace", label: "Marketplace", icon: Store },
+  { to: "/ai-traffic", label: "AI Traffic", icon: Activity },
+  { to: "/ai-crawlers", label: "AI Crawlers", icon: Bot },
+];
 
 export function BrandMark() {
-  return <span className="brand__mark" aria-hidden="true" />
+  return <span className="brand__mark" aria-hidden="true" />;
 }
 
 export function Layout() {
-  const { pathname } = useLocation()
-  const [navOpen, setNavOpen] = useState(false)
-  const toggleRef = useRef<HTMLButtonElement>(null)
+  const { pathname } = useLocation();
+  const [navOpen, setNavOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    setNavOpen(false)
-  }, [pathname])
+    setNavOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
-    const media = window.matchMedia('(min-width: 1024px)')
+    const media = window.matchMedia("(min-width: 1024px)");
     const onChange = () => {
-      if (media.matches) setNavOpen(false)
-    }
-    media.addEventListener('change', onChange)
-    return () => media.removeEventListener('change', onChange)
-  }, [])
+      if (media.matches) setNavOpen(false);
+    };
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
 
   useEffect(() => {
-    document.body.classList.toggle('nav-open', navOpen)
-    if (!navOpen) return
+    document.body.classList.toggle("nav-open", navOpen);
+    if (!navOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setNavOpen(false)
-        toggleRef.current?.focus()
+      if (event.key === "Escape") {
+        setNavOpen(false);
+        toggleRef.current?.focus();
       }
-    }
-    window.addEventListener('keydown', onKeyDown)
+    };
+    window.addEventListener("keydown", onKeyDown);
     return () => {
-      document.body.classList.remove('nav-open')
-      window.removeEventListener('keydown', onKeyDown)
-    }
-  }, [navOpen])
+      document.body.classList.remove("nav-open");
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [navOpen]);
 
   return (
     <div className="site bg-bg text-ink">
@@ -83,7 +89,7 @@ export function Layout() {
         />
       )}
 
-      <aside className={`app-sidebar ${navOpen ? 'is-open' : ''}`}>
+      <aside className={`app-sidebar ${navOpen ? "is-open" : ""}`}>
         <div className="mb-5 flex items-start justify-between gap-3 px-1">
           <Link className="brand" to="/" aria-label="Alora, home">
             <BrandMark />
@@ -105,24 +111,35 @@ export function Layout() {
 
         <nav className="app-sidebar__links" aria-label="Primary navigation">
           {NAV.map((item) => {
-            const Icon = item.icon
+            const Icon = item.icon;
             return (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.end}
-                className={({ isActive }) => (isActive ? 'is-active' : undefined)}
+                className={({ isActive }) =>
+                  isActive ? "is-active" : undefined
+                }
                 style={({ isActive }) =>
                   isActive
-                    ? { color: '#6b746e', background: '#e6e9e6', fontWeight: 500 }
+                    ? {
+                        color: "#6b746e",
+                        background: "#e6e9e6",
+                        fontWeight: 500,
+                      }
                     : undefined
                 }
                 onClick={() => setNavOpen(false)}
               >
-                <Icon width={16} height={16} strokeWidth={1.8} aria-hidden="true" />
+                <Icon
+                  width={16}
+                  height={16}
+                  strokeWidth={1.8}
+                  aria-hidden="true"
+                />
                 {item.label}
               </NavLink>
-            )
+            );
           })}
         </nav>
       </aside>
@@ -151,5 +168,5 @@ export function Layout() {
         </main>
       </div>
     </div>
-  )
+  );
 }
