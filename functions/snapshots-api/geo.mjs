@@ -177,6 +177,9 @@ function asArray(value, preferredKey) {
     if (Array.isArray(value.topics)) return value.topics
     if (Array.isArray(value.tags)) return value.tags
     if (Array.isArray(value.competitors)) return value.competitors
+    if (Array.isArray(value.sites)) return value.sites
+    if (Array.isArray(value.catalog)) return value.catalog
+    if (Array.isArray(value.matches)) return value.matches
     if (Array.isArray(value.items)) return value.items
     if (Array.isArray(value.data)) return value.data
   }
@@ -291,6 +294,48 @@ async function optionalSource(accountId, apiKey, pathAndQuery) {
   } catch (err) {
     console.warn(
       `[geo] optional ${pathAndQuery} failed: ${err instanceof Error ? err.message : err}`,
+    )
+    return null
+  }
+}
+
+function isPublicAllowlistDenied(err) {
+  const message = err instanceof Error ? err.message : String(err)
+  return (
+    err?.statusCode === 403 &&
+    /not exposed for public API access/i.test(message)
+  )
+}
+
+/** REST first; MCP `api_get` for MCP-allowlisted paths the public API blocks. */
+async function sourceGetAllowlisted(accountId, apiKey, pathAndQuery) {
+  try {
+    return await sourceGet(accountId, apiKey, pathAndQuery)
+  } catch (err) {
+    if (!isPublicAllowlistDenied(err)) throw err
+    try {
+      const raw = await mcpApiGet(accountId, apiKey, pathAndQuery)
+      console.info(`[geo] MCP api_get OK ${pathAndQuery}`)
+      return unwrapPayload(raw)
+    } catch (mcpErr) {
+      console.warn(
+        `[geo] MCP api_get failed for ${pathAndQuery}: ${
+          mcpErr instanceof Error ? mcpErr.message : mcpErr
+        }`,
+      )
+      throw err
+    }
+  }
+}
+
+async function optionalAllowlisted(accountId, apiKey, pathAndQuery) {
+  try {
+    return await sourceGetAllowlisted(accountId, apiKey, pathAndQuery)
+  } catch (err) {
+    console.warn(
+      `[geo] optional allowlisted ${pathAndQuery} failed: ${
+        err instanceof Error ? err.message : err
+      }`,
     )
     return null
   }
@@ -905,4 +950,114 @@ export async function geoCrawlers(db, tenantId, rawQuery) {
     apiKey,
     `/traffic/${accountId}/cloudflare/crawler-analytics?${params.toString()}`,
   )
+}
+
+function numberOrNull(value) {
+  if (value == null || value === '') return null
+  const n = Number(value)
+  return Number.isFinite(n) ? n : null
+}
+
+function normalizeHost(value) {
+  if (value == null) return null
+  const raw = String(value).trim()
+  if (!raw) return null
+  try {
+    const url = raw.includes('://') ? new URL(raw) : new URL(`https://${raw}`)
+    return url.hostname.replace(/^www\./i, '').toLowerCase() || null
+  } catch {
+    return raw.replace(/^https?:\/\//i, '').replace(/^www\./i, '').split('/')[0]?.toLowerCase() || null
+  }
+}
+
+function stringList(value) {
+  return asArray(value)
+    .map((item) => {
+      if (typeof item === 'string') return item.trim()
+      if (item && typeof item === 'object') {
+        const name = item.name || item.label || item.title || item.category
+        return typeof name === 'string' ? name.trim() : ''
+      }
+      return ''
+    })
+    .filter(Boolean)
+}
+
+function mapMarketplaceSite(row) {
+  if (!row || typeof row !== 'object') return null
+  const site = row.site && typeof row.site === 'object' ? row.site : row
+  const domain = normalizeHost(site.domain || site.site || site.url || site.website)
+  const name = site.name || site.title || site.publisher || domain
+  if (!name && !domain) return null
+  const status = typeof site.status === 'string' ? site.status.toUpperCase() : 'ACTIVE'
+  const mentionsValue = site.mentions
+  const mentions =
+    mentionsValue && typeof mentionsValue === 'object'
+      ? numberOrNull(mentionsValue.appearances ?? mentionsValue.count ?? mentionsValue.avgCitations)
+      : numberOrNull(mentionsValue)
+  return {
+    id: String(site.id || site.siteId || site.thirdPartySiteId || domain || name),
+    name: String(name || domain),
+    domain,
+    logo: site.logoUrl || site.logo || site.faviconUrl || null,
+    faviconUrl: site.faviconUrl || null,
+    categories: stringList(site.categories || site.category),
+    customerPriceCents: numberOrNull(site.priceCents ?? site.customerPriceCents ?? site.price),
+    currency: site.currency || 'USD',
+    credits: numberOrNull(site.credits),
+    publisher: site.publisher || null,
+    origin: site.origin || null,
+    status: status === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE',
+    thirdPartySiteId: site.thirdPartySiteId ? String(site.thirdPartySiteId) : null,
+    traffic: numberOrNull(site.traffic),
+    rank: numberOrNull(site.rank),
+    mentions,
+    occurrences: mentions,
+    cited: mentions != null && mentions > 0,
+  }
+}
+
+function catalogQuery(rawQuery) {
+  const params = new URLSearchParams()
+  for (const key of ['category', 'domain', 'origin', 'includeInactive']) {
+    if (rawQuery[key] != null && rawQuery[key] !== '') params.set(key, String(rawQuery[key]))
+  }
+  for (const key of ['categories', 'origins']) {
+    for (const value of csv(rawQuery[key])) params.append(key, value)
+  }
+  const qs = params.toString()
+  return qs ? `?${qs}` : ''
+}
+
+// ---------------------------------------------------------------------------
+// /geo/marketplace
+// ---------------------------------------------------------------------------
+export async function geoMarketplace(db, tenantId, rawQuery) {
+  parseGeoFilters(rawQuery)
+  const { accountId, apiKey } = await creds(db, tenantId)
+  const raw = await sourceGet(
+    accountId,
+    apiKey,
+    accountPath(accountId, '/articles-marketplace/catalog', catalogQuery(rawQuery)),
+  )
+  const sites = asArray(raw, 'catalog').map(mapMarketplaceSite).filter(Boolean)
+  const matches = sites
+    .filter((site) => site.cited)
+    .sort((a, b) => {
+      const mentionDiff = (b.mentions ?? 0) - (a.mentions ?? 0)
+      if (mentionDiff !== 0) return mentionDiff
+      return (a.rank ?? Number.POSITIVE_INFINITY) - (b.rank ?? Number.POSITIVE_INFINITY)
+    })
+
+  console.info('[geo/marketplace] catalog', { sites: sites.length, matches: matches.length })
+
+  return {
+    data: {
+      matches,
+      sites,
+      catalogAvailable: true,
+    },
+    isLive: true,
+    computedAt: nowIso(),
+  }
 }

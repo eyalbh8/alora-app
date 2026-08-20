@@ -268,6 +268,53 @@ export function CompetitorsScreenSkeleton() {
   )
 }
 
+export function MarketplaceScreenSkeleton() {
+  return (
+    <div className="flex flex-col gap-8 md:gap-10 lg:gap-14">
+      <div>
+        <Skeleton className="h-5 w-48" />
+        <Skeleton className="mt-1 h-3 w-80 max-w-full" />
+        <div className="mt-4 flex gap-6 border-b-2 border-line pb-2.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-3 flex-1 rounded-none" />
+          ))}
+        </div>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="flex gap-6 border-b border-line py-4">
+            {Array.from({ length: 5 }).map((_, j) => (
+              <Skeleton
+                key={j}
+                className="h-4 rounded-none"
+                style={{ width: j === 0 ? '28%' : j === 1 ? '24%' : '12%' }}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      <div>
+        <Skeleton className="h-5 w-28" />
+        <Skeleton className="mt-1 h-3 w-64 max-w-full" />
+        <div className="mt-4 flex gap-6 border-b-2 border-line pb-2.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-3 flex-1 rounded-none" />
+          ))}
+        </div>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="flex gap-6 border-b border-line py-4">
+            {Array.from({ length: 5 }).map((_, j) => (
+              <Skeleton
+                key={j}
+                className="h-4 rounded-none"
+                style={{ width: j === 0 ? '28%' : j === 1 ? '24%' : '12%' }}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function AiTrafficScreenSkeleton() {
   return (
     <div className="flex flex-col gap-10">

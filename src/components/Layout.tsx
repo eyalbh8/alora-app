@@ -8,6 +8,7 @@ const NAV = [
   { to: '/mentions', label: 'Mentions' },
   { to: '/sentiment', label: 'Sentiment' },
   { to: '/competitors', label: 'Competitors' },
+  { to: '/marketplace', label: 'Marketplace' },
   { to: '/ai-traffic', label: 'AI Traffic' },
   { to: '/ai-crawlers', label: 'AI Crawlers' },
 ]

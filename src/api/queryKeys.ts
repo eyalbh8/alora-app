@@ -18,6 +18,8 @@ export const queryKeys = {
       ['geo', 'sentiment', accountId, filters] as const,
     competitors: (accountId: string | undefined, filters: GeoFilters) =>
       ['geo', 'competitors', accountId, filters] as const,
+    marketplace: (accountId: string | undefined, filters: GeoFilters) =>
+      ['geo', 'marketplace', accountId, filters] as const,
     responses: (
       accountId: string | undefined,
       filters: GeoFilters,

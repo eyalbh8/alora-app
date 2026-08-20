@@ -15,6 +15,11 @@ export function formatNumber(value: number | null | undefined, digits = 1): stri
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: digits }).format(value)
 }
 
+export function formatCompactNumber(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return '—'
+  return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(value)
+}
+
 export function formatScore(value: number | null | undefined): string {
   if (value === null || value === undefined || Number.isNaN(value)) return '—'
   return value.toFixed(1)

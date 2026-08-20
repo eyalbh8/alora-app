@@ -9,6 +9,7 @@ import {
   geoCompetitors,
   geoCrawlers,
   geoDashboard,
+  geoMarketplace,
   geoMentions,
   geoMeta,
   geoPrompts,
@@ -208,6 +209,7 @@ export const handler = async (event) => {
         '/geo/prompts': () => geoPrompts(db, tenantId, q),
         '/geo/tags': () => geoTags(db, tenantId),
         '/geo/competitors': () => geoCompetitors(db, tenantId, q),
+        '/geo/marketplace': () => geoMarketplace(db, tenantId, q),
         '/geo/responses': () => geoResponses(db, tenantId, q),
       }
       const geoHandler =

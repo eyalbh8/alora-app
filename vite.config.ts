@@ -616,6 +616,7 @@ interface GeoApiModule {
   ) => Promise<unknown>
   geoDeleteTag: (db: unknown, tenantId: string, tagId: string) => Promise<unknown>
   geoCompetitors: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
+  geoMarketplace: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
   geoResponses: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
   geoResponseDetail: (db: unknown, tenantId: string, responseId: string) => Promise<unknown>
   geoProviderMentionPrompts: (
@@ -1011,6 +1012,7 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
           '/geo/prompts': () => geo.geoPrompts(db, tenantId, q),
           '/geo/tags': () => geo.geoTags(db, tenantId),
           '/geo/competitors': () => geo.geoCompetitors(db, tenantId, q),
+          '/geo/marketplace': () => geo.geoMarketplace(db, tenantId, q),
           '/geo/responses': () => geo.geoResponses(db, tenantId, q),
         }
         const geoHandler = providerPromptsMatch

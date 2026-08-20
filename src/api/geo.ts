@@ -115,6 +115,34 @@ export interface GeoCompetitors {
   computedAt: string
 }
 
+export interface MarketplaceSite {
+  id: string
+  name: string
+  domain: string | null
+  logo: string | null
+  faviconUrl: string | null
+  categories: string[]
+  customerPriceCents: number | null
+  currency: string
+  credits: number | null
+  publisher: string | null
+  origin: string | null
+  status: 'ACTIVE' | 'INACTIVE'
+  thirdPartySiteId: string | null
+  traffic: number | null
+  rank: number | null
+  mentions: number | null
+  matchedDomain?: string | null
+  occurrences?: number | null
+  cited?: boolean
+}
+
+export interface GeoMarketplace {
+  data: { matches: MarketplaceSite[]; sites: MarketplaceSite[]; catalogAvailable: boolean }
+  isLive: boolean
+  computedAt: string
+}
+
 export interface GeoResponseRow {
   id: string
   provider: string
@@ -231,6 +259,10 @@ export function deleteGeoTag(tagId: string): Promise<{ ok: boolean }> {
 
 export function getGeoCompetitors(filters: GeoFilters): Promise<GeoCompetitors> {
   return apiGet<GeoCompetitors>(`/geo/competitors?${filtersToQuery(filters)}`)
+}
+
+export function getGeoMarketplace(filters: GeoFilters): Promise<GeoMarketplace> {
+  return apiGet<GeoMarketplace>(`/geo/marketplace?${filtersToQuery(filters)}`)
 }
 
 export function getGeoResponses(

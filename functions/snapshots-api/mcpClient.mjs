@@ -125,60 +125,102 @@ export function validateMcpApiKey(apiKey) {
  * @param {Object} args - Tool arguments
  * @returns {Promise<any>} Parsed result from MCP
  */
-async function callMcpTool(accountId, apiKey, toolName, args = {}) {
+async function mcpRpc(accountId, apiKey, method, params = {}) {
   validateMcpApiKey(apiKey)
-
   const requestId = Math.random().toString(36).substring(7)
-  const jsonRpcRequest = {
-    jsonrpc: '2.0',
-    id: requestId,
-    method: 'tools/call',
-    params: {
+  const response = await fetch(getMcpUrl(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
+      Authorization: `Bearer ${apiKey}`,
+      'X-Workspace-Id': accountId,
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: requestId,
+      method,
+      params,
+    }),
+  })
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`MCP HTTP ${response.status}: ${errorText.slice(0, 240)}`)
+  }
+  const jsonRpcResponse = await response.json()
+  if (jsonRpcResponse.error) {
+    const { code, message } = jsonRpcResponse.error
+    throw new Error(`MCP error ${code}: ${message}`)
+  }
+  return jsonRpcResponse.result
+}
+
+function parseMcpToolResult(result) {
+  if (result == null) throw new Error('MCP returned empty result')
+  const content = result.content
+  if (!content || !Array.isArray(content) || content.length === 0) {
+    return result
+  }
+  const textContent = content.find((item) => item.type === 'text')
+  if (!textContent?.text) return result
+  try {
+    return JSON.parse(textContent.text)
+  } catch {
+    return textContent.text
+  }
+}
+
+/**
+ * @param {string} accountId
+ * @param {string} apiKey
+ * @param {string} toolName
+ * @param {Object} [args]
+ */
+export async function callMcpTool(accountId, apiKey, toolName, args = {}) {
+  console.log(`[MCP] Calling tool: ${toolName} for account ${accountId}`)
+  try {
+    const result = await mcpRpc(accountId, apiKey, 'tools/call', {
       name: toolName,
       arguments: args,
-    },
-  }
-
-  console.log(`[MCP] Calling tool: ${toolName} for account ${accountId}`)
-
-  try {
-    const response = await fetch(getMcpUrl(), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-        'X-Workspace-Id': accountId,
-      },
-      body: JSON.stringify(jsonRpcRequest),
     })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`MCP HTTP ${response.status}: ${errorText}`)
-    }
-
-    const jsonRpcResponse = await response.json()
-
-    if (jsonRpcResponse.error) {
-      const { code, message } = jsonRpcResponse.error
-      throw new Error(`MCP error ${code}: ${message}`)
-    }
-
-    const content = jsonRpcResponse.result?.content
-    if (!content || !Array.isArray(content) || content.length === 0) {
-      throw new Error('MCP returned empty or invalid content')
-    }
-
-    const textContent = content.find((item) => item.type === 'text')
-    if (!textContent || !textContent.text) {
-      throw new Error('MCP result missing text content')
-    }
-
-    return JSON.parse(textContent.text)
+    return parseMcpToolResult(result)
   } catch (error) {
     console.error(`[MCP] Error calling ${toolName}:`, error.message)
     throw error
   }
+}
+
+/**
+ * @param {string} accountId
+ * @param {string} apiKey
+ * @returns {Promise<Array<{ name: string, description?: string, inputSchema?: object }>>}
+ */
+export async function mcpListTools(accountId, apiKey) {
+  const result = await mcpRpc(accountId, apiKey, 'tools/list', {})
+  if (Array.isArray(result?.tools)) return result.tools
+  const parsed = parseMcpToolResult(result)
+  if (Array.isArray(parsed?.tools)) return parsed.tools
+  if (Array.isArray(parsed)) return parsed
+  return []
+}
+
+/**
+ * MCP `api_get` — marketplace catalog is on the MCP read allowlist, not the public REST allowlist.
+ * @param {string} accountId
+ * @param {string} apiKey
+ * @param {string} path path starting with /
+ */
+export async function mcpApiGet(accountId, apiKey, path) {
+  const attempts = [{ path }, { url: path }, { route: path }, { pathAndQuery: path }]
+  let lastError
+  for (const args of attempts) {
+    try {
+      return await callMcpTool(accountId, apiKey, 'api_get', args)
+    } catch (err) {
+      lastError = err
+    }
+  }
+  throw lastError || new Error('MCP api_get failed')
 }
 
 /**
