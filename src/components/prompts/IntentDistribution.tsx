@@ -22,7 +22,7 @@ export function IntentDistribution({ prompts }: { prompts: PromptRow[] }) {
   const hasData = segments.some((s) => s.count > 0)
 
   return (
-    <section className="border-y border-line py-5" aria-labelledby="intent-distribution-heading">
+    <section className="rounded-lg border border-line bg-surface p-5 shadow-soft" aria-labelledby="intent-distribution-heading">
       <div className="mb-5 flex items-start justify-between gap-2">
         <div>
           <p className="text-[12px] font-medium text-muted">

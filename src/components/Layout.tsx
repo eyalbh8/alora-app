@@ -1,17 +1,33 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ComponentType, type SVGProps } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import {
+  Activity,
+  Bot,
+  Heart,
+  LayoutDashboard,
+  Link2,
+  MessageSquareText,
+  Quote,
+  Store,
+  Users,
+} from 'lucide-react'
 import { AccountSwitcher } from './AccountSwitcher'
 
-const NAV = [
-  { to: '/', label: 'Dashboard', end: true },
-  { to: '/prompts', label: 'Prompts' },
-  { to: '/mentions', label: 'Mentions' },
-  { to: '/citations', label: 'Citations' },
-  { to: '/sentiment', label: 'Sentiment' },
-  { to: '/competitors', label: 'Competitors' },
-  { to: '/marketplace', label: 'Marketplace' },
-  { to: '/ai-traffic', label: 'AI Traffic' },
-  { to: '/ai-crawlers', label: 'AI Crawlers' },
+const NAV: Array<{
+  to: string
+  label: string
+  end?: boolean
+  icon: ComponentType<SVGProps<SVGSVGElement>>
+}> = [
+  { to: '/', label: 'Dashboard', end: true, icon: LayoutDashboard },
+  { to: '/prompts', label: 'Prompts', icon: MessageSquareText },
+  { to: '/mentions', label: 'Mentions', icon: Quote },
+  { to: '/citations', label: 'Citations', icon: Link2 },
+  { to: '/sentiment', label: 'Sentiment', icon: Heart },
+  { to: '/competitors', label: 'Competitors', icon: Users },
+  { to: '/marketplace', label: 'Marketplace', icon: Store },
+  { to: '/ai-traffic', label: 'AI Traffic', icon: Activity },
+  { to: '/ai-crawlers', label: 'AI Crawlers', icon: Bot },
 ]
 
 export function BrandMark() {
@@ -68,7 +84,7 @@ export function Layout() {
       )}
 
       <aside className={`app-sidebar ${navOpen ? 'is-open' : ''}`}>
-        <div className="mb-6 flex items-start justify-between gap-3 border-b border-line pb-6">
+        <div className="mb-5 flex items-start justify-between gap-3 px-1">
           <Link className="brand" to="/" aria-label="Alora, home">
             <BrandMark />
             <span className="brand__name">Alora</span>
@@ -88,17 +104,26 @@ export function Layout() {
         </div>
 
         <nav className="app-sidebar__links" aria-label="Primary navigation">
-          {NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) => (isActive ? 'is-active' : undefined)}
-              onClick={() => setNavOpen(false)}
-            >
-              {item.label}
-            </NavLink>
-          ))}
+          {NAV.map((item) => {
+            const Icon = item.icon
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) => (isActive ? 'is-active' : undefined)}
+                style={({ isActive }) =>
+                  isActive
+                    ? { color: '#6b746e', background: '#e6e9e6', fontWeight: 500 }
+                    : undefined
+                }
+                onClick={() => setNavOpen(false)}
+              >
+                <Icon width={16} height={16} strokeWidth={1.8} aria-hidden="true" />
+                {item.label}
+              </NavLink>
+            )
+          })}
         </nav>
       </aside>
 

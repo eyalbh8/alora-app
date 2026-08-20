@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { CitationTypeCount } from '../../api/geo'
 import { formatNumber } from '../../lib/format'
+import { useCitationHover } from './CitationHoverContext'
 import { humanizeType, typeColor } from './constants'
 
 interface CitationsDonutProps {
@@ -22,6 +23,7 @@ export function CitationsDonut({ title, total, segments }: CitationsDonutProps) 
         })),
     [segments],
   )
+  const { setHoveredType, isLit } = useCitationHover()
   const sum = rows.reduce((acc, row) => acc + row.count, 0) || total
   const radius = 54
   const stroke = 14
@@ -47,6 +49,7 @@ export function CitationsDonut({ title, total, segments }: CitationsDonutProps) 
             {rows.map((row) => {
               const length = sum > 0 ? (row.count / sum) * circumference : 0
               const dash = `${length} ${circumference - length}`
+              const lit = isLit(row.type)
               const circle = (
                 <circle
                   key={row.type}
@@ -55,9 +58,13 @@ export function CitationsDonut({ title, total, segments }: CitationsDonutProps) 
                   r={radius}
                   fill="none"
                   stroke={row.color}
-                  strokeWidth={stroke}
+                  strokeWidth={lit ? stroke + 1 : stroke}
+                  strokeOpacity={lit ? 1 : 0.22}
                   strokeDasharray={dash}
                   strokeDashoffset={-offset}
+                  className="cursor-pointer transition-[stroke-opacity,stroke-width]"
+                  onMouseEnter={() => setHoveredType(row.type)}
+                  onMouseLeave={() => setHoveredType(null)}
                 />
               )
               offset += length
@@ -74,13 +81,27 @@ export function CitationsDonut({ title, total, segments }: CitationsDonutProps) 
           {rows.length === 0 ? (
             <li className="text-sm text-muted">No citation types for this period.</li>
           ) : (
-            rows.map((row) => (
-              <li key={row.type} className="flex items-center gap-2 text-[13px]">
-                <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: row.color }} />
-                <span className="min-w-0 flex-1 truncate text-muted">{row.label}</span>
-                <span className="tabular-nums text-ink">{formatNumber(row.count, 0)}</span>
-              </li>
-            ))
+            rows.map((row) => {
+              const lit = isLit(row.type)
+              return (
+                <li key={row.type}>
+                  <button
+                    type="button"
+                    className={`flex w-full items-center gap-2 text-left text-[13px] transition-opacity ${
+                      lit ? 'opacity-100' : 'opacity-30'
+                    }`}
+                    onMouseEnter={() => setHoveredType(row.type)}
+                    onMouseLeave={() => setHoveredType(null)}
+                    onFocus={() => setHoveredType(row.type)}
+                    onBlur={() => setHoveredType(null)}
+                  >
+                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: row.color }} />
+                    <span className="min-w-0 flex-1 truncate text-muted">{row.label}</span>
+                    <span className="tabular-nums text-ink">{formatNumber(row.count, 0)}</span>
+                  </button>
+                </li>
+              )
+            })
           )}
         </ul>
       </div>

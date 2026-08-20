@@ -110,12 +110,28 @@ export function TrackedRecommendationPin({
 }: TrackedRecommendationPinProps) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
+  const closeTimer = useRef<number>(0)
+
+  const show = () => {
+    window.clearTimeout(closeTimer.current)
+    setOpen(true)
+  }
+
+  const hideSoon = () => {
+    window.clearTimeout(closeTimer.current)
+    closeTimer.current = window.setTimeout(() => setOpen(false), 280)
+  }
+
+  useEffect(() => {
+    return () => window.clearTimeout(closeTimer.current)
+  }, [])
 
   useEffect(() => {
     if (!open) return
 
     const close = (event: MouseEvent) => {
       if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
+        window.clearTimeout(closeTimer.current)
         setOpen(false)
       }
     }
@@ -137,26 +153,31 @@ export function TrackedRecommendationPin({
     <div
       ref={rootRef}
       className="relative"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseEnter={show}
+      onMouseLeave={hideSoon}
     >
       <button
         type="button"
         className="flex items-center justify-center outline-offset-2 transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-ink"
         aria-expanded={open}
         aria-label={`${items.length} tracked recommendation${items.length === 1 ? '' : 's'}`}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          window.clearTimeout(closeTimer.current)
+          setOpen((current) => !current)
+        }}
       >
         <RecommendationPinIcon count={items.length} />
       </button>
 
       {open && (
         <div
-          className={`absolute bottom-full z-30 mb-2 w-64 ${alignClass}`}
+          className={`absolute bottom-full z-30 w-64 pt-0 pb-3 ${alignClass}`}
           role="dialog"
           aria-label="Tracked recommendations"
+          onMouseEnter={show}
+          onMouseLeave={hideSoon}
         >
-          <div className="max-h-72 overflow-y-auto overscroll-contain rounded-lg border border-line bg-surface ">
+          <div className="max-h-72 overflow-y-auto overscroll-contain rounded-lg border border-line bg-surface shadow-soft">
             {items.map((rec, index) => (
               <div
                 key={rec.id}

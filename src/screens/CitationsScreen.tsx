@@ -6,6 +6,7 @@ import {
   type CitationUrl,
 } from '../api/geo'
 import { queryKeys } from '../api/queryKeys'
+import { CitationHoverProvider } from '../components/citations/CitationHoverContext'
 import { CitationsDonut } from '../components/citations/CitationsDonut'
 import { CitationsTrendChart } from '../components/citations/CitationsTrendChart'
 import { CitationUrlDrawer } from '../components/citations/CitationUrlDrawer'
@@ -60,6 +61,7 @@ export function CitationsScreen() {
         : summary.distributionByDomainType
 
     return (
+      <CitationHoverProvider>
       <div className={`flex flex-col gap-8 md:gap-10 lg:gap-14${drill.fetching ? ' opacity-70' : ''}`}>
         <p className="text-xs text-muted">
           Citations / <span className="text-ink">{domain}</span>
@@ -78,6 +80,7 @@ export function CitationsScreen() {
           <CitationUrlDrawer row={selectedUrl} onClose={() => setSelectedUrl(null)} />
         ) : null}
       </div>
+      </CitationHoverProvider>
     )
   }
 
@@ -93,6 +96,7 @@ export function CitationsScreen() {
   }
 
   return (
+    <CitationHoverProvider>
     <div className={`flex flex-col gap-8 md:gap-10 lg:gap-14${list.loading ? ' opacity-70' : ''}`}>
       <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
         <CitationsDonut
@@ -108,5 +112,6 @@ export function CitationsScreen() {
         onSelect={(next) => navigate(`/citations/${encodeURIComponent(next)}`)}
       />
     </div>
+    </CitationHoverProvider>
   )
 }

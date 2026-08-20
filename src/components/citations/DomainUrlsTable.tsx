@@ -90,7 +90,8 @@ export function DomainUrlsTable({ domain, rows, onSelect, onBack }: DomainUrlsTa
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-lg border border-line bg-surface px-4 shadow-soft">
+          <div className="table-bleed">
+          <div className="table-bleed__scroll">
             <table className="w-full min-w-0 border-collapse text-sm">
               <thead>
                 <tr className="border-b border-line bg-paper-soft">
@@ -149,16 +150,19 @@ export function DomainUrlsTable({ domain, rows, onSelect, onBack }: DomainUrlsTa
               </tbody>
             </table>
           </div>
-          <TablePagination
-            pageSize={pageSize}
-            onPageSizeChange={setPageSize}
-            pageStart={pageStart}
-            pageEnd={Math.min(pageStart + pageSize, filtered.length)}
-            total={filtered.length}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setPage}
-          />
+          <div className="px-4">
+            <TablePagination
+              pageSize={pageSize}
+              onPageSizeChange={setPageSize}
+              pageStart={pageStart}
+              pageEnd={Math.min(pageStart + pageSize, filtered.length)}
+              total={filtered.length}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          </div>
+          </div>
         </>
       )}
     </section>

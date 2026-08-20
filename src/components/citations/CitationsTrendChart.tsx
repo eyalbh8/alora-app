@@ -5,6 +5,7 @@ import { shortDateLabel } from '../../lib/dates'
 import { formatNumber } from '../../lib/format'
 import { CHART_AXIS, CHART_GRID } from '../dashboard/constants'
 import { DeltaLabel } from '../prompts/DeltaLabel'
+import { useCitationHover } from './CitationHoverContext'
 import { CITATIONS_CHART_HEIGHT, citationGrowthPercent, humanizeType, typeColor } from './constants'
 
 interface CitationsTrendChartProps {
@@ -28,6 +29,7 @@ export function CitationsTrendChart({ title, trend }: CitationsTrendChartProps) 
     })
   }, [series, trend.chartCategories])
 
+  const { hoveredType, isLit } = useCitationHover()
   const growth = citationGrowthPercent(trend.currentTotal, trend.previousTotal)
   const hasData = rows.length > 0 && series.some((item) => item.data.some((value) => value > 0))
 
@@ -88,19 +90,25 @@ export function CitationsTrendChart({ title, trend }: CitationsTrendChartProps) 
                   )
                 }}
               />
-              {series.map((item, index) => (
-                <Area
-                  key={item.name}
-                  type="monotone"
-                  dataKey={item.name}
-                  name={item.name}
-                  stackId="citations"
-                  stroke={typeColor(item.name, index)}
-                  fill={typeColor(item.name, index)}
-                  fillOpacity={0.18}
-                  strokeWidth={1.6}
-                />
-              ))}
+              {series.map((item, index) => {
+                const lit = isLit(item.name)
+                const popped = Boolean(hoveredType && lit)
+                return (
+                  <Area
+                    key={item.name}
+                    type="monotone"
+                    dataKey={item.name}
+                    name={item.name}
+                    stackId="citations"
+                    stroke={typeColor(item.name, index)}
+                    fill={typeColor(item.name, index)}
+                    fillOpacity={popped ? 0.42 : lit ? 0.18 : 0.04}
+                    strokeOpacity={lit ? 1 : 0.18}
+                    strokeWidth={popped ? 2.6 : 1.6}
+                    isAnimationActive={false}
+                  />
+                )
+              })}
             </AreaChart>
           </ResponsiveContainer>
         </div>

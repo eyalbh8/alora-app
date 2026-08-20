@@ -92,7 +92,8 @@ export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
       <h2 id="competitors-list-title" className="mb-4 text-[17px] font-semibold text-ink">
         Competitors List
       </h2>
-      <div className="overflow-x-auto rounded-lg border border-line bg-surface px-4 shadow-soft">
+      <div className="table-bleed">
+      <div className="table-bleed__scroll">
         <table className="w-full min-w-0 border-collapse text-sm">
           <thead>
             <tr className="border-b border-line">
@@ -173,6 +174,7 @@ export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
             })}
           </tbody>
         </table>
+      </div>
       </div>
     </section>
   )

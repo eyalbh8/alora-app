@@ -129,32 +129,18 @@ export function ResponsesTable({
           </h2>
         )}
         <div
-          className={`${
-            editorial
-              ? 'overflow-hidden'
-              : 'overflow-hidden rounded-xl border border-line bg-surface '
-          }${loading ? ' opacity-70' : ''}`}
+          className={`table-bleed${loading ? ' opacity-70' : ''}`}
         >
-        <div className="overflow-x-auto">
+        <div className="table-bleed__scroll">
           <table className="w-full text-sm">
             <thead>
-              <tr
-                className={
-                  editorial
-                    ? 'border-b border-line'
-                    : 'border-b border-line bg-paper-soft'
-                }
-              >
+              <tr className="border-b border-line">
                 {headers.map((header) => (
                   <th
                     key={header}
-                    className={`whitespace-nowrap font-semibold uppercase ${
-                      editorial
-                        ? 'px-3 pb-2.5 text-[10px] tracking-[0.08em] text-muted'
-                        : 'px-4 py-3 text-xs tracking-wide text-muted'
-                    } ${header === 'Response' ? 'min-w-0 pl-0 text-left' : ''} ${
-                      editorial && header === 'Sentiment' ? 'pr-0' : ''
-                    } ${
+                    className={`whitespace-nowrap text-[12px] font-medium text-muted ${
+                      editorial ? 'px-3 py-3' : 'px-4 py-3'
+                    } ${header === 'Response' ? 'min-w-0 text-left' : ''} ${
                       editorial && (header === 'Rank' || header === 'Citations')
                         ? 'hidden md:table-cell'
                         : ''

@@ -212,7 +212,7 @@ export function PromptsScreen() {
       </div>
 
       <section aria-labelledby="prompts-table-heading">
-        <div className="flex flex-col gap-4 border-b border-line pb-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[12px] font-medium text-muted">
               Prompt library
@@ -251,10 +251,11 @@ export function PromptsScreen() {
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-lg border border-line bg-surface px-4 shadow-soft">
+        <div className="table-bleed">
+          <div className="table-bleed__scroll">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-line bg-paper-soft">
+              <tr className="border-b border-line">
                 <th className="py-3 pr-4 text-left text-[12px] font-medium text-muted">
                   Prompt
                 </th>
@@ -320,7 +321,7 @@ export function PromptsScreen() {
                 </tr>
               ) : (
                 pagedRows.map((r) => (
-                  <tr key={r.id} className="group border-b border-line transition hover:bg-surface/70">
+                  <tr key={r.id} className="group border-b border-line transition hover:bg-paper-soft/70">
                     <td className="max-w-sm py-4 pr-4">
                       <button
                         type="button"
@@ -391,18 +392,20 @@ export function PromptsScreen() {
               )}
             </tbody>
           </table>
+          </div>
+          <div className="px-4">
+            <TablePagination
+              pageSize={pageSize}
+              onPageSizeChange={setPageSize}
+              pageStart={pageStart}
+              pageEnd={pageEnd}
+              total={tableRows.length}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          </div>
         </div>
-
-        <TablePagination
-          pageSize={pageSize}
-          onPageSizeChange={setPageSize}
-          pageStart={pageStart}
-          pageEnd={pageEnd}
-          total={tableRows.length}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
       </section>
 
       {drawerPrompt && (

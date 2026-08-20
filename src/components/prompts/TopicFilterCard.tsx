@@ -24,7 +24,7 @@ export function TopicFilterCard({
   const allActive = selectedTopicIds.length === 0
 
   return (
-    <section className="border-y border-line py-5" aria-labelledby="prompt-topics-heading">
+    <section className="rounded-lg border border-line bg-surface p-5 shadow-soft" aria-labelledby="prompt-topics-heading">
       <div className="mb-4">
         <p className="text-[12px] font-medium text-muted">
           Explore
@@ -39,9 +39,9 @@ export function TopicFilterCard({
           type="button"
           onClick={onClearTopics}
           aria-pressed={allActive}
-          className={`inline-flex items-center gap-2 border px-3 py-2 text-xs font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+          className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
             allActive
-              ? 'border-accent bg-surface text-ink'
+              ? 'border-accent bg-paper-soft text-ink'
               : 'border-line bg-transparent text-muted hover:border-ink hover:text-ink'
           }`}
         >
@@ -59,24 +59,24 @@ export function TopicFilterCard({
               title={topic.name}
               onClick={() => onToggleTopic(topic.id)}
               aria-pressed={active}
-              className={`group relative z-0 inline-flex items-center gap-2 border px-3 py-2 text-xs font-medium transition hover:z-30 focus-visible:z-30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+              className={`group relative z-0 inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium transition hover:z-30 focus-visible:z-30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                 active
-                  ? 'border-accent bg-surface text-ink'
+                  ? 'border-accent bg-paper-soft text-ink'
                   : 'border-line bg-transparent text-muted hover:border-ink hover:text-ink'
               }`}
             >
-              <span className={`h-1.5 w-1.5 shrink-0 ${topicStateDot(topic.state)}`} />
+              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${topicStateDot(topic.state)}`} />
               <span className="max-w-[140px] truncate">{topic.name}</span>
               <span className="font-display text-muted">{count}</span>
               <span
                 aria-hidden
-                className={`pointer-events-none absolute top-0 left-0 z-10 hidden h-full items-center gap-2 whitespace-nowrap border px-3 group-hover:inline-flex group-focus-visible:inline-flex ${
+                className={`pointer-events-none absolute top-0 left-0 z-10 hidden h-full items-center gap-2 whitespace-nowrap rounded-full border px-3 group-hover:inline-flex group-focus-visible:inline-flex ${
                   active
-                    ? 'border-accent bg-surface text-ink'
+                    ? 'border-accent bg-paper-soft text-ink'
                     : 'border-ink bg-surface text-ink'
                 }`}
               >
-                <span className={`h-1.5 w-1.5 shrink-0 ${topicStateDot(topic.state)}`} />
+                <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${topicStateDot(topic.state)}`} />
                 {topic.name}
                 <span className="font-display text-muted">{count}</span>
               </span>

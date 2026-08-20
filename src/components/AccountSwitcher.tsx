@@ -78,7 +78,20 @@ export function AccountSwitcher({ onNavigate }: { onNavigate?: () => void }) {
         aria-expanded={isOpen}
         title={displayName}
       >
-        <span className="nav-assessment__name">{displayName}</span>
+        <span className="nav-assessment__meta">
+          <span className="nav-assessment__label">Workspace</span>
+          <span className="nav-assessment__name">{displayName}</span>
+        </span>
+        <svg
+          className="nav-assessment__chevron"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path d="M4 6.5L8 10.5L12 6.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </button>
 
       {isOpen && (

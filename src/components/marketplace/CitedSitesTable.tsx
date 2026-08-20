@@ -35,7 +35,8 @@ export function CitedSitesTable({ rows }: CitedSitesTableProps) {
           Publishing sites that already mention this brand in AI answers.
         </p>
       </header>
-      <div className="overflow-x-auto rounded-lg border border-line bg-surface px-4 shadow-soft">
+      <div className="table-bleed">
+      <div className="table-bleed__scroll">
         <table className="w-full min-w-0 border-collapse text-sm">
           <thead>
             <tr className="border-b border-line">
@@ -88,6 +89,7 @@ export function CitedSitesTable({ rows }: CitedSitesTableProps) {
             ))}
           </tbody>
         </table>
+      </div>
       </div>
     </section>
   )

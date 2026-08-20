@@ -69,8 +69,8 @@ export function DataTable<T>({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-line bg-surface shadow-soft">
-      <div className="overflow-x-auto">
+    <div className="table-bleed">
+      <div className="table-bleed__scroll">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line bg-paper-soft">
