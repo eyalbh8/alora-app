@@ -9,6 +9,9 @@ import {
   geoCompetitors,
   geoCrawlers,
   geoDashboard,
+  geoCitations,
+  geoCitationDomain,
+  geoCitationUrlDetail,
   geoMarketplace,
   geoMentions,
   geoMeta,
@@ -185,6 +188,8 @@ export const handler = async (event) => {
     if (path.startsWith('/geo/')) {
       const providerPromptsMatch = path.match(/^\/geo\/provider-mentions\/([^/]+)\/prompts$/)
       const responseDetailMatch = path.match(/^\/geo\/responses\/([^/]+)$/)
+      const citationDomainMatch = path.match(/^\/geo\/citations\/domains\/([^/]+)$/)
+      const citationUrlDetailMatch = path === '/geo/citations/url-detail'
       if (method === 'GET' && path === '/geo/tags') {
         return json(200, await geoTags(db, tenantId), requestHeaders)
       }
@@ -210,6 +215,7 @@ export const handler = async (event) => {
         '/geo/tags': () => geoTags(db, tenantId),
         '/geo/competitors': () => geoCompetitors(db, tenantId, q),
         '/geo/marketplace': () => geoMarketplace(db, tenantId, q),
+        '/geo/citations': () => geoCitations(db, tenantId, q),
         '/geo/responses': () => geoResponses(db, tenantId, q),
       }
       const geoHandler =
@@ -217,7 +223,11 @@ export const handler = async (event) => {
           ? () => geoProviderMentionPrompts(db, tenantId, q, decodeURIComponent(providerPromptsMatch[1]))
           : responseDetailMatch
             ? () => geoResponseDetail(db, tenantId, decodeURIComponent(responseDetailMatch[1]))
-            : geoHandlers[path]
+            : citationDomainMatch
+              ? () => geoCitationDomain(db, tenantId, q, decodeURIComponent(citationDomainMatch[1]))
+              : citationUrlDetailMatch
+                ? () => geoCitationUrlDetail(db, tenantId, q, q.url)
+                : geoHandlers[path]
       if (!geoHandler) return json(404, { error: `Unknown path ${path}` }, requestHeaders)
       return json(200, await geoHandler(), requestHeaders)
     }

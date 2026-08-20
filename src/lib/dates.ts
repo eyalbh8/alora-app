@@ -1,4 +1,4 @@
-import { format, subDays, parseISO, differenceInCalendarDays } from 'date-fns'
+import { differenceInCalendarDays, format, formatDistanceToNow, parseISO, subDays } from 'date-fns'
 
 export interface DateRange {
   startDate: string
@@ -59,6 +59,17 @@ export function formatPulledAt(iso: string | null | undefined): string {
     return format(new Date(iso), 'MMM d, yyyy HH:mm')
   } catch {
     return iso
+  }
+}
+
+export function formatRelativeTime(value: string | number | Date | null | undefined): string {
+  if (value == null || value === '') return '—'
+  try {
+    const date = value instanceof Date ? value : new Date(value)
+    if (Number.isNaN(date.getTime())) return '—'
+    return formatDistanceToNow(date, { addSuffix: true })
+  } catch {
+    return '—'
   }
 }
 

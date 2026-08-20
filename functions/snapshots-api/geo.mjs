@@ -1061,3 +1061,310 @@ export async function geoMarketplace(db, tenantId, rawQuery) {
     computedAt: nowIso(),
   }
 }
+
+// ---------------------------------------------------------------------------
+// /geo/citations — Sources domains, domain URLs, and URL detail
+// ---------------------------------------------------------------------------
+
+function mapTypeCount(row) {
+  if (!row || typeof row !== 'object') return null
+  const type = String(row.type || row.name || row.domainType || row.urlType || '').trim()
+  const count = numberOrNull(row.count ?? row.total ?? row.appearances)
+  if (!type || count == null) return null
+  return { type, count }
+}
+
+function mapCitationTrend(raw) {
+  const trend = raw && typeof raw === 'object' ? raw : {}
+  return {
+    chartCategories: asArray(trend.chartCategories).map((value) => String(value)),
+    chartSeries: asArray(trend.chartSeries)
+      .map((series) => ({
+        name: String(series?.name || series?.type || 'Other'),
+        data: asArray(series?.data).map((value) => numberOrNull(value) ?? 0),
+      }))
+      .filter((series) => series.name),
+    currentTotal: numberOrNull(trend.currentTotal) ?? 0,
+    previousTotal: numberOrNull(trend.previousTotal) ?? 0,
+  }
+}
+
+function mapCitationSummary(raw) {
+  const summary = raw?.summary && typeof raw.summary === 'object' ? raw.summary : raw || {}
+  return {
+    totalCitations: numberOrNull(summary.totalCitations) ?? 0,
+    distributionByDomainType: asArray(summary.distributionByDomainType).map(mapTypeCount).filter(Boolean),
+    distributionByUrlType: asArray(summary.distributionByUrlType).map(mapTypeCount).filter(Boolean),
+    trend: mapCitationTrend(summary.trend),
+  }
+}
+
+function asUsedPercent(value) {
+  const n = numberOrNull(value)
+  if (n == null) return null
+  return n
+}
+
+function normalizeUsedPercents(rows) {
+  const values = rows.map((row) => row.usedPercent).filter((value) => value != null)
+  if (values.length > 0 && values.every((value) => value >= 0 && value <= 1)) {
+    return rows.map((row) => ({
+      ...row,
+      usedPercent: row.usedPercent == null ? null : row.usedPercent * 100,
+    }))
+  }
+  return rows
+}
+
+function mapCitationDomain(row) {
+  if (!row || typeof row !== 'object') return null
+  const domain = normalizeHost(row.domain || row.host || row.hostname || row.source)
+  if (!domain) return null
+  return {
+    domain,
+    appearances: numberOrNull(row.appearances ?? row.occurrences ?? row.count),
+    domainType: String(row.domainType || row.type || 'Other'),
+    usedPercent: asUsedPercent(row.usedPercent ?? row.used),
+    avgCitations: numberOrNull(row.avgCitations ?? row.averageCitations),
+  }
+}
+
+function mapCitationUrl(row, fallbackDomain) {
+  if (!row || typeof row !== 'object') return null
+  const url = String(row.url || row.href || row.path || '').trim()
+  if (!url) return null
+  const domain = normalizeHost(row.domain || fallbackDomain) || normalizeHost(url)
+  return {
+    title: String(row.title || row.name || '').trim() || url,
+    url,
+    domain: domain || fallbackDomain || '',
+    urlType: String(row.urlType || row.domainType || row.type || 'Other'),
+    mentions: numberOrNull(row.occurrences ?? row.usedTotal ?? row.mentions ?? row.appearances),
+    avgCitations: numberOrNull(row.avgCitations ?? row.averageCitations),
+    lastUpdated: row.lastUpdated || row.updatedAt || row.updated || null,
+  }
+}
+
+function flattenSourceUrls(raw, fallbackDomain) {
+  const groups = asArray(raw?.sourceGroups ?? raw?.groups ?? raw?.items, 'sourceGroups')
+  const urls = []
+  if (groups.length) {
+    for (const group of groups) {
+      const groupDomain = group?.domain || fallbackDomain
+      const groupUrls = asArray(group?.urls)
+      if (groupUrls.length) {
+        for (const item of groupUrls) urls.push(mapCitationUrl(item, groupDomain))
+      } else {
+        urls.push(mapCitationUrl(group, groupDomain))
+      }
+    }
+  } else {
+    for (const item of asArray(raw?.urls ?? raw?.items, 'urls')) {
+      urls.push(mapCitationUrl(item, fallbackDomain))
+    }
+  }
+  return urls.filter(Boolean)
+}
+
+function growthPercent(current, previous) {
+  if (current == null || previous == null) return null
+  if (previous === 0) return current > 0 ? 100 : 0
+  return ((current - previous) / previous) * 100
+}
+
+function mapCitationUrlDetail(raw, fallbackUrl) {
+  const row = raw?.data && typeof raw.data === 'object' && !Array.isArray(raw.data) ? raw.data : raw || {}
+  const url = String(row.url || fallbackUrl || '').trim()
+  const citations = numberOrNull(row.citations ?? row.appearances ?? row.occurrences)
+  const previous = numberOrNull(row.previousCitations ?? row.previousAppearances)
+  const delta = numberOrNull(row.citationsDelta ?? row.growthPercent ?? row.growth)
+  const computedGrowth =
+    numberOrNull(row.growthPercent ?? row.growth) ??
+    (previous != null ? growthPercent(citations, previous) : delta)
+  const providers = asArray(row.providers).map((item) => ({
+    provider: String(item.provider || item.name || item.engine || ''),
+    count: numberOrNull(item.count ?? item.appearances) ?? 0,
+    share: numberOrNull(item.share) ?? 0,
+  })).filter((item) => item.provider)
+  const prompts = asArray(row.promptList ?? row.prompts).map((item) => {
+    if (typeof item === 'string') return { text: item, promptId: null }
+    const text = String(item?.text || item?.prompt || item?.title || '').trim()
+    if (!text) return null
+    return { text, promptId: item.promptId ? String(item.promptId) : null }
+  }).filter(Boolean)
+  const series = asArray(row.citationTimeSeries ?? row.timeSeries).map((item) => ({
+    date: toIsoDay(item.date) || String(item.date || ''),
+    count: numberOrNull(item.count ?? item.value) ?? 0,
+  })).filter((item) => item.date)
+
+  return {
+    title: String(row.title || row.name || '').trim() || url,
+    url,
+    path: String(row.path || '').trim(),
+    isBranded: typeof row.isBranded === 'boolean' ? row.isBranded : null,
+    appearances: citations ?? 0,
+    promptCount: numberOrNull(row.promptCount) ?? prompts.length,
+    growthPercent: computedGrowth,
+    providers,
+    citationTimeSeries: series,
+    sparkline: asArray(row.sparkline).map((value) => numberOrNull(value) ?? 0),
+    prompts,
+    lastUpdated: row.lastUpdated || null,
+  }
+}
+
+export async function geoCitations(db, tenantId, rawQuery) {
+  const f = parseGeoFilters(rawQuery)
+  const { accountId, apiKey } = await creds(db, tenantId)
+  const pageSize = 200
+  const firstQuery = toSourceQueryWithRange(f, { page: 1, pageSize }, { engines: 'aiEngines' })
+  const first = await sourceGet(accountId, apiKey, accountPath(accountId, '/sources/domains-page', firstQuery))
+  const summary = mapCitationSummary(first)
+  let items = asArray(first?.domains?.items ?? first?.domains ?? first?.items, 'items').map(mapCitationDomain).filter(Boolean)
+  const total = numberOrNull(first?.domains?.total ?? first?.total) ?? items.length
+  items = normalizeUsedPercents(items)
+
+  console.info('[geo/citations] domains', { total, loaded: items.length })
+
+  return {
+    data: {
+      summary,
+      domains: items,
+      total,
+    },
+    isLive: true,
+    computedAt: nowIso(),
+  }
+}
+
+export async function geoCitationDomain(db, tenantId, rawQuery, domain) {
+  const f = parseGeoFilters(rawQuery)
+  const { accountId, apiKey } = await creds(db, tenantId)
+  const host = normalizeHost(domain)
+  if (!host) {
+    const err = new Error('domain is required')
+    err.statusCode = 400
+    throw err
+  }
+
+  const pageSize = 100
+  const encoded = encodeURIComponent(host)
+  let raw
+  try {
+    raw = await sourceGet(
+      accountId,
+      apiKey,
+      accountPath(
+        accountId,
+        `/sources/domain-drill-down/${encoded}`,
+        toSourceQueryWithRange(f, { page: 1, pageSize }, { engines: 'aiEngines' }),
+      ),
+    )
+  } catch (err) {
+    console.warn(
+      `[geo/citations] drill-down failed for ${host}, falling back: ${err instanceof Error ? err.message : err}`,
+    )
+    const [summaryRaw, urlsRaw] = await Promise.all([
+      sourceGet(
+        accountId,
+        apiKey,
+        accountPath(accountId, '/sources/url-type-summary', toSourceQueryWithRange(f, {}, { engines: 'aiEngines' })),
+      ),
+      sourceGet(
+        accountId,
+        apiKey,
+        accountPath(
+          accountId,
+          `/sources/domains/${encoded}/urls`,
+          toSourceQueryWithRange(f, { page: 1, pageSize }, { engines: 'aiEngines' }),
+        ),
+      ),
+    ])
+    raw = {
+      summary: summaryRaw?.summary ?? summaryRaw,
+      sourceGroups: urlsRaw?.sourceGroups ?? urlsRaw,
+      total: urlsRaw?.total,
+    }
+  }
+
+  const urls = flattenSourceUrls(raw, host)
+  const seen = new Set(urls.map((row) => row.url))
+  const total = numberOrNull(raw?.total) ?? urls.length
+  const pages = Math.min(Math.ceil(total / pageSize), 8)
+  for (let page = 2; page <= pages; page += 1) {
+    try {
+      const next = await sourceGet(
+        accountId,
+        apiKey,
+        accountPath(
+          accountId,
+          `/sources/domains/${encoded}/urls`,
+          toSourceQueryWithRange(f, { page, pageSize }, { engines: 'aiEngines' }),
+        ),
+      )
+      for (const row of flattenSourceUrls(next, host)) {
+        if (seen.has(row.url)) continue
+        seen.add(row.url)
+        urls.push(row)
+      }
+    } catch (err) {
+      console.warn(
+        `[geo/citations] extra URL page failed for ${host}: ${err instanceof Error ? err.message : err}`,
+      )
+      break
+    }
+  }
+
+  console.info('[geo/citations] domain', { domain: host, urls: urls.length, total })
+
+  return {
+    data: {
+      domain: host,
+      summary: mapCitationSummary(raw),
+      urls,
+      total,
+    },
+    isLive: true,
+    computedAt: nowIso(),
+  }
+}
+
+export async function geoCitationUrlDetail(db, tenantId, rawQuery, url) {
+  const f = parseGeoFilters(rawQuery)
+  const { accountId, apiKey } = await creds(db, tenantId)
+  const target = String(url || rawQuery.url || '').trim()
+  if (!target) {
+    const err = new Error('url is required')
+    err.statusCode = 400
+    throw err
+  }
+
+  const attempts = [
+    ['/sources/detail', { url: target }],
+    ['/sources/detail', { pageUrl: target }],
+    ['/pages/detail', { url: target }],
+  ]
+  let lastError
+  let raw = null
+  for (const [path, extra] of attempts) {
+    try {
+      raw = await sourceGet(
+        accountId,
+        apiKey,
+        accountPath(accountId, path, toSourceQueryWithRange(f, extra, { engines: 'aiEngines' })),
+      )
+      if (raw) break
+    } catch (err) {
+      lastError = err
+    }
+  }
+  if (!raw) {
+    throw lastError || new Error('Source URL detail was not available')
+  }
+
+  return {
+    data: mapCitationUrlDetail(raw, target),
+    isLive: true,
+    computedAt: nowIso(),
+  }
+}

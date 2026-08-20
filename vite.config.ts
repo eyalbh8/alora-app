@@ -617,6 +617,19 @@ interface GeoApiModule {
   geoDeleteTag: (db: unknown, tenantId: string, tagId: string) => Promise<unknown>
   geoCompetitors: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
   geoMarketplace: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
+  geoCitations: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
+  geoCitationDomain: (
+    db: unknown,
+    tenantId: string,
+    q: Record<string, string>,
+    domain: string,
+  ) => Promise<unknown>
+  geoCitationUrlDetail: (
+    db: unknown,
+    tenantId: string,
+    q: Record<string, string>,
+    url: string,
+  ) => Promise<unknown>
   geoResponses: (db: unknown, tenantId: string, q: Record<string, string>) => Promise<unknown>
   geoResponseDetail: (db: unknown, tenantId: string, responseId: string) => Promise<unknown>
   geoProviderMentionPrompts: (
@@ -986,6 +999,8 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
         const q = Object.fromEntries(url.searchParams.entries())
         const providerPromptsMatch = pathName.match(/^\/geo\/provider-mentions\/([^/]+)\/prompts$/)
         const responseDetailMatch = pathName.match(/^\/geo\/responses\/([^/]+)$/)
+        const citationDomainMatch = pathName.match(/^\/geo\/citations\/domains\/([^/]+)$/)
+        const citationUrlDetailMatch = pathName === '/geo/citations/url-detail'
         if (req.method === 'GET' && pathName === '/geo/tags') {
           send(200, await geo.geoTags(db, tenantId))
           return
@@ -1013,6 +1028,7 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
           '/geo/tags': () => geo.geoTags(db, tenantId),
           '/geo/competitors': () => geo.geoCompetitors(db, tenantId, q),
           '/geo/marketplace': () => geo.geoMarketplace(db, tenantId, q),
+          '/geo/citations': () => geo.geoCitations(db, tenantId, q),
           '/geo/responses': () => geo.geoResponses(db, tenantId, q),
         }
         const geoHandler = providerPromptsMatch
@@ -1026,7 +1042,17 @@ function createSnapshotsMiddleware(env: Record<string, string>): Connect.NextHan
           : responseDetailMatch
             ? () =>
                 geo.geoResponseDetail(db, tenantId, decodeURIComponent(responseDetailMatch[1]))
-            : geoHandlers[pathName]
+            : citationDomainMatch
+              ? () =>
+                  geo.geoCitationDomain(
+                    db,
+                    tenantId,
+                    q,
+                    decodeURIComponent(citationDomainMatch[1]),
+                  )
+              : citationUrlDetailMatch
+                ? () => geo.geoCitationUrlDetail(db, tenantId, q, q.url)
+                : geoHandlers[pathName]
         if (!geoHandler) {
           send(404, { error: `Unknown path ${pathName}` })
           return

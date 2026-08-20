@@ -20,6 +20,12 @@ export const queryKeys = {
       ['geo', 'competitors', accountId, filters] as const,
     marketplace: (accountId: string | undefined, filters: GeoFilters) =>
       ['geo', 'marketplace', accountId, filters] as const,
+    citations: (accountId: string | undefined, filters: GeoFilters) =>
+      ['geo', 'citations', accountId, filters] as const,
+    citationDomain: (accountId: string | undefined, domain: string, filters: GeoFilters) =>
+      ['geo', 'citations', 'domain', accountId, domain, filters] as const,
+    citationUrlDetail: (accountId: string | undefined, url: string, filters: GeoFilters) =>
+      ['geo', 'citations', 'url', accountId, url, filters] as const,
     responses: (
       accountId: string | undefined,
       filters: GeoFilters,

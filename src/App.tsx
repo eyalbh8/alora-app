@@ -11,6 +11,7 @@ import { AiTrafficScreen } from './screens/AiTrafficScreen'
 import { CompetitorsScreen } from './screens/CompetitorsScreen'
 import { DashboardScreen } from './screens/DashboardScreen'
 import { LoginScreen } from './screens/LoginScreen'
+import { CitationsScreen } from './screens/CitationsScreen'
 import { MarketplaceScreen } from './screens/MarketplaceScreen'
 import { MentionsScreen } from './screens/MentionsScreen'
 import { PromptsScreen } from './screens/PromptsScreen'
@@ -50,6 +51,10 @@ export default function App() {
                             </Route>
                             <Route element={<GeoScreenLayout title="Mentions" />}>
                               <Route path="/mentions" element={<MentionsScreen />} />
+                            </Route>
+                            <Route element={<GeoScreenLayout title="Citations" />}>
+                              <Route path="/citations" element={<CitationsScreen />} />
+                              <Route path="/citations/:domain" element={<CitationsScreen />} />
                             </Route>
                             <Route element={<GeoScreenLayout title="Sentiment" />}>
                               <Route path="/sentiment" element={<SentimentScreen />} />

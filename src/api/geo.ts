@@ -265,6 +265,92 @@ export function getGeoMarketplace(filters: GeoFilters): Promise<GeoMarketplace> 
   return apiGet<GeoMarketplace>(`/geo/marketplace?${filtersToQuery(filters)}`)
 }
 
+export interface CitationTypeCount {
+  type: string
+  count: number
+}
+
+export interface CitationTrend {
+  chartCategories: string[]
+  chartSeries: Array<{ name: string; data: number[] }>
+  currentTotal: number
+  previousTotal: number
+}
+
+export interface CitationSummary {
+  totalCitations: number
+  distributionByDomainType: CitationTypeCount[]
+  distributionByUrlType: CitationTypeCount[]
+  trend: CitationTrend
+}
+
+export interface CitationDomain {
+  domain: string
+  appearances: number | null
+  domainType: string
+  usedPercent: number | null
+  avgCitations: number | null
+}
+
+export interface GeoCitations {
+  data: { summary: CitationSummary; domains: CitationDomain[]; total: number }
+  isLive: boolean
+  computedAt: string
+}
+
+export interface CitationUrl {
+  title: string
+  url: string
+  domain: string
+  urlType: string
+  mentions: number | null
+  avgCitations: number | null
+  lastUpdated: string | null
+}
+
+export interface GeoCitationDomain {
+  data: { domain: string; summary: CitationSummary; urls: CitationUrl[]; total: number }
+  isLive: boolean
+  computedAt: string
+}
+
+export interface CitationUrlDetail {
+  title: string
+  url: string
+  path: string
+  isBranded: boolean | null
+  appearances: number
+  promptCount: number
+  growthPercent: number | null
+  providers: Array<{ provider: string; count: number; share: number }>
+  citationTimeSeries: Array<{ date: string; count: number }>
+  sparkline: number[]
+  prompts: Array<{ text: string; promptId: string | null }>
+  lastUpdated: string | null
+}
+
+export interface GeoCitationUrlDetail {
+  data: CitationUrlDetail
+  isLive: boolean
+  computedAt: string
+}
+
+export function getGeoCitations(filters: GeoFilters): Promise<GeoCitations> {
+  return apiGet<GeoCitations>(`/geo/citations?${filtersToQuery(filters)}`)
+}
+
+export function getGeoCitationDomain(domain: string, filters: GeoFilters): Promise<GeoCitationDomain> {
+  return apiGet<GeoCitationDomain>(
+    `/geo/citations/domains/${encodeURIComponent(domain)}?${filtersToQuery(filters)}`,
+  )
+}
+
+export function getGeoCitationUrlDetail(url: string, filters: GeoFilters): Promise<GeoCitationUrlDetail> {
+  return apiGet<GeoCitationUrlDetail>(
+    `/geo/citations/url-detail?${filtersToQuery(filters, { url })}`,
+  )
+}
+
 export function getGeoResponses(
   filters: GeoFilters,
   pagination: { skip?: number; take?: number; sentiment?: boolean } = {},
