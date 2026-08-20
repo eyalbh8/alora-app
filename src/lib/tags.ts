@@ -9,7 +9,7 @@ const TAG_ROW_COLORS: Record<TagColorRow, string> = {
   B: '#e07a6a',
   C: '#d9793d',
   D: '#e3c76b',
-  E: '#42ca80',
+  E: '#1a8a4a',
   F: '#3db8a8',
   G: '#5b9fd4',
   H: '#7a5fb0',

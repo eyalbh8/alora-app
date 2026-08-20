@@ -69,16 +69,16 @@ export function DataTable<T>({
   }
 
   return (
-    <div className="overflow-hidden border border-line bg-bg">
+    <div className="overflow-hidden rounded-lg border border-line bg-surface shadow-soft">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-line bg-surface">
+            <tr className="border-b border-line bg-paper-soft">
               {columns.map((column) => (
                 <th
                   key={column.key}
                   onClick={() => handleHeaderClick(column)}
-                  className={`px-4 py-3 font-mono text-[11px] font-medium tracking-[0.1em] whitespace-nowrap text-muted uppercase ${
+                  className={`px-4 py-3 text-[12px] font-medium whitespace-nowrap text-muted ${
                     column.align === 'right' ? 'text-right' : 'text-left'
                   } ${column.sortable ? 'cursor-pointer select-none hover:text-ink' : ''}`}
                 >
@@ -104,7 +104,7 @@ export function DataTable<T>({
                   </tr>
                 ))
               : rows.map((row) => (
-                  <tr key={rowKey(row)} className="border-b border-line transition hover:bg-surface">
+                  <tr key={rowKey(row)} className="border-b border-line transition hover:bg-paper-soft/70">
                     {columns.map((column) => (
                       <td
                         key={column.key}
@@ -127,7 +127,7 @@ export function DataTable<T>({
 
       {(totalPages > 1 || totalCount !== undefined) && (
         <div className="flex items-center justify-between border-t border-line px-4 py-2.5">
-          <span className="font-mono text-[11px] tracking-[0.1em] text-muted-dark uppercase">
+          <span className="text-[12px] text-muted-dark">
             {totalCount !== undefined ? `${totalCount.toLocaleString()} total` : ''}
           </span>
           {totalPages > 1 && onPageChange && (
@@ -135,17 +135,17 @@ export function DataTable<T>({
               <button
                 disabled={page <= 1 || loading}
                 onClick={() => onPageChange(page - 1)}
-                className="border border-line px-3 py-1 font-mono text-[11px] tracking-[0.1em] text-ink uppercase hover:border-ink disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-full border border-line px-3 py-1 text-[13px] font-medium text-ink hover:border-ink disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Previous
               </button>
-              <span className="font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
+              <span className="text-[12px] text-muted">
                 Page {page} of {totalPages}
               </span>
               <button
                 disabled={page >= totalPages || loading}
                 onClick={() => onPageChange(page + 1)}
-                className="border border-line px-3 py-1 font-mono text-[11px] tracking-[0.1em] text-ink uppercase hover:border-ink disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-full border border-line px-3 py-1 text-[13px] font-medium text-ink hover:border-ink disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next
               </button>

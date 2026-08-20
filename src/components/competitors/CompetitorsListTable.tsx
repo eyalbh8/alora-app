@@ -89,26 +89,26 @@ export function CompetitorsListTable({ rows }: CompetitorsListTableProps) {
 
   return (
     <section aria-labelledby="competitors-list-title">
-      <h2 id="competitors-list-title" className="mb-4 text-[19px] font-semibold text-ink">
+      <h2 id="competitors-list-title" className="mb-4 text-[17px] font-semibold text-ink">
         Competitors List
       </h2>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-lg border border-line bg-surface px-4 shadow-soft">
         <table className="w-full min-w-0 border-collapse text-sm">
           <thead>
-            <tr className="border-b-2 border-ink">
-              <th className="w-8 pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+            <tr className="border-b border-line">
+              <th className="w-8 pb-2.5 pr-3 text-left text-[12px] font-medium text-muted">
                 Rank
               </th>
-              <th className="min-w-0 pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+              <th className="min-w-0 pb-2.5 pr-3 text-left text-[12px] font-medium text-muted">
                 Brand
               </th>
-              <th className="hidden px-3 pb-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted md:table-cell">
+              <th className="hidden px-3 pb-2.5 text-left text-[12px] font-medium text-muted md:table-cell">
                 Shared Topics
               </th>
-              <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+              <th className="px-3 pb-2.5 text-right text-[12px] font-medium text-muted">
                 Mentions
               </th>
-              <th className="pb-2.5 pl-3 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+              <th className="pb-2.5 pl-3 text-right text-[12px] font-medium text-muted">
                 Sentiment
               </th>
             </tr>

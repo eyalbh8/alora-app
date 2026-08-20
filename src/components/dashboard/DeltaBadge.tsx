@@ -9,7 +9,7 @@ interface DeltaBadgeProps {
 
 export function DeltaBadge({ value, mode = 'percent', invert = false, className = '' }: DeltaBadgeProps) {
   if (value === null || value === undefined || Number.isNaN(value)) {
-    return <span className="font-mono text-[11px] text-muted-dark">—</span>
+    return <span className="text-[12px] text-muted-dark">—</span>
   }
 
   const displayed = Math.round(value)
@@ -25,7 +25,7 @@ export function DeltaBadge({ value, mode = 'percent', invert = false, className 
 
   return (
     <span
-      className={`inline-flex items-center font-mono text-[11px] font-medium tracking-[0.1em] uppercase ${tone} ${className}`}
+      className={`inline-flex items-center text-[12px] font-medium tabular-nums ${tone} ${className}`}
     >
       {arrow} {formatted}
     </span>

@@ -78,14 +78,14 @@ function ChartBody({
             }}
             contentStyle={{
               background: '#ffffff',
-              color: '#111111',
+              color: '#14201a',
               border: `1px solid ${CHART_GRID}`,
-              borderRadius: 0,
+              borderRadius: 12,
               fontSize: 12,
             }}
-            cursor={{ fill: 'rgba(66, 202, 128, 0.12)' }}
+            cursor={{ fill: 'rgba(26, 138, 74, 0.12)' }}
           />
-          <Bar dataKey="value" fill="#42ca80" maxBarSize={56} radius={[2, 2, 0, 0]} />
+          <Bar dataKey="value" fill="#1a8a4a" maxBarSize={56} radius={[6, 6, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -113,7 +113,7 @@ export function CrawlerVolumeChart({ chartRows, range }: CrawlerVolumeChartProps
       <section>
         <div className="mb-5 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-[19px] font-semibold text-ink">Crawler Volume</h2>
+            <h2 className="text-[17px] font-semibold text-ink">Crawler Volume</h2>
             <p className="mt-0.5 text-xs text-muted">
               AI crawler entries over time for the selected period.
             </p>
@@ -153,7 +153,7 @@ export function CrawlerVolumeChart({ chartRows, range }: CrawlerVolumeChartProps
           >
             <div className="flex items-center justify-between border-b border-line px-6 py-5">
               <div>
-                <h2 className="text-[19px] font-semibold text-ink">Crawler Volume</h2>
+                <h2 className="text-[17px] font-semibold text-ink">Crawler Volume</h2>
                 <p className="mt-0.5 text-xs text-muted">
                   AI crawler entries over time for the selected period.
                 </p>

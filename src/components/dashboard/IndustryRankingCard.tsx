@@ -76,18 +76,18 @@ export function IndustryRankingCard({ competitors }: IndustryRankingCardProps) {
             </colgroup>
             <thead>
               <tr
-                className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted"
+                className="text-[12px] font-medium text-muted"
                 style={{ height: PAIRED_LEGEND_HEIGHT_PX }}
               >
-                <th className="border-b-2 border-ink pr-2 text-left font-semibold">
+                <th className="border-b border-line pr-2 text-left font-semibold">
                   <span className="inline-flex items-center gap-2">
                     <span>Position</span>
                     <span>Brand</span>
                   </span>
                 </th>
-                <th className="border-b-2 border-ink px-1.5 text-right font-semibold">Avg. rank</th>
-                <th className="border-b-2 border-ink px-1.5 text-right font-semibold">Mentions</th>
-                <th className="border-b-2 border-ink pl-1.5 text-right font-semibold">Sentiment</th>
+                <th className="border-b border-line px-1.5 text-right font-semibold">Avg. rank</th>
+                <th className="border-b border-line px-1.5 text-right font-semibold">Mentions</th>
+                <th className="border-b border-line pl-1.5 text-right font-semibold">Sentiment</th>
               </tr>
             </thead>
             <tbody>

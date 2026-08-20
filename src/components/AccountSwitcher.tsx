@@ -84,7 +84,7 @@ export function AccountSwitcher({ onNavigate }: { onNavigate?: () => void }) {
       {isOpen && (
         <div
           ref={popoverRef}
-          className="absolute left-0 top-full z-50 mt-2 w-[min(320px,calc(100vw-32px))] border border-line bg-surface"
+          className="absolute left-0 top-full z-50 mt-2 w-[min(320px,calc(100vw-32px))] rounded-lg border border-line bg-surface shadow-soft"
         >
           <div className="form-field border-b border-line p-3">
             <label htmlFor="account-search">Account — search</label>
@@ -99,7 +99,7 @@ export function AccountSwitcher({ onNavigate }: { onNavigate?: () => void }) {
 
           <div className="max-h-[320px] overflow-y-auto">
             {filteredAccounts.length === 0 ? (
-              <div className="px-4 py-8 text-center font-mono text-[12px] uppercase tracking-[0.1em] text-muted-dark">
+              <div className="px-4 py-8 text-center text-[13px] text-muted-dark">
                 No accounts found
               </div>
             ) : (
@@ -121,13 +121,13 @@ export function AccountSwitcher({ onNavigate }: { onNavigate?: () => void }) {
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[15px] text-ink">{accountTitle}</div>
                       {accountDomain && (
-                        <div className="truncate font-mono text-[11px] uppercase tracking-[0.1em] text-muted-dark">
+                        <div className="truncate text-[12px] text-muted-dark">
                           {accountDomain}
                         </div>
                       )}
                     </div>
                     {isSelected && (
-                      <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-accent">
+                      <span className="rounded-full bg-chip px-2 py-0.5 text-[11px] font-medium text-ink">
                         Active
                       </span>
                     )}

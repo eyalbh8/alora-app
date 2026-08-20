@@ -22,8 +22,8 @@ describe('tags', () => {
   })
 
   it('maps colorRow letters and hex', () => {
-    expect(tagColor('E')).toBe('#42ca80')
+    expect(tagColor('E')).toBe('#1a8a4a')
     expect(tagColor('#ff00aa')).toBe('#ff00aa')
-    expect(tagColor(null)).toBe('#42ca80')
+    expect(tagColor(null)).toBe('#1a8a4a')
   })
 })

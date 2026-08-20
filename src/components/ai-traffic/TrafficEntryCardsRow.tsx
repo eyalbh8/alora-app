@@ -39,19 +39,19 @@ function EntryCard({ title, value, change, periodText, provider }: EntryCardProp
         {provider ? (
           <>
             <ProviderIcon provider={provider} size="sm" />
-            <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-dark">
+            <span className="text-[12px] font-medium text-muted">
               {providerLabel(provider)}
             </span>
           </>
         ) : (
-          <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-dark">
+          <span className="text-[12px] font-medium text-muted">
             {title}
           </span>
         )}
       </div>
 
       <div className="mt-auto flex items-end justify-between gap-3">
-        <span className="font-display text-[30px] font-semibold leading-none tracking-[-0.02em] text-ink">
+        <span className="text-[30px] font-medium leading-none tracking-[-0.03em] text-ink tabular-nums">
           {formatNumber(value, 0)}
         </span>
         <span className={`pb-0.5 text-[11.5px] font-medium ${trendTone}`}>
@@ -86,7 +86,7 @@ export function TrafficEntryCardsRow({
   const providerByKey = new Map(providers.map((p) => [p.provider, p]))
 
   return (
-    <div className="grid grid-cols-1 border-t border-t-ink sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+    <div className="grid grid-cols-1 overflow-hidden rounded-lg border border-line bg-surface shadow-soft sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       <EntryCard
         title="Total entries"
         value={totalEntries}

@@ -9,17 +9,8 @@ import { useGeoMeta } from '../context/GeoMetaContext'
 import { ScreenSubheaderProvider } from '../context/ScreenSubheaderContext'
 import { Skeleton } from '../components/LoadingSpinner'
 
-function GhostTitle({ title }: { title: string }) {
-  const space = title.indexOf(' ')
-  if (space === -1) {
-    return <h1 className="screen-title">{title}</h1>
-  }
-  return (
-    <h1 className="screen-title">
-      <span>{title.slice(0, space)}</span>{' '}
-      <span className="screen-title__rest">{title.slice(space + 1)}</span>
-    </h1>
-  )
+function ScreenTitle({ title }: { title: string }) {
+  return <h1 className="screen-title">{title}</h1>
 }
 
 function ScreenChrome({
@@ -39,7 +30,7 @@ function ScreenChrome({
   return (
     <ScreenSubheaderProvider setSubheader={setSubheader}>
       <div className={`flex flex-col ${isCrawlerVariant ? 'gap-7' : 'gap-4'}`}>
-        <GhostTitle title={title} />
+        <ScreenTitle title={title} />
         {subheader}
         <FilterBar variant={variant} />
         {showLoadingChrome ? (

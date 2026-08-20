@@ -25,7 +25,7 @@ export function IntentDistribution({ prompts }: { prompts: PromptRow[] }) {
     <section className="border-y border-line py-5" aria-labelledby="intent-distribution-heading">
       <div className="mb-5 flex items-start justify-between gap-2">
         <div>
-          <p className="text-[10px] font-semibold tracking-[0.18em] text-muted-dark uppercase">
+          <p className="text-[12px] font-medium text-muted">
             Current view
           </p>
           <h2 id="intent-distribution-heading" className="mt-1 font-display text-xl text-ink">
@@ -42,7 +42,7 @@ export function IntentDistribution({ prompts }: { prompts: PromptRow[] }) {
       ) : (
         <>
           <div
-            className="flex h-2 overflow-hidden bg-line"
+            className="flex h-2 overflow-hidden rounded-full bg-paper-soft"
             role="img"
             aria-label={segments.map((segment) => `${segment.label} ${segment.pct}%`).join(', ')}
           >
@@ -53,7 +53,7 @@ export function IntentDistribution({ prompts }: { prompts: PromptRow[] }) {
                   className="h-full transition-all"
                   style={{
                     width: `${s.pct}%`,
-                    backgroundColor: INTENT_BAR_COLORS[s.type] ?? '#6b6b6b',
+                    backgroundColor: INTENT_BAR_COLORS[s.type] ?? '#7a857e',
                   }}
                   title={`${s.label} ${s.pct}%`}
                 />
@@ -65,10 +65,10 @@ export function IntentDistribution({ prompts }: { prompts: PromptRow[] }) {
               <li key={s.type} className="flex items-center gap-2 text-xs text-muted">
                 <span
                   className="h-2 w-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: INTENT_BAR_COLORS[s.type] ?? '#6b6b6b' }}
+                  style={{ backgroundColor: INTENT_BAR_COLORS[s.type] ?? '#7a857e' }}
                 />
                 <span>{s.label}</span>
-                <span className="font-display text-sm text-ink">{s.pct}%</span>
+                <span className="text-sm font-medium tabular-nums text-ink">{s.pct}%</span>
               </li>
             ))}
           </ul>

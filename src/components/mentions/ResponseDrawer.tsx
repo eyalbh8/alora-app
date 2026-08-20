@@ -26,7 +26,7 @@ function SentimentBadge({ score }: { score: number | null }) {
   if (score == null) return <span className="text-muted-dark">—</span>
   const tone = score >= 70 ? 'text-accent' : score >= 40 ? 'text-muted' : 'text-error'
   return (
-    <span className={`inline-flex min-w-[2.5rem] items-center justify-center font-mono text-[11px] font-medium tracking-[0.1em] ${tone}`}>
+    <span className={`inline-flex min-w-[2.5rem] items-center justify-center text-[12px] font-medium tabular-nums ${tone}`}>
       {formatNumber(score, 0)}
     </span>
   )
@@ -35,7 +35,7 @@ function SentimentBadge({ score }: { score: number | null }) {
 function MetricChip({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-line bg-paper-soft/80 px-3 py-2">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-dark">{label}</p>
+      <p className="text-[12px] font-medium text-muted">{label}</p>
       <p className="mt-0.5 text-sm font-semibold text-ink">{value}</p>
     </div>
   )
@@ -84,7 +84,7 @@ export function ResponseDrawer({ row, onClose }: ResponseDrawerProps) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-bg/80">
       <button type="button" className="flex-1 cursor-default" aria-label="Close drawer" onClick={onClose} />
-      <div className="flex h-full w-full max-w-2xl flex-col overflow-hidden border-l border-line bg-surface ">
+      <div className="flex h-full w-full max-w-2xl flex-col overflow-hidden rounded-l-xl border-l border-line bg-surface shadow-hover">
         {/* Header */}
         <div className="shrink-0 border-b border-line px-5 py-4">
           <div className="flex items-start justify-between gap-3">
@@ -118,7 +118,7 @@ export function ResponseDrawer({ row, onClose }: ResponseDrawerProps) {
             <div className="flex flex-col gap-5 px-5 py-4">
               {detail.promptText && (
                 <section>
-                  <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-dark">
+                  <h3 className="mb-2 text-[12px] font-medium text-muted">
                     Prompt
                   </h3>
                   <p className="rounded-xl border border-line bg-paper-soft/80 px-4 py-3 text-sm leading-relaxed text-ink">
@@ -134,7 +134,7 @@ export function ResponseDrawer({ row, onClose }: ResponseDrawerProps) {
               )}
 
               <section>
-                <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-dark">
+                <h3 className="mb-2 text-[12px] font-medium text-muted">
                   Response
                 </h3>
                 {fullText ? (
@@ -154,7 +154,7 @@ export function ResponseDrawer({ row, onClose }: ResponseDrawerProps) {
                   value={detail.myRank != null ? formatNumber(detail.myRank, 0) : '—'}
                 />
                 <div className="rounded-lg border border-line bg-paper-soft/80 px-3 py-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-dark">Sentiment</p>
+                  <p className="text-[12px] font-medium text-muted">Sentiment</p>
                   <div className="mt-1">
                     <SentimentBadge score={sentiment} />
                   </div>
@@ -171,7 +171,7 @@ export function ResponseDrawer({ row, onClose }: ResponseDrawerProps) {
 
               {(brands.length > 0 || meta?.account?.logo) && (
                 <section>
-                  <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-dark">
+                  <h3 className="mb-2 text-[12px] font-medium text-muted">
                     Brands
                   </h3>
                   <div className="flex flex-wrap items-center gap-2">
@@ -194,7 +194,7 @@ export function ResponseDrawer({ row, onClose }: ResponseDrawerProps) {
 
               {citations.length > 0 && (
                 <section>
-                  <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-dark">
+                  <h3 className="mb-2 text-[12px] font-medium text-muted">
                     Citations ({citationCount(detail)})
                   </h3>
                   <ul className="divide-y divide-slate-100 rounded-xl border border-line">

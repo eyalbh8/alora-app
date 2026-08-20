@@ -57,7 +57,7 @@ export function CatalogTable({ rows, citedIds }: CatalogTableProps) {
     <section aria-labelledby="marketplace-catalog-title">
       <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 id="marketplace-catalog-title" className="text-[19px] font-semibold text-ink">
+          <h2 id="marketplace-catalog-title" className="text-[17px] font-semibold text-ink">
             All sites
           </h2>
           <p className="mt-0.5 text-[13px] text-muted">
@@ -66,12 +66,12 @@ export function CatalogTable({ rows, citedIds }: CatalogTableProps) {
         </div>
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
           {categories.length > 0 ? (
-            <label className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">
+            <label className="flex items-center gap-2 text-[13px] font-medium text-muted">
               Category
               <select
                 value={category}
                 onChange={(event) => setCategory(event.target.value)}
-                className="border-0 border-b border-muted-dark bg-transparent py-1.5 text-sm font-medium normal-case tracking-normal text-ink focus:border-accent focus:outline-none"
+                className="rounded-full border border-line bg-surface px-3 py-1.5 text-sm font-medium text-ink focus:border-ink focus:outline-none"
               >
                 <option value="all">All</option>
                 {categories.map((item) => (
@@ -84,7 +84,7 @@ export function CatalogTable({ rows, citedIds }: CatalogTableProps) {
           ) : null}
           <div className="relative w-full sm:w-64">
             <svg
-              className="pointer-events-none absolute top-1/2 left-0 h-4 w-4 -translate-y-1/2 text-muted-dark"
+              className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-dark"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -102,36 +102,36 @@ export function CatalogTable({ rows, citedIds }: CatalogTableProps) {
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search sites…"
               aria-label="Search marketplace sites"
-              className="w-full border-0 border-b border-muted-dark bg-transparent py-2 pr-2 pl-7 text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+              className="w-full rounded-full border border-line bg-surface py-2 pr-3 pl-9 text-sm text-ink placeholder:text-muted shadow-soft focus:border-ink focus:outline-none"
             />
           </div>
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="border-y border-line px-6 py-12 text-center">
+        <div className="rounded-lg border border-line bg-surface px-6 py-12 text-center shadow-soft">
           <p className="text-base font-semibold text-ink">No sites match</p>
           <p className="mt-1 text-sm text-muted">Try a different search or category.</p>
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-lg border border-line bg-surface px-4 shadow-soft">
             <table className="w-full min-w-0 border-collapse text-sm">
               <thead>
-                <tr className="border-b-2 border-ink">
-                  <th className="min-w-0 pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+                <tr className="border-b border-line">
+                  <th className="min-w-0 pb-2.5 pr-3 text-left text-[12px] font-medium text-muted">
                     Site
                   </th>
-                  <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+                  <th className="px-3 pb-2.5 text-right text-[12px] font-medium text-muted">
                     Price
                   </th>
-                  <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+                  <th className="px-3 pb-2.5 text-right text-[12px] font-medium text-muted">
                     Traffic
                   </th>
-                  <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+                  <th className="px-3 pb-2.5 text-right text-[12px] font-medium text-muted">
                     Rank
                   </th>
-                  <th className="pb-2.5 pl-3 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+                  <th className="pb-2.5 pl-3 text-right text-[12px] font-medium text-muted">
                     Mentions
                   </th>
                 </tr>

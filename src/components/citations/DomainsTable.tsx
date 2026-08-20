@@ -40,7 +40,7 @@ export function DomainsTable({ rows, total, onSelect }: DomainsTableProps) {
     <section aria-labelledby="citations-domains-title">
       <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 id="citations-domains-title" className="text-[19px] font-semibold text-ink">
+          <h2 id="citations-domains-title" className="text-[17px] font-semibold text-ink">
             Sources
           </h2>
           <p className="mt-0.5 text-[13px] text-muted">
@@ -52,7 +52,7 @@ export function DomainsTable({ rows, total, onSelect }: DomainsTableProps) {
         </div>
         <div className="relative w-full sm:w-64">
           <svg
-            className="pointer-events-none absolute top-1/2 left-0 h-4 w-4 -translate-y-1/2 text-muted-dark"
+            className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-dark"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -70,35 +70,35 @@ export function DomainsTable({ rows, total, onSelect }: DomainsTableProps) {
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search domains…"
             aria-label="Search cited domains"
-            className="w-full border-0 border-b border-muted-dark bg-transparent py-2 pr-2 pl-7 text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+            className="w-full rounded-full border border-line bg-surface py-2 pr-3 pl-9 text-sm text-ink placeholder:text-muted shadow-soft focus:border-ink focus:outline-none"
           />
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="border-y border-line px-6 py-12 text-center">
+        <div className="rounded-lg border border-line bg-surface px-6 py-12 text-center shadow-soft">
           <p className="text-base font-semibold text-ink">No domains match</p>
           <p className="mt-1 text-sm text-muted">Try a different search or date range.</p>
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-lg border border-line bg-surface px-4 shadow-soft">
             <table className="w-full min-w-0 border-collapse text-sm">
               <thead>
-                <tr className="border-b-2 border-ink">
-                  <th className="w-10 pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+                <tr className="border-b border-line bg-paper-soft">
+                  <th className="w-10 pb-2.5 pr-3 text-left text-[12px] font-medium text-muted">
                     #
                   </th>
-                  <th className="min-w-0 pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+                  <th className="min-w-0 pb-2.5 pr-3 text-left text-[12px] font-medium text-muted">
                     Source
                   </th>
-                  <th className="px-3 pb-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+                  <th className="px-3 pb-2.5 text-left text-[12px] font-medium text-muted">
                     Domain type
                   </th>
-                  <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+                  <th className="px-3 pb-2.5 text-right text-[12px] font-medium text-muted">
                     Used
                   </th>
-                  <th className="pb-2.5 pl-3 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+                  <th className="pb-2.5 pl-3 text-right text-[12px] font-medium text-muted">
                     Avg citations
                   </th>
                 </tr>

@@ -9,7 +9,7 @@ export function LoadingSpinner({ label = 'Loading…' }: { label?: string }) {
           d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
         />
       </svg>
-      <span className="font-mono text-[12px] tracking-[0.1em] text-muted uppercase">{label}</span>
+      <span className="text-[13px] font-medium text-muted">{label}</span>
     </div>
   )
 }
@@ -22,7 +22,7 @@ export function Skeleton({
   className?: string
   style?: React.CSSProperties
 }) {
-  return <div className={`animate-pulse bg-paper-soft ${className}`} style={style} />
+  return <div className={`animate-pulse rounded-md bg-paper-soft ${className}`} style={style} />
 }
 
 export function ChartSkeleton() {

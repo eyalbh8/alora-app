@@ -40,7 +40,7 @@ export function SourcesCard({ sources }: SourcesCardProps) {
             <col className="w-[6.75rem]" />
           </colgroup>
           <thead>
-            <tr className="border-b-2 border-ink text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+            <tr className="border-b border-line text-[12px] font-medium text-muted">
               <th className="pb-2.5 text-left font-semibold">Domain</th>
               <th className="pb-2.5 text-right font-semibold">Cited pages</th>
             </tr>

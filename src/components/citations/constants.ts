@@ -3,16 +3,16 @@ import type { PillTone } from '../Pill'
 export const CITATIONS_CHART_HEIGHT = 220
 
 export const DOMAIN_TYPE_COLORS: Record<string, string> = {
-  corporate: '#d9793d',
-  institutional: '#42ca80',
-  editorial: '#2f6fb0',
-  ugc: '#7a5fb0',
-  reference: '#5c8f8a',
-  other: '#8a8a8a',
-  'category page': '#d9793d',
-  'how-to guide': '#42ca80',
-  'how to guide': '#42ca80',
-  listicle: '#c45b8a',
+  corporate: '#1a8a4a',
+  institutional: '#2ec37a',
+  editorial: '#5c8f8a',
+  ugc: '#2a3830',
+  reference: '#7a857e',
+  other: '#a3ada7',
+  'category page': '#1a8a4a',
+  'how-to guide': '#2ec37a',
+  'how to guide': '#2ec37a',
+  listicle: '#14201a',
 }
 
 export const DOMAIN_TYPE_TONES: Record<string, PillTone> = {
@@ -42,7 +42,7 @@ export function humanizeType(value: string | null | undefined): string {
 }
 
 export function typeColor(value: string, index = 0): string {
-  return DOMAIN_TYPE_COLORS[typeKey(value)] ?? ['#42ca80', '#111111', '#e07a6a', '#d9793d', '#7a5fb0', '#5c5c5c', '#2f6fb0'][index % 7]
+  return DOMAIN_TYPE_COLORS[typeKey(value)] ?? ['#1a8a4a', '#14201a', '#5c8f8a', '#2ec37a', '#cfe8d6', '#7a857e', '#2a3830'][index % 7]
 }
 
 export function typeTone(value: string): PillTone {

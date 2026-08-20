@@ -25,7 +25,7 @@ export function IntentBadge({ type }: { type: string | null | undefined }) {
     <span
       title={cfg.label}
       aria-label={cfg.label}
-      className={`inline-flex h-6 w-6 items-center justify-center border border-line font-mono text-[10px] font-medium tracking-[0.1em] uppercase ${cfg.bg} ${cfg.text}`}
+      className={`inline-flex h-6 w-6 items-center justify-center rounded-full border border-line text-[11px] font-medium ${cfg.bg} ${cfg.text}`}
     >
       {cfg.letter}
     </span>
@@ -35,8 +35,8 @@ export function IntentBadge({ type }: { type: string | null | undefined }) {
 export const INTENT_ORDER = ['COMMERCIAL', 'NAVIGATIONAL', 'TRANSACTIONAL', 'INFORMATIONAL'] as const
 
 export const INTENT_BAR_COLORS: Record<string, string> = {
-  COMMERCIAL: '#111111',
-  NAVIGATIONAL: '#7a5fb0',
-  TRANSACTIONAL: '#d9793d',
-  INFORMATIONAL: '#42ca80',
+  COMMERCIAL: '#14201a',
+  NAVIGATIONAL: '#5c8f8a',
+  TRANSACTIONAL: '#2a3830',
+  INFORMATIONAL: '#1a8a4a',
 }

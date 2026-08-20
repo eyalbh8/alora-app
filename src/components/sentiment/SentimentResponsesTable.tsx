@@ -26,7 +26,7 @@ export function SentimentResponsesTable({
   return (
     <>
       <section aria-labelledby="recent-responses-title">
-        <h2 id="recent-responses-title" className="mb-4 text-[19px] font-semibold text-ink">
+        <h2 id="recent-responses-title" className="mb-4 text-[17px] font-semibold text-ink">
           Recent Responses
         </h2>
 
@@ -38,17 +38,17 @@ export function SentimentResponsesTable({
             </p>
           </div>
         ) : (
-          <div className={`overflow-x-auto${loading ? ' opacity-70' : ''}`}>
+          <div className={`overflow-x-auto rounded-lg border border-line bg-surface px-4 shadow-soft${loading ? ' opacity-70' : ''}`}>
             <table className="w-full min-w-0 border-collapse text-sm">
               <thead>
-                <tr className="border-b-2 border-ink">
-                  <th className="min-w-0 pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+                <tr className="border-b border-line bg-paper-soft">
+                  <th className="min-w-0 pb-2.5 pr-3 text-left text-[12px] font-medium text-muted">
                     Response
                   </th>
-                  <th className="hidden min-w-0 px-3 pb-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted sm:table-cell">
+                  <th className="hidden min-w-0 px-3 pb-2.5 text-left text-[12px] font-medium text-muted sm:table-cell">
                     Model
                   </th>
-                  <th className="pb-2.5 pl-3 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+                  <th className="pb-2.5 pl-3 text-right text-[12px] font-medium text-muted">
                     Sentiment
                   </th>
                 </tr>

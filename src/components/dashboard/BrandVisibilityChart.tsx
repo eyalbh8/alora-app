@@ -135,7 +135,7 @@ export function BrandVisibilityChart({
         <div className={`flex h-full flex-col ${variant === 'card' ? 'px-2 pb-4 pt-2' : ''}`}>
           {showLegend && (
             <div
-              className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 overflow-hidden border-b-2 border-ink"
+              className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 overflow-hidden border-b border-line"
               style={{ height: PAIRED_LEGEND_HEIGHT_PX }}
             >
               {competitors.map((competitor, index) => (

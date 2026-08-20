@@ -9,22 +9,22 @@ export const AI_TRAFFIC_PROVIDER_ORDER = [
 
 /** Provider palette used by the AI Traffic trend chart. */
 export const AI_TRAFFIC_PROVIDER_COLORS: Record<string, string> = {
-  OPENAI: '#111111',
-  CHATGPT: '#111111',
-  CHAT_GPT: '#111111',
-  GPT: '#111111',
-  ANTHROPIC: '#d9793d',
-  CLAUDE: '#d9793d',
-  PERPLEXITY: '#42ca80',
-  GEMINI: '#7a5fb0',
-  BD_COPILOT: '#2f6fb0',
-  COPILOT: '#2f6fb0',
-  MICROSOFT_COPILOT: '#2f6fb0',
+  OPENAI: '#14201a',
+  CHATGPT: '#14201a',
+  CHAT_GPT: '#14201a',
+  GPT: '#14201a',
+  ANTHROPIC: '#7a857e',
+  CLAUDE: '#7a857e',
+  PERPLEXITY: '#1a8a4a',
+  GEMINI: '#5c8f8a',
+  BD_COPILOT: '#2ec37a',
+  COPILOT: '#2ec37a',
+  MICROSOFT_COPILOT: '#2ec37a',
 }
 
 export function trafficProviderColor(provider: string): string {
   const key = provider.toUpperCase().replace(/\s+/g, '_')
-  return AI_TRAFFIC_PROVIDER_COLORS[key] ?? '#6b6b6b'
+  return AI_TRAFFIC_PROVIDER_COLORS[key] ?? '#7a857e'
 }
 
 export const AI_TRAFFIC_CHART_HEIGHT = '420px'

@@ -28,7 +28,7 @@ function BreakdownCard({ title, subtitle, columnLabel, rows, kind }: BreakdownCa
   return (
     <section className="min-w-0">
       <div className="mb-[18px] min-h-[4.5rem]">
-        <h2 className="text-[19px] font-semibold text-ink">{title}</h2>
+        <h2 className="text-[17px] font-semibold text-ink">{title}</h2>
         <p className="mt-0.5 text-xs leading-4 text-muted">{subtitle}</p>
       </div>
       {isEmpty ? (
@@ -37,7 +37,7 @@ function BreakdownCard({ title, subtitle, columnLabel, rows, kind }: BreakdownCa
         </div>
       ) : (
         <div>
-          <div className="grid grid-cols-[minmax(0,1fr)_5.25rem] items-end border-b-2 border-ink pb-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+          <div className="grid grid-cols-[minmax(0,1fr)_5.25rem] items-end border-b border-line pb-2.5 text-[12px] font-medium text-muted">
             <span className="min-w-0 truncate text-left">{columnLabel}</span>
             <span className="text-right">Visitors</span>
           </div>

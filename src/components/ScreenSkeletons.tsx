@@ -3,7 +3,7 @@ import { ChartSkeleton, Skeleton } from './LoadingSpinner'
 export function DashboardScreenSkeleton() {
   return (
     <div className="flex flex-col gap-14 pb-4">
-      <div className="overflow-hidden border border-line border-t-2 border-t-ink bg-bg">
+      <div className="overflow-hidden border border-line border-line rounded-lg bg-bg">
         <div className="px-5 py-5 sm:px-6">
           <Skeleton className="h-7 w-52" />
           <Skeleton className="mt-2 h-3 w-80 max-w-full" />
@@ -45,7 +45,7 @@ export function DashboardScreenSkeleton() {
         <div>
           <Skeleton className="h-5 w-32" />
           <Skeleton className="mt-1 h-3 w-48" />
-          <div className="mt-5 border-t-2 border-ink">
+          <div className="mt-5 border-t border-line">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex gap-6 border-b border-line py-3.5">
                 <Skeleton className="h-3 w-12" />
@@ -60,7 +60,7 @@ export function DashboardScreenSkeleton() {
         <div>
           <Skeleton className="h-5 w-40" />
           <Skeleton className="mt-1 h-3 w-52" />
-          <div className="mt-5 border-t-2 border-ink">
+          <div className="mt-5 border-t border-line">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex gap-6 border-b border-line py-3.5">
                 <Skeleton className="h-3 w-12" />
@@ -76,7 +76,7 @@ export function DashboardScreenSkeleton() {
       <div>
         <Skeleton className="h-5 w-36" />
         <Skeleton className="mt-1 h-3 w-56" />
-        <div className="mt-5 border-t-2 border-ink">
+        <div className="mt-5 border-t border-line">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex gap-6 border-b border-line py-3">
               <Skeleton className="h-3 flex-1" />
@@ -103,7 +103,7 @@ export function MentionsScreenSkeleton() {
                 key={i}
                 className="flex items-center gap-2.5 border-b border-line/70 py-2 last:border-b-0"
               >
-                <Skeleton className="h-2 w-2 rounded-none" />
+                <Skeleton className="h-2 w-2 rounded-sm" />
                 <Skeleton className="h-3 flex-1" />
                 <Skeleton className="h-4 w-8" />
               </div>
@@ -120,7 +120,7 @@ export function MentionsScreenSkeleton() {
       </div>
       <div>
         <Skeleton className="mb-4 h-5 w-40" />
-        <div className="border-t-2 border-ink">
+        <div className="border-t border-line">
           {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="flex gap-6 border-b border-line py-3.5">
               <Skeleton className="h-3 flex-1" />
@@ -150,12 +150,12 @@ export function SentimentScreenSkeleton() {
             <Skeleton className="h-10 w-16" />
             <Skeleton className="h-3 w-28" />
           </div>
-          <Skeleton className="mt-5 h-[180px] w-full rounded-none" />
+          <Skeleton className="mt-5 h-[180px] w-full rounded-sm" />
         </div>
       </div>
       <div>
         <Skeleton className="mb-4 h-5 w-44" />
-        <div className="flex gap-6 border-b-2 border-line pb-2.5">
+        <div className="flex gap-6 border-b border-line pb-2.5">
           <Skeleton className="h-3 w-20" />
           <Skeleton className="ml-auto h-3 w-16" />
           <Skeleton className="h-3 w-16" />
@@ -198,7 +198,7 @@ export function PromptsScreenSkeleton() {
         </div>
       </div>
       <div>
-        <div className="flex flex-col gap-3 border-b-2 border-ink pb-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-3 border-b border-line pb-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Skeleton className="mb-1 h-2.5 w-20" />
             <Skeleton className="h-7 w-40" />
@@ -230,10 +230,10 @@ export function CompetitorsScreenSkeleton() {
             <Skeleton className="h-11 w-24" />
             <Skeleton className="mb-1 h-3 w-28" />
           </div>
-          <Skeleton className="mt-[18px] h-2.5 w-full rounded-none" />
+          <Skeleton className="mt-[18px] h-2.5 w-full rounded-sm" />
           <div className="mt-3.5 flex flex-wrap gap-x-4 gap-y-2">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-3 w-16 rounded-none" />
+              <Skeleton key={i} className="h-3 w-16 rounded-sm" />
             ))}
           </div>
         </div>
@@ -247,9 +247,9 @@ export function CompetitorsScreenSkeleton() {
       </div>
       <div>
         <Skeleton className="mb-4 h-5 w-36" />
-        <div className="flex gap-6 border-b-2 border-line pb-2.5">
+        <div className="flex gap-6 border-b border-line pb-2.5">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-3 flex-1 rounded-none" />
+            <Skeleton key={i} className="h-3 flex-1 rounded-sm" />
           ))}
         </div>
         {Array.from({ length: 8 }).map((_, i) => (
@@ -257,7 +257,7 @@ export function CompetitorsScreenSkeleton() {
             {Array.from({ length: 5 }).map((_, j) => (
               <Skeleton
                 key={j}
-                className="h-4 rounded-none"
+                className="h-4 rounded-sm"
                 style={{ width: j === 0 ? '24%' : j === 1 ? '32%' : '12%' }}
               />
             ))}
@@ -292,9 +292,9 @@ export function CitationsScreenSkeleton() {
       <div>
         <Skeleton className="h-5 w-28" />
         <Skeleton className="mt-1 h-3 w-64 max-w-full" />
-        <div className="mt-4 flex gap-6 border-b-2 border-line pb-2.5">
+        <div className="mt-4 flex gap-6 border-b border-line pb-2.5">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-3 flex-1 rounded-none" />
+            <Skeleton key={i} className="h-3 flex-1 rounded-sm" />
           ))}
         </div>
         {Array.from({ length: 8 }).map((_, i) => (
@@ -302,7 +302,7 @@ export function CitationsScreenSkeleton() {
             {Array.from({ length: 5 }).map((_, j) => (
               <Skeleton
                 key={j}
-                className="h-4 rounded-none"
+                className="h-4 rounded-sm"
                 style={{ width: j === 0 ? '8%' : j === 1 ? '36%' : '14%' }}
               />
             ))}
@@ -319,9 +319,9 @@ export function MarketplaceScreenSkeleton() {
       <div>
         <Skeleton className="h-5 w-48" />
         <Skeleton className="mt-1 h-3 w-80 max-w-full" />
-        <div className="mt-4 flex gap-6 border-b-2 border-line pb-2.5">
+        <div className="mt-4 flex gap-6 border-b border-line pb-2.5">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-3 flex-1 rounded-none" />
+            <Skeleton key={i} className="h-3 flex-1 rounded-sm" />
           ))}
         </div>
         {Array.from({ length: 4 }).map((_, i) => (
@@ -329,7 +329,7 @@ export function MarketplaceScreenSkeleton() {
             {Array.from({ length: 5 }).map((_, j) => (
               <Skeleton
                 key={j}
-                className="h-4 rounded-none"
+                className="h-4 rounded-sm"
                 style={{ width: j === 0 ? '28%' : j === 1 ? '24%' : '12%' }}
               />
             ))}
@@ -339,9 +339,9 @@ export function MarketplaceScreenSkeleton() {
       <div>
         <Skeleton className="h-5 w-28" />
         <Skeleton className="mt-1 h-3 w-64 max-w-full" />
-        <div className="mt-4 flex gap-6 border-b-2 border-line pb-2.5">
+        <div className="mt-4 flex gap-6 border-b border-line pb-2.5">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-3 flex-1 rounded-none" />
+            <Skeleton key={i} className="h-3 flex-1 rounded-sm" />
           ))}
         </div>
         {Array.from({ length: 8 }).map((_, i) => (
@@ -349,7 +349,7 @@ export function MarketplaceScreenSkeleton() {
             {Array.from({ length: 5 }).map((_, j) => (
               <Skeleton
                 key={j}
-                className="h-4 rounded-none"
+                className="h-4 rounded-sm"
                 style={{ width: j === 0 ? '28%' : j === 1 ? '24%' : '12%' }}
               />
             ))}
@@ -363,7 +363,7 @@ export function MarketplaceScreenSkeleton() {
 export function AiTrafficScreenSkeleton() {
   return (
     <div className="flex flex-col gap-10">
-      <div className="grid grid-cols-1 border-t border-t-ink sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-1 overflow-hidden rounded-lg border border-line sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
@@ -410,7 +410,7 @@ export function AiTrafficScreenSkeleton() {
 export function AiCrawlersScreenSkeleton() {
   return (
     <div className="flex flex-col gap-8 md:gap-10 lg:gap-14">
-      <div className="overflow-x-auto border-y border-b-line border-t-ink">
+      <div className="overflow-x-auto rounded-lg border border-line">
         <div className="flex min-w-max">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
@@ -433,7 +433,7 @@ export function AiCrawlersScreenSkeleton() {
         <Skeleton className="mt-2 h-3 w-64" />
         <div className="mt-5 flex h-[260px] items-end gap-3 border-b border-line px-3">
           {[32, 48, 42, 64, 55, 78, 68].map((height, i) => (
-            <Skeleton key={i} className="flex-1 rounded-none" style={{ height: `${height}%` }} />
+            <Skeleton key={i} className="flex-1 rounded-sm" style={{ height: `${height}%` }} />
           ))}
         </div>
       </div>
@@ -450,7 +450,7 @@ export function AiCrawlersScreenSkeleton() {
                     <Skeleton className="h-3 w-32" />
                     <Skeleton className="h-3 w-8" />
                   </div>
-                  <Skeleton className="h-0.5 w-full rounded-none" />
+                  <Skeleton className="h-0.5 w-full rounded-sm" />
                 </div>
               ))}
             </div>

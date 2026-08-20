@@ -51,7 +51,7 @@ export function TablePagination({
       : `${(pageStart + 1).toLocaleString()}–${pageEnd.toLocaleString()} of ${total.toLocaleString()}`
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line py-2.5 pl-1 font-mono text-[12px] tracking-[0.1em] text-muted uppercase sm:justify-end sm:gap-5">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line py-2.5 pl-1 text-[13px] text-muted sm:justify-end sm:gap-5">
       <div ref={rootRef} className="relative flex items-center gap-2">
         <span className="hidden sm:inline">Rows per page:</span>
         <button
@@ -71,7 +71,7 @@ export function TablePagination({
           <ul
             role="listbox"
             aria-label="Rows per page"
-            className="absolute bottom-full left-1/2 z-50 mb-1 min-w-[4.5rem] -translate-x-1/2 border border-line bg-surface p-1"
+            className="absolute bottom-full left-1/2 z-50 mb-1 min-w-[4.5rem] -translate-x-1/2 rounded-md border border-line bg-surface p-1 shadow-soft"
           >
             {[...PAGE_SIZE_OPTIONS].reverse().map((size) => {
               const selected = pageSize === size

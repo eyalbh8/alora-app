@@ -152,7 +152,7 @@ export function DateRangePicker({
       !(isSameDay(rangeStart, rangeEnd) && isStart)
 
     let cls =
-      'relative flex h-8 w-8 items-center justify-center text-xs transition-colors '
+      'relative flex h-8 w-8 items-center justify-center rounded-full text-xs transition-colors '
     if (disabled) cls += 'cursor-not-allowed text-muted-dark/40 '
     else cls += 'cursor-pointer '
     if (outside && !inSpan && !isStart && !isEnd) cls += 'text-muted-dark/50 '
@@ -173,8 +173,8 @@ export function DateRangePicker({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[11px] tracking-[0.1em] uppercase ${
-          open ? 'border-ink bg-paper-soft' : 'border-line bg-surface hover:border-ink'
+        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium ${
+          open ? 'border-ink bg-paper-soft' : 'border-line bg-surface hover:border-ink hover:bg-paper-soft'
         }`}
       >
         <CalendarIcon className="h-3.5 w-3.5 text-muted-dark" />
@@ -185,7 +185,7 @@ export function DateRangePicker({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 flex overflow-hidden border border-line bg-paper-soft lg:left-auto lg:right-0">
+        <div className="absolute left-0 top-full z-50 mt-1 flex overflow-hidden rounded-lg border border-line bg-surface shadow-soft lg:left-auto lg:right-0">
           <div className="flex w-44 flex-col border-r border-line py-2">
             {TIME_PRESET_OPTIONS.map(({ days, label }) => (
               <button
@@ -195,10 +195,10 @@ export function DateRangePicker({
                   onPreset(days)
                   setDraftStart(null)
                 }}
-                className={`px-4 py-2 text-left font-mono text-[11px] tracking-[0.1em] uppercase transition-colors ${
+                className={`px-4 py-2 text-left text-[13px] font-medium transition-colors ${
                   activePreset === days
-                    ? 'bg-surface font-medium text-ink'
-                    : 'text-muted hover:bg-surface hover:text-ink'
+                    ? 'bg-paper-soft font-medium text-ink'
+                    : 'text-muted hover:bg-paper-soft hover:text-ink'
                 }`}
               >
                 {label}
@@ -211,7 +211,7 @@ export function DateRangePicker({
                   onResetDefault()
                   setDraftStart(null)
                 }}
-                className="w-full px-4 py-2 text-left font-mono text-[11px] tracking-[0.1em] text-muted-dark uppercase hover:bg-surface hover:text-ink"
+                className="w-full px-4 py-2 text-left text-[13px] text-muted-dark hover:bg-paper-soft hover:text-ink"
               >
                 Reset to default
               </button>
@@ -228,7 +228,7 @@ export function DateRangePicker({
               >
                 ‹
               </button>
-              <span className="font-mono text-[12px] font-medium tracking-[0.1em] text-ink uppercase">
+              <span className="text-[13px] font-medium text-ink">
                 {format(viewMonth, 'MMMM yyyy')}
               </span>
               <button
@@ -241,7 +241,7 @@ export function DateRangePicker({
               </button>
             </div>
 
-            <div className="mb-1 grid grid-cols-7 text-center font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-muted-dark">
+            <div className="mb-1 grid grid-cols-7 text-center font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-dark">
               {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
                 <span key={d}>{d}</span>
               ))}
@@ -264,7 +264,7 @@ export function DateRangePicker({
               })}
             </div>
 
-            <p className="mt-3 font-mono text-[11px] tracking-[0.08em] text-muted-dark uppercase">
+            <p className="mt-3 text-[12px] text-muted-dark">
               {draftStart
                 ? 'Select end date'
                 : `${format(rangeStart, 'MMM d, yyyy')} – ${format(rangeEnd, 'MMM d, yyyy')}`}

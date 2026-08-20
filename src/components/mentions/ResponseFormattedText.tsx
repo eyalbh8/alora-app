@@ -20,7 +20,7 @@ export function ResponseFormattedText({ text }: ResponseFormattedTextProps) {
         return (
           <div key={index}>
             {section.label && (
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
+              <p className="mb-2 text-xs font-medium text-muted">
                 {section.label}
               </p>
             )}

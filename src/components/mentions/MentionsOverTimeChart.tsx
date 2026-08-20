@@ -182,7 +182,7 @@ export function MentionsOverTimeChart({
       <section aria-labelledby="mentions-trend-heading">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 id="mentions-trend-heading" className="text-[19px] font-semibold text-ink">
+            <h2 id="mentions-trend-heading" className="text-[17px] font-semibold text-ink">
               Mentions Over Time
             </h2>
             <p className="mt-1 text-xs text-muted">{periodLabel}</p>
@@ -235,7 +235,7 @@ export function MentionsOverTimeChart({
               <div>
                 <h2
                   id="expanded-mentions-heading"
-                  className="font-display text-2xl font-semibold tracking-tight text-ink"
+                  className="text-2xl font-medium tracking-tight text-ink tabular-nums"
                 >
                   Mentions Over Time
                 </h2>

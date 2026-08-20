@@ -41,7 +41,7 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
       <div className="flex min-w-[10.5rem] flex-1 flex-col border-r border-line px-5 py-5 last:border-r-0">
         <div className="mb-3 flex items-center gap-2">
           <ProviderIcon provider={mention.provider} size="sm" />
-          <span className="truncate text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted">
+          <span className="truncate text-[12px] font-medium text-muted">
             {label}
           </span>
         </div>
@@ -51,7 +51,7 @@ function ProviderMentionCard({ mention }: ProviderMentionCardProps) {
             type="button"
             disabled={!clickable}
             onClick={() => clickable && setOpen(true)}
-            className={`font-display text-[34px] font-semibold leading-none tracking-[-0.02em] text-ink transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${
+            className={`text-[34px] font-medium leading-none tracking-[-0.03em] text-ink tabular-nums transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${
               clickable ? 'cursor-pointer hover:text-accent' : 'cursor-default opacity-60'
             }`}
           >
@@ -179,8 +179,8 @@ export function ProviderMentionCardsRow({
         <h2
           className={
             embedded
-              ? 'text-xs font-semibold uppercase tracking-[0.08em] text-ink'
-              : 'text-[19px] font-semibold tracking-[-0.01em] text-ink'
+              ? 'text-xs font-medium text-ink'
+              : 'text-[17px] font-semibold tracking-[-0.01em] text-ink'
           }
         >
           By platform
@@ -189,7 +189,7 @@ export function ProviderMentionCardsRow({
       </header>
       <div
         className={`overflow-x-auto border-line ${
-          embedded ? 'border-t bg-bg' : 'border-y border-t-ink bg-bg'
+          embedded ? 'border-t bg-surface' : 'rounded-lg border bg-surface shadow-soft'
         }`}
       >
         <div className="flex min-w-max md:min-w-full">

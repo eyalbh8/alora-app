@@ -28,30 +28,30 @@ export function CitedSitesTable({ rows }: CitedSitesTableProps) {
   return (
     <section aria-labelledby="cited-marketplace-title">
       <header className="mb-4">
-        <h2 id="cited-marketplace-title" className="text-[19px] font-semibold text-ink">
+        <h2 id="cited-marketplace-title" className="text-[17px] font-semibold text-ink">
           Cited in marketplace
         </h2>
         <p className="mt-0.5 text-[13px] text-muted">
           Publishing sites that already mention this brand in AI answers.
         </p>
       </header>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-lg border border-line bg-surface px-4 shadow-soft">
         <table className="w-full min-w-0 border-collapse text-sm">
           <thead>
-            <tr className="border-b-2 border-ink">
-              <th className="min-w-0 pb-2.5 pr-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+            <tr className="border-b border-line">
+              <th className="min-w-0 pb-2.5 pr-3 text-left text-[12px] font-medium text-muted">
                 Site
               </th>
-              <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+              <th className="px-3 pb-2.5 text-right text-[12px] font-medium text-muted">
                 Price
               </th>
-              <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+              <th className="px-3 pb-2.5 text-right text-[12px] font-medium text-muted">
                 Traffic
               </th>
-              <th className="px-3 pb-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+              <th className="px-3 pb-2.5 text-right text-[12px] font-medium text-muted">
                 Rank
               </th>
-              <th className="pb-2.5 pl-3 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+              <th className="pb-2.5 pl-3 text-right text-[12px] font-medium text-muted">
                 Mentions
               </th>
             </tr>

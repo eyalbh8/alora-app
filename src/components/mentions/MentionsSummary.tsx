@@ -32,10 +32,10 @@ export function MentionsSummary({ providers, range }: MentionsSummaryProps) {
 
   return (
     <section aria-labelledby="llm-mentions-heading">
-      <h2 id="llm-mentions-heading" className="text-[19px] font-semibold text-ink">
+      <h2 id="llm-mentions-heading" className="text-[17px] font-semibold text-ink">
         LLM Mentions
       </h2>
-      <p className="mt-5 font-display text-[40px] font-semibold leading-none tracking-tight text-ink sm:text-[52px]">
+      <p className="mt-5 text-[40px] font-medium leading-none tracking-tight text-ink tabular-nums sm:text-[52px]">
         {formatNumber(total, 0)}
       </p>
       <p className="mt-2 text-xs text-muted">Total mentions, {periodLabel}</p>
@@ -52,7 +52,7 @@ export function MentionsSummary({ providers, range }: MentionsSummaryProps) {
               <span className="min-w-0 flex-1 text-[13px] text-ink">
                 {providerLabel(provider.provider)}
               </span>
-              <span className="font-display text-[15px] font-semibold tabular-nums text-ink">
+              <span className="text-[15px] font-semibold tabular-nums text-ink">
                 {formatNumber(provider.count, 0)}
               </span>
             </div>

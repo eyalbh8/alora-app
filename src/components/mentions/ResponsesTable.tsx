@@ -40,7 +40,7 @@ function SentimentBadge({
   }
   const tone = score >= 70 ? 'text-accent' : score >= 40 ? 'text-muted' : 'text-error'
   return (
-    <span className={`inline-flex min-w-[2.5rem] items-center justify-center font-mono text-[11px] font-medium tracking-[0.1em] ${tone}`}>
+    <span className={`inline-flex min-w-[2.5rem] items-center justify-center text-[12px] font-medium tabular-nums ${tone}`}>
       {formatNumber(score, 0)}
     </span>
   )
@@ -95,7 +95,7 @@ export function ResponsesTable({
         <section aria-labelledby="recent-responses-heading">
           <h2
             id="recent-responses-heading"
-            className="mb-4 text-[19px] font-semibold text-ink"
+            className="mb-4 text-[17px] font-semibold text-ink"
           >
             Recent Responses
           </h2>
@@ -123,7 +123,7 @@ export function ResponsesTable({
         {editorial && (
           <h2
             id="recent-responses-heading"
-            className="mb-4 text-[19px] font-semibold text-ink"
+            className="mb-4 text-[17px] font-semibold text-ink"
           >
             Recent Responses
           </h2>
@@ -141,7 +141,7 @@ export function ResponsesTable({
               <tr
                 className={
                   editorial
-                    ? 'border-b-2 border-ink'
+                    ? 'border-b border-line'
                     : 'border-b border-line bg-paper-soft'
                 }
               >

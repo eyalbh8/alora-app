@@ -24,7 +24,7 @@ interface CitationUrlDrawerProps {
 function MetricChip({ label, value, extra }: { label: string; value: string; extra?: ReactNode }) {
   return (
     <div className="rounded-lg border border-line bg-paper-soft/80 px-3 py-2">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-dark">{label}</p>
+      <p className="text-[12px] font-medium text-muted">{label}</p>
       <p className="mt-0.5 text-sm font-semibold text-ink">{value}</p>
       {extra}
     </div>
@@ -75,7 +75,7 @@ export function CitationUrlDrawer({ row, onClose }: CitationUrlDrawerProps) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-bg/80">
       <button type="button" className="flex-1 cursor-default" aria-label="Close drawer" onClick={onClose} />
-      <div className="flex h-full w-full max-w-xl flex-col overflow-hidden border-l border-line bg-surface">
+      <div className="flex h-full w-full max-w-xl flex-col overflow-hidden rounded-l-xl border-l border-line bg-surface shadow-hover">
         <div className="shrink-0 border-b border-line px-5 py-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -134,7 +134,7 @@ export function CitationUrlDrawer({ row, onClose }: CitationUrlDrawerProps) {
               </div>
 
               <section>
-                <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-dark">
+                <h3 className="mb-2 text-[12px] font-medium text-muted">
                   Citations over time
                 </h3>
                 {series.length > 0 ? (
@@ -165,7 +165,7 @@ export function CitationUrlDrawer({ row, onClose }: CitationUrlDrawerProps) {
                         <Line
                           type="monotone"
                           dataKey="count"
-                          stroke="#111111"
+                          stroke="#14201a"
                           strokeWidth={1.8}
                           dot={false}
                           activeDot={{ r: 3, strokeWidth: 0 }}
@@ -179,7 +179,7 @@ export function CitationUrlDrawer({ row, onClose }: CitationUrlDrawerProps) {
               </section>
 
               <section>
-                <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-dark">
+                <h3 className="mb-2 text-[12px] font-medium text-muted">
                   Provider breakdown
                 </h3>
                 {detail.providers.length === 0 ? (
@@ -208,7 +208,7 @@ export function CitationUrlDrawer({ row, onClose }: CitationUrlDrawerProps) {
               </section>
 
               <section>
-                <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-dark">
+                <h3 className="mb-2 text-[12px] font-medium text-muted">
                   Prompts that surfaced this page
                 </h3>
                 {detail.prompts.length === 0 ? (

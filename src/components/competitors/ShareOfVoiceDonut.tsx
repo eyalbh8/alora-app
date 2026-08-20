@@ -40,7 +40,7 @@ export function ShareOfVoiceDonut({ competitors }: ShareOfVoiceDonutProps) {
 
   return (
     <section aria-labelledby="share-of-voice-title">
-      <h2 id="share-of-voice-title" className="text-[19px] font-semibold text-ink">
+      <h2 id="share-of-voice-title" className="text-[17px] font-semibold text-ink">
         Share of Voice
       </h2>
       {segments.length === 0 ? (
@@ -50,7 +50,7 @@ export function ShareOfVoiceDonut({ competitors }: ShareOfVoiceDonutProps) {
       ) : (
         <div className="mt-4">
           <div className="flex items-baseline gap-2.5">
-            <span className="font-display text-[44px] font-semibold leading-none tracking-tight text-ink">
+            <span className="text-[44px] font-medium leading-none tracking-tight text-ink tabular-nums">
               {formatNumber(myShare, 0)}%
             </span>
             <span className="text-xs text-muted">My share of voice</span>

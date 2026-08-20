@@ -11,13 +11,13 @@ import { ProviderIcon } from '../ProviderIcon'
 import { getCrawlerBotDisplayName } from '../../lib/crawlerBots'
 
 const FILTER_CHIP_BASE =
-  'inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[11px] font-medium leading-[1.7] tracking-[0.1em] uppercase transition-colors'
+  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium leading-[1.4] transition-colors'
 
 function filterChipClass(disabled: boolean, active: boolean, open: boolean): string {
   if (disabled) return 'cursor-not-allowed border-line bg-surface text-muted-dark'
-  if (active) return 'border-ink bg-surface text-ink hover:border-ink'
+  if (active) return 'border-ink bg-ink text-button-ink hover:border-ink'
   if (open) return 'border-ink bg-paper-soft text-ink hover:border-ink'
-  return 'border-line bg-surface text-muted hover:border-ink'
+  return 'border-line bg-surface text-muted hover:border-ink hover:bg-paper-soft'
 }
 
 function MultiSelect({
@@ -101,7 +101,7 @@ function MultiSelect({
       >
         <span>{disabled ? `${label} N/A` : label}</span>
         {hasSelection && values.length > 1 && (
-          <span className="flex h-4 min-w-4 items-center justify-center bg-accent px-1 font-mono text-[10px] font-medium leading-none text-button-ink">
+          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-medium leading-none text-button-ink">
             {values.length}
           </span>
         )}
@@ -114,7 +114,7 @@ function MultiSelect({
 
       {open && !disabled && (
         <div
-          className={`absolute left-0 top-full z-50 mt-1 border border-line bg-paper-soft py-1 ${
+          className={`absolute left-0 top-full z-50 mt-1 rounded-lg border border-line bg-surface py-1 shadow-soft ${
             fullWidth ? 'w-full max-w-none' : 'min-w-[220px] max-w-[320px]'
           }`}
         >
@@ -131,7 +131,7 @@ function MultiSelect({
           )}
           <div className="max-h-56 overflow-y-auto">
             {filteredOptions.length === 0 ? (
-              <p className="px-3 py-2 font-mono text-[11px] text-muted-dark uppercase">No matches</p>
+              <p className="px-3 py-2 text-[13px] text-muted-dark">No matches</p>
             ) : (
               filteredOptions.map((o) => (
                 <label
@@ -214,7 +214,7 @@ function SingleSelect({
 
       {open && (
         <div
-          className={`absolute left-0 top-full z-50 mt-1 border border-line bg-paper-soft py-1 ${
+          className={`absolute left-0 top-full z-50 mt-1 rounded-lg border border-line bg-surface py-1 shadow-soft ${
             fullWidth ? 'w-full max-w-none' : 'min-w-[220px] max-w-[320px]'
           }`}
         >
@@ -490,7 +490,7 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
           >
             <span>Filters</span>
             {activeCount > 0 && (
-              <span className="flex h-4 min-w-4 items-center justify-center bg-accent px-1 font-mono text-[10px] font-medium leading-none text-button-ink">
+              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-medium leading-none text-button-ink">
                 {activeCount}
               </span>
             )}
@@ -507,7 +507,7 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
             className="absolute inset-0 bg-bg/80"
             onClick={() => setSheetOpen(false)}
           />
-          <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col border-t border-line bg-bg">
+          <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-xl border-t border-line bg-surface shadow-hover">
             <div className="flex items-center justify-between border-b border-line px-4 py-3">
               <h2 className="eyebrow mb-0">Filters</h2>
               <button

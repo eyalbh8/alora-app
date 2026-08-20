@@ -16,7 +16,7 @@ interface ChartCardProps {
 
 export function ChartCard({ title, subtitle, loading, error, onRetry, hasData, children }: ChartCardProps) {
   return (
-    <div className="border border-line bg-surface p-[22px]">
+    <div className="rounded-lg border border-line bg-surface p-6 shadow-soft">
       <div className="mb-4">
         <p className="eyebrow mb-1">{title}</p>
         {subtitle && <p className="text-[13px] text-muted">{subtitle}</p>}

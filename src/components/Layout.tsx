@@ -14,26 +14,6 @@ const NAV = [
   { to: '/ai-crawlers', label: 'AI Crawlers' },
 ]
 
-function ScrollProgress() {
-  const [progress, setProgress] = useState(0)
-
-  useEffect(() => {
-    const onScroll = () => {
-      const max = document.documentElement.scrollHeight - window.innerHeight
-      setProgress(max > 0 ? window.scrollY / max : 0)
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  return (
-    <div className="scroll-progress" aria-hidden="true">
-      <span style={{ height: `${progress * 100}%` }} />
-    </div>
-  )
-}
-
 export function BrandMark() {
   return <span className="brand__mark" aria-hidden="true" />
 }
@@ -77,7 +57,6 @@ export function Layout() {
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
-      <ScrollProgress />
 
       {navOpen && (
         <button

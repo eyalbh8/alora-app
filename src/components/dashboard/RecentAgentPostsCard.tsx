@@ -38,7 +38,7 @@ export function RecentAgentPostsCard({ posts }: RecentAgentPostsCardProps) {
       ) : (
         <table className="w-full min-w-[32rem] text-sm">
           <thead>
-            <tr className="border-b-2 border-ink text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
+            <tr className="border-b border-line text-[12px] font-medium text-muted">
               <th className="pb-2.5 text-left font-semibold">Channel</th>
               <th className="px-4 pb-2.5 text-left font-semibold">Published</th>
               <th className="pb-2.5 text-left font-semibold">Topic / prompt</th>

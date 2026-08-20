@@ -14,7 +14,7 @@ export function CurrentSentimentScore({ score }: CurrentSentimentScoreProps) {
 
   return (
     <section aria-labelledby="current-sentiment-title" className="flex flex-col items-center">
-      <h2 id="current-sentiment-title" className="mb-6 text-[19px] font-semibold text-ink">
+      <h2 id="current-sentiment-title" className="mb-6 text-[17px] font-semibold text-ink">
         Current Sentiment Score
       </h2>
       <div
@@ -25,10 +25,10 @@ export function CurrentSentimentScore({ score }: CurrentSentimentScoreProps) {
       >
         <div className="flex h-[164px] w-[164px] flex-col items-center justify-center rounded-full bg-bg">
           {value == null ? (
-            <span className="font-display text-[36px] font-semibold text-muted-dark">—</span>
+            <span className="text-[36px] font-medium text-muted-dark">—</span>
           ) : (
             <>
-              <span className="font-display text-[36px] font-semibold tracking-tight text-ink">
+              <span className="text-[36px] font-medium tracking-tight text-ink tabular-nums">
                 {formatNumber(value, 0)}
               </span>
               <span className="mt-0.5 text-[12px] text-muted">/ 100</span>

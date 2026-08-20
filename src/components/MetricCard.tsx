@@ -22,13 +22,13 @@ export function MetricCard({
   loading = false,
 }: MetricCardProps) {
   return (
-    <div className="border border-line bg-surface p-[22px]">
+    <div className="rounded-lg border border-line bg-surface p-6 shadow-soft">
       <p className="eyebrow mb-3">{label}</p>
       {loading ? (
         <Skeleton className="mt-2 h-8 w-20" />
       ) : (
         <div className="mt-1 flex items-baseline gap-2">
-          <span className="font-display text-[32px] font-normal leading-none tracking-[-0.02em] text-ink">
+          <span className="text-[32px] font-medium leading-none tracking-[-0.03em] text-ink tabular-nums">
             {value}
           </span>
           <TrendBadge value={trend} percent={trendPercent} invert={trendInvert} />

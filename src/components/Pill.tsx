@@ -37,7 +37,7 @@ export function toneFromColor(color: string | null | undefined): PillTone {
 export function Pill({ tone = 'grey', children }: { tone?: PillTone; children: ReactNode }) {
   return (
     <span
-      className={`inline-flex items-center border border-line px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.1em] whitespace-nowrap uppercase ${TONE_CLASSES[tone]}`}
+      className={`inline-flex items-center rounded-full border border-line bg-paper-soft px-2.5 py-0.5 text-[12px] font-medium whitespace-nowrap ${TONE_CLASSES[tone]}`}
     >
       {children}
     </span>

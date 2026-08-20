@@ -26,7 +26,7 @@ export function TopicFilterCard({
   return (
     <section className="border-y border-line py-5" aria-labelledby="prompt-topics-heading">
       <div className="mb-4">
-        <p className="text-[10px] font-semibold tracking-[0.18em] text-muted-dark uppercase">
+        <p className="text-[12px] font-medium text-muted">
           Explore
         </p>
         <h2 id="prompt-topics-heading" className="mt-1 font-display text-xl text-ink">

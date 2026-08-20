@@ -212,9 +212,9 @@ export function PromptsScreen() {
       </div>
 
       <section aria-labelledby="prompts-table-heading">
-        <div className="flex flex-col gap-4 border-b-2 border-ink pb-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-4 border-b border-line pb-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[10px] font-semibold tracking-[0.18em] text-muted-dark uppercase">
+            <p className="text-[12px] font-medium text-muted">
               Prompt library
             </p>
             <div className="mt-1 flex items-baseline gap-3">
@@ -228,7 +228,7 @@ export function PromptsScreen() {
           </div>
           <div className="relative w-full sm:w-72">
             <svg
-              className="pointer-events-none absolute top-1/2 left-0 h-4 w-4 -translate-y-1/2 text-muted-dark"
+              className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-dark"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -246,27 +246,27 @@ export function PromptsScreen() {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search prompts…"
               aria-label="Search prompts"
-              className="w-full border-0 border-b border-muted-dark bg-transparent py-2 pr-2 pl-7 text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+              className="w-full rounded-full border border-line bg-surface py-2 pr-3 pl-9 text-sm text-ink placeholder:text-muted shadow-soft focus:border-ink focus:outline-none"
             />
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-lg border border-line bg-surface px-4 shadow-soft">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-line">
-                <th className="py-3 pr-4 text-left text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase">
+              <tr className="border-b border-line bg-paper-soft">
+                <th className="py-3 pr-4 text-left text-[12px] font-medium text-muted">
                   Prompt
                 </th>
-                <th className="hidden px-4 py-3 text-left text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase md:table-cell">
+                <th className="hidden px-4 py-3 text-left text-[12px] font-medium text-muted md:table-cell">
                   Topic
                 </th>
-                <th className="hidden px-4 py-3 text-left text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase sm:table-cell">
+                <th className="hidden px-4 py-3 text-left text-[12px] font-medium text-muted sm:table-cell">
                   Intent
                 </th>
                 <th
                   aria-sort={sortKey === 'visibility' ? (sortDir === 'desc' ? 'descending' : 'ascending') : 'none'}
-                  className="px-4 py-3 text-right text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase"
+                  className="px-4 py-3 text-right text-[12px] font-medium text-muted"
                 >
                   <button
                     type="button"
@@ -279,7 +279,7 @@ export function PromptsScreen() {
                 </th>
                 <th
                   aria-sort={sortKey === 'sentiment' ? (sortDir === 'desc' ? 'descending' : 'ascending') : 'none'}
-                  className="hidden px-4 py-3 text-right text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase sm:table-cell"
+                  className="hidden px-4 py-3 text-right text-[12px] font-medium text-muted sm:table-cell"
                 >
                   <button
                     type="button"
@@ -292,7 +292,7 @@ export function PromptsScreen() {
                 </th>
                 <th
                   aria-sort={sortKey === 'rank' ? (sortDir === 'desc' ? 'descending' : 'ascending') : 'none'}
-                  className="px-4 py-3 text-right text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase"
+                  className="px-4 py-3 text-right text-[12px] font-medium text-muted"
                 >
                   <button
                     type="button"
@@ -303,7 +303,7 @@ export function PromptsScreen() {
                     <span aria-hidden="true">{sortKey === 'rank' ? (sortDir === 'desc' ? '↓' : '↑') : '↕'}</span>
                   </button>
                 </th>
-                <th className="px-4 py-3 text-left text-[10px] font-semibold tracking-[0.16em] text-muted-dark uppercase">
+                <th className="px-4 py-3 text-left text-[12px] font-medium text-muted">
                   Tags
                 </th>
               </tr>
@@ -353,7 +353,7 @@ export function PromptsScreen() {
                     </td>
                     <td className="px-4 py-4 text-right">
                       <div className="flex flex-col items-end">
-                        <span className="font-display text-base tabular-nums text-ink">
+                        <span className="text-base font-medium tabular-nums text-ink">
                           {r.avgVisibility != null ? `${formatNumber(r.avgVisibility, 0)}%` : '—'}
                         </span>
                         <DeltaLabel value={r.visibilityChange} />
@@ -361,7 +361,7 @@ export function PromptsScreen() {
                     </td>
                     <td className="hidden px-4 py-4 text-right sm:table-cell">
                       <div className="flex flex-col items-end">
-                        <span className="font-display text-base tabular-nums text-ink">
+                        <span className="text-base font-medium tabular-nums text-ink">
                           {formatScore(r.avgSentimentScore)}
                         </span>
                         <DeltaLabel value={r.sentimentChange} />
@@ -369,7 +369,7 @@ export function PromptsScreen() {
                     </td>
                     <td className="px-4 py-4 text-right">
                       <div className="flex flex-col items-end">
-                        <span className="font-display text-base tabular-nums text-ink">
+                        <span className="text-base font-medium tabular-nums text-ink">
                           {formatScore(r.avgRank)}
                         </span>
                         <DeltaLabel value={r.rankChange} invert />
@@ -414,12 +414,12 @@ export function PromptsScreen() {
             onClick={closePrompt}
           />
           <aside
-            className="flex h-full w-full max-w-xl flex-col overflow-y-auto border-l border-line bg-bg "
+            className="flex h-full w-full max-w-xl flex-col overflow-y-auto rounded-l-xl border-l border-line bg-surface shadow-hover"
             aria-labelledby="prompt-detail-heading"
           >
-            <div className="flex items-start justify-between gap-5 border-b-2 border-ink px-6 py-6">
+            <div className="flex items-start justify-between gap-5 border-b border-line px-6 py-6">
               <div className="min-w-0">
-                <p className="text-[10px] font-semibold tracking-[0.18em] text-muted-dark uppercase">
+                <p className="text-[12px] font-medium text-muted">
                   Prompt detail
                 </p>
                 <h2 id="prompt-detail-heading" className="mt-2 font-display text-2xl leading-tight text-ink">
@@ -460,7 +460,7 @@ export function PromptsScreen() {
               <MetricMini label="Intent" value={drawerPrompt.type ?? '—'} />
             </div>
             <div className="px-6 py-6">
-              <h3 className="mb-3 text-[10px] font-semibold tracking-[0.18em] text-muted-dark uppercase">
+              <h3 className="mb-3 text-[12px] font-medium text-muted">
                 Related responses ({detailResponses.length})
               </h3>
               {geoDetail.loading ? (
@@ -523,8 +523,8 @@ export function PromptsScreen() {
 function MetricMini({ label, value }: { label: string; value: string }) {
   return (
     <div className="border-r border-b border-line px-4 py-4 last:border-r-0 sm:border-b-0">
-      <p className="text-[9px] font-semibold tracking-[0.16em] text-muted-dark uppercase">{label}</p>
-      <p className="mt-1 font-display text-lg text-ink">{value}</p>
+      <p className="text-[12px] font-medium text-muted">{label}</p>
+      <p className="mt-1 text-lg font-medium tabular-nums text-ink">{value}</p>
     </div>
   )
 }

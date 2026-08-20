@@ -56,7 +56,7 @@ export function AccountSnapshot({ snapshot, embedded = false }: AccountSnapshotP
     <section>
       {!embedded && (
         <header className="mb-5">
-          <h2 className="text-[19px] font-semibold tracking-[-0.01em] text-ink">
+          <h2 className="text-[17px] font-semibold tracking-[-0.01em] text-ink">
             Period snapshot
           </h2>
           <p className="mt-0.5 text-xs text-muted">Headline performance for the selected range</p>
@@ -64,7 +64,7 @@ export function AccountSnapshot({ snapshot, embedded = false }: AccountSnapshotP
       )}
       <div
         className={`overflow-x-auto border-line ${
-          embedded ? 'border-t bg-surface/60' : 'border-y border-t-ink bg-bg'
+          embedded ? 'border-t bg-surface/60' : 'rounded-lg border bg-surface shadow-soft'
         }`}
       >
         <div className="flex min-w-max md:min-w-full">
@@ -73,11 +73,11 @@ export function AccountSnapshot({ snapshot, embedded = false }: AccountSnapshotP
               key={metric.label}
               className="flex min-w-[10.5rem] flex-1 flex-col border-r border-line px-5 py-5 last:border-r-0"
             >
-              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted">
+              <span className="text-[12px] font-medium text-muted">
                 {metric.label}
               </span>
               <div className="mt-3 flex items-end justify-between gap-2">
-                <span className="font-display text-[34px] font-normal leading-none tracking-[-0.02em] text-ink">
+                <span className="text-[34px] font-medium leading-none tracking-[-0.03em] text-ink tabular-nums">
                   {metric.value}
                 </span>
                 {metric.delta}

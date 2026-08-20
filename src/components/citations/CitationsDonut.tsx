@@ -30,7 +30,7 @@ export function CitationsDonut({ title, total, segments }: CitationsDonutProps) 
 
   return (
     <section aria-labelledby="citations-donut-title">
-      <h2 id="citations-donut-title" className="text-[19px] font-semibold text-ink">
+      <h2 id="citations-donut-title" className="text-[17px] font-semibold text-ink">
         {title}
       </h2>
       <div className="mt-5 flex items-center gap-6">
@@ -65,7 +65,7 @@ export function CitationsDonut({ title, total, segments }: CitationsDonutProps) 
             })}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="font-display text-[28px] font-semibold leading-none tracking-tight text-ink">
+            <span className="text-[28px] font-medium leading-none tracking-tight text-ink tabular-nums">
               {formatNumber(total, 0)}
             </span>
           </div>
@@ -76,7 +76,7 @@ export function CitationsDonut({ title, total, segments }: CitationsDonutProps) 
           ) : (
             rows.map((row) => (
               <li key={row.type} className="flex items-center gap-2 text-[13px]">
-                <span className="h-2 w-2 shrink-0" style={{ backgroundColor: row.color }} />
+                <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: row.color }} />
                 <span className="min-w-0 flex-1 truncate text-muted">{row.label}</span>
                 <span className="tabular-nums text-ink">{formatNumber(row.count, 0)}</span>
               </li>

@@ -62,7 +62,7 @@ export function DistributionCard({
   return (
     <section>
       <div className="mb-[18px]">
-        <h2 className="text-[19px] font-semibold text-ink">{title}</h2>
+        <h2 className="text-[17px] font-semibold text-ink">{title}</h2>
         <p className="mt-0.5 text-xs text-muted">{subtitle}</p>
       </div>
       {isEmpty ? (

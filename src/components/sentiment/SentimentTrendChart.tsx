@@ -71,7 +71,7 @@ function PeriodStat({
   return (
     <div>
       <div className="flex items-baseline gap-2">
-        <span className="font-display text-[34px] font-semibold tracking-tight text-ink">
+        <span className="text-[34px] font-medium tracking-tight text-ink tabular-nums">
           {value != null ? formatNumber(value, 0) : '—'}
         </span>
         {delta != null && (
@@ -102,7 +102,7 @@ function ChartBody({
             dataKey="date"
             axisLine={{ stroke: SENTIMENT_DIVIDER }}
             tickLine={false}
-            tick={{ fontSize: 10, fill: '#6b6b6b' }}
+            tick={{ fontSize: 10, fill: '#7a857e' }}
             interval="preserveStartEnd"
             dy={8}
           />
@@ -115,7 +115,7 @@ function ChartBody({
             }}
             contentStyle={{
               border: `1px solid ${SENTIMENT_DIVIDER}`,
-              borderRadius: 0,
+              borderRadius: 12,
               boxShadow: 'none',
               fontSize: 12,
             }}
@@ -163,7 +163,7 @@ export function SentimentTrendChart({
       <section aria-labelledby="sentiment-trend-title">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 id="sentiment-trend-title" className="text-[19px] font-semibold text-ink">
+            <h2 id="sentiment-trend-title" className="text-[17px] font-semibold text-ink">
               Sentiment Trend
             </h2>
             <div className="mt-0.5 flex flex-wrap items-end gap-x-8 gap-y-2">

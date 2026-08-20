@@ -62,9 +62,9 @@ export function DashboardScreen() {
       <div
         className={`flex flex-col gap-8 pb-4 transition-opacity md:gap-10 lg:gap-14${geo.loading ? ' opacity-70' : ''}`}
       >
-        <section className="overflow-hidden border border-line border-t-2 border-t-ink bg-bg shadow-[0_12px_32px_rgba(16,20,20,0.05)]">
+        <section className="overflow-hidden rounded-lg border border-line bg-surface shadow-soft">
           <header className="px-5 py-5 sm:px-6">
-            <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink">
+            <h2 className="font-display text-2xl font-normal tracking-[-0.03em] text-ink">
               AI visibility overview
             </h2>
             <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">

@@ -48,12 +48,12 @@ function EntryCard({ title, value, change, periodText, bot }: EntryCardProps) {
     <div className="flex w-[13.5rem] shrink-0 flex-col border-r border-line px-4 py-5 last:border-r-0 md:px-5">
       <div className="mb-3 flex min-h-4 items-center gap-2">
         {bot && <CrawlerIcon bot={bot} size="sm" />}
-        <span className="truncate text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted">
+        <span className="truncate text-[12px] font-medium text-muted">
           {title}
         </span>
       </div>
 
-      <span className="font-display text-[28px] font-semibold leading-none tracking-tight text-ink">
+      <span className="text-[28px] font-medium leading-none tracking-tight text-ink tabular-nums">
         {formatNumber(value, 0)}
       </span>
       <div className="mt-2 flex items-center justify-between gap-2 text-[11.5px]">
@@ -88,7 +88,7 @@ export function CrawlerEntryCardsRow({
   )
 
   return (
-    <div className="overflow-x-auto border-y border-b-line border-t-ink">
+    <div className="overflow-x-auto rounded-lg border border-line bg-surface shadow-soft">
       <div className="flex min-w-max">
         <EntryCard
           title="Total entries"

@@ -35,12 +35,12 @@ export function CitationsTrendChart({ title, trend }: CitationsTrendChartProps) 
     <section aria-labelledby="citations-trend-title">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 id="citations-trend-title" className="text-[19px] font-semibold text-ink">
+          <h2 id="citations-trend-title" className="text-[17px] font-semibold text-ink">
             {title}
           </h2>
           <div className="mt-3 flex flex-wrap items-baseline gap-4">
             <div>
-              <p className="font-display text-[28px] font-semibold leading-none tracking-tight text-ink">
+              <p className="text-[28px] font-medium leading-none tracking-tight text-ink tabular-nums">
                 {formatNumber(trend.currentTotal, 0)}
               </p>
               <p className="mt-1 text-[11px] text-muted">This period</p>

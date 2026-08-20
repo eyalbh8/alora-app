@@ -93,7 +93,7 @@ function RecommendationCard({ rec }: { rec: TrackedRecommendation }) {
 
 function RecommendationPinIcon({ count }: { count: number }) {
   return (
-    <span className="flex h-8 min-w-8 items-center justify-center bg-button px-1.5 font-mono text-xs font-semibold tabular-nums leading-none text-button-ink">
+    <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-button px-1.5 text-xs font-semibold tabular-nums leading-none text-button-ink">
       {count > 9 ? '9+' : count}
     </span>
   )

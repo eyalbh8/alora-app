@@ -28,15 +28,13 @@ export function FirstAccountSetup() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-6">
-      <div className="w-full max-w-xl border border-line bg-surface p-8">
+      <div className="w-full max-w-xl rounded-xl border border-line bg-surface p-8 shadow-hover">
         <div className="mb-6 flex items-center gap-2.5">
           <BrandMark />
           <span className="brand__name">Alora</span>
         </div>
         <p className="eyebrow">First-time setup</p>
-        <h1 className="screen-title">
-          Connect your first <span className="screen-title__rest">account</span>
-        </h1>
+        <h1 className="screen-title">Connect your first account</h1>
         <p className="mt-4 text-[15px] leading-[1.7] text-muted">
           You&apos;re signed in. Paste the workspace MCP URL. We&apos;ll save the
           API key and workspace id on your first Alora account.

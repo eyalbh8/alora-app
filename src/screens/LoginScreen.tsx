@@ -26,15 +26,13 @@ export function LoginScreen() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-6">
-      <div className="w-full max-w-md border border-line bg-surface p-8">
+      <div className="w-full max-w-md rounded-xl border border-line bg-surface p-8 shadow-hover">
         <div className="mb-8">
           <div className="mb-6 flex items-center gap-2.5">
             <BrandMark />
             <span className="brand__name">Alora</span>
           </div>
-          <h1 className="screen-title">
-            Sign <span className="screen-title__rest">in</span>
-          </h1>
+          <h1 className="screen-title">Sign in</h1>
         </div>
         {error ? (
           <p className="mb-4 text-[13px] text-error">{error}</p>

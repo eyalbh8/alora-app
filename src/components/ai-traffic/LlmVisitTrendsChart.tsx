@@ -162,7 +162,7 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
       >
         <div className="flex shrink-0 items-start justify-between gap-3 pb-4">
           <div>
-            <h2 className="text-[19px] font-semibold tracking-[-0.01em] text-ink">
+            <h2 className="text-[17px] font-semibold tracking-[-0.01em] text-ink">
               LLM Visit Trends
             </h2>
             <p className="mt-0.5 text-xs text-muted">
@@ -221,7 +221,7 @@ export function LlmVisitTrendsChart({ chartRows, providerKeys, range }: LlmVisit
           >
             <div className="flex items-center justify-between border-b border-line px-6 py-5">
               <div>
-                <h2 className="text-[19px] font-semibold text-ink">LLM Visit Trends</h2>
+                <h2 className="text-[17px] font-semibold text-ink">LLM Visit Trends</h2>
                 <p className="mt-0.5 text-xs text-muted">
                   Track visits from different LLM providers over time.
                 </p>
