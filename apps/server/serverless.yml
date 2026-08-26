@@ -1,0 +1,90 @@
+service: alora-api
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  stage: ${opt:stage, 'prod'}
+  region: ${env:AWS_REGION, 'us-east-1'}
+  profile: ${env:AWS_PROFILE, 'default'}
+  environment:
+    NODE_ENV: ${self:provider.stage}
+    DATABASE_URL: ${env:DATABASE_URL}
+    DESCOPE_PROJECT_ID: ${env:DESCOPE_PROJECT_ID}
+    SOURCE_API_BASE: ${env:SOURCE_API_BASE, ''}
+    SOURCE_API_KEY: ${env:SOURCE_API_KEY, ''}
+    MCP_URL: ${env:MCP_URL, ''}
+    MCP_API_KEY: ${env:MCP_API_KEY, ''}
+    ALLOWED_ORIGIN: ${env:ALLOWED_ORIGIN, '*'}
+    AWS_LAMBDA_NODEJS_DISABLE_CALLBACK_WARNING: 1
+
+  ecr:
+    images:
+      appimage:
+        path: ./
+        file: dockerfile
+        platform: linux/amd64
+        provenance: false
+        buildArgs:
+          DATABASE_URL: ${env:BUILD_DATABASE_URL, env:DATABASE_URL}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - secretsmanager:GetSecretValue
+          Resource:
+            - 'arn:aws:secretsmanager:${self:provider.region}:*:secret:alora-${self:provider.stage}*'
+        - Effect: Allow
+          Action:
+            - ecr:GetAuthorizationToken
+            - ecr:BatchCheckLayerAvailability
+            - ecr:GetDownloadUrlForLayer
+            - ecr:BatchGetImage
+          Resource: '*'
+
+package:
+  individually: true
+  patterns:
+    - '!node_modules/**'
+    - '!.webpack/**'
+    - '!.serverless/**'
+    - '!.build/**'
+    - '!test/**'
+    - '!coverage/**'
+    - '!.env*'
+    - '!.git/**'
+    - '!README.md'
+
+functions:
+  api:
+    name: ${self:service}-${self:provider.stage}-api
+    image:
+      name: appimage
+      command:
+        - dist/lambda.handler
+    timeout: 29
+    memorySize: 2048
+    url: true
+    events:
+      - http:
+          path: /
+          method: ANY
+          cors: true
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+    environment:
+      NODE_ENV: ${self:provider.stage}
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3003
+    lambdaPort: 3004
+    noPrependStageInUrl: true
+    noTimeout: true
+    useInProcess: true

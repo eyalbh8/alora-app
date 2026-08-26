@@ -17,8 +17,12 @@ dist-ssr
 .env.*
 !.env.example
 
-# Generated carousel slide PNGs
-functions/data/carousel-assets/
+# Serverless / build artifacts
+apps/server/.serverless/
+apps/server/.webpack/
+apps/server/dist/
+apps/client/dist/
+packages/shared/dist/
 
 # Editor directories and files
 .vscode/*

@@ -1,9 +1,0 @@
-{
-  "name": "snapshots-api",
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "jose": "^6.2.9",
-    "pg": "^8.16.3"
-  }
-}

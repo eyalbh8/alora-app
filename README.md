@@ -1,159 +1,62 @@
-# Alora (white-label analytics)
+# Alora App
 
-React + Vite + TypeScript app that renders **Alora analytics screens from the live upstream analytics API** with **Descope authentication** and **multi-tenant account switching**.
+Whitelabel analytics dashboard (GEO / traffic / crawlers).
 
-The browser never calls upstream directly. Descope JWT + `X-Alora-Tenant-Id` go to Alora’s BFF, which injects the workspace API key.
+## Monorepo layout
 
-## Screens
+```
+Alora-app/
+├── apps/
+│   ├── client/          # Vite + React 19 SPA
+│   └── server/          # NestJS + Prisma + Serverless
+├── packages/
+│   └── shared/          # @alora/shared (types + utils)
+├── docs/
+├── amplify.yml
+└── amplify-redirects.json
+```
 
-| Route | Live upstream sources |
-| --- | --- |
-| `/` Dashboard | `/ui-pages/dashboard`, `/ui-pages/dashboard/top-source-domains` |
-| `/prompts` | `/prompts`, `/prompts/responses` |
-| `/mentions` | `/prompts/responses/chart-data`, `/prompts/responses` |
-| `/sentiment` | `/findings/ai-feel`, `/findings/provider-feel`, sentiment historical + responses |
-| `/competitors` | `/market-players/page-data` |
-| `/ai-traffic` | `/traffic/{id}/ai-dashboard-data` |
-| `/ai-crawlers` | `/traffic/{id}/cloudflare/crawler-analytics` |
-
-Filters are applied **server-side** on upstream (date range, providers, topics, prompts, regions, tags, branded, prompt types).
-
-## Setup
+## Develop
 
 ```bash
-npm install
-cp .env.example .env   # fill DATABASE_URL, DESCOPE_*, and an upstream API key
-npm run dev
+# Install all workspaces
+npm ci
+
+# Terminal A — API on :3003
+npm run dev:server
+
+# Terminal B — SPA on :5173 (proxies /api → :3003)
+npm run dev:client
 ```
 
-Open http://localhost:5173. You'll be redirected to the Descope login flow.
+Copy root `.env.example` → `apps/server/.env` (and `apps/client/.env` for `VITE_*` keys).
 
-Each tenant needs an upstream key (`live_…`) bound to `whitelabel_tenants.source_account_id`. Paste the MCP URL in **Carousel → Connect**, or set `SOURCE_API_KEY` as a single-workspace fallback.
-
-### Environment Variables
-
-| Variable | Purpose |
-| --- | --- |
-| `DATABASE_URL` | **Server-only.** Postgres for users, membership, and tenant→workspace mapping. |
-| `DESCOPE_PROJECT_ID` | **Server-only.** Your Descope project ID for JWT verification. |
-| `VITE_DESCOPE_PROJECT_ID` | **Client.** Same Descope project ID, exposed to the browser for auth. |
-| `VITE_DESCOPE_FLOW_ID` | **Client.** Optional Descope flow ID (defaults to `sign-up-or-in`). |
-| `SOURCE_API_BASE` | **Server-only.** Upstream analytics API origin. |
-| `SOURCE_API_KEY` / `MCP_API_KEY` | **Server-only.** Fallback `live_` key when a tenant has no stored key. |
-| `MCP_URL` | **Server-only.** MCP endpoint for carousel (default `${SOURCE_API_BASE}/mcp`). |
-| `WHITELABEL_TENANT_ID` | **Server-only.** Used by sync/backfill scripts only (not browser requests). |
-| `ALLOWED_ORIGIN` | Lambda only — CORS allowlist (optional). |
-
-Never prefix `DATABASE_URL`, `DESCOPE_PROJECT_ID`, or upstream keys with `VITE_`.
-
-### Database Schema
-
-Apply the schemas in order:
-
-1. **Core snapshot schema** (if not already applied):
-   ```bash
-   psql "$DATABASE_URL" -f db/schema_relational_mirror.sql
-   ```
-
-2. **Auth & membership schema**:
-   ```bash
-   psql "$DATABASE_URL" -f db/schema_auth.sql
-   ```
-
-3. **Per-tenant MCP/API key column**:
-   ```bash
-   psql "$DATABASE_URL" -f db/schema_tenant_mcp.sql
-   ```
-
-### Seeding Users & Memberships
-
-After a user logs in for the first time via Descope, their record is automatically created in `wl_users`. To grant access:
-
-**Grant admin access** (can see all enabled tenants):
-```sql
-UPDATE wl_users SET is_admin = true WHERE email = 'admin@example.com';
-```
-
-**Grant specific tenant membership** (non-admins):
-```sql
-INSERT INTO wl_user_tenants (user_id, tenant_id, role)
-VALUES ('descope-user-id', 'tenant-uuid-here', 'member');
-```
-
-To find the Descope user ID after first login:
-```sql
-SELECT id, email, name, is_admin FROM wl_users WHERE email = 'user@example.com';
-```
-
-## Architecture
-
-```
-Browser → Descope JWT + X-Alora-Tenant-Id → [Vite middleware (dev) | Lambda (prod)]
-        → Postgres (membership + tenant key)
-        → SOURCE_API_BASE (Bearer live_… + X-Workspace-Id)
-```
-
-All data endpoints require:
-- **Authentication**: `Authorization: Bearer <Descope JWT>` header
-- **Tenant selection**: `X-Alora-Tenant-Id: <tenant-uuid>` header
-
-The API verifies JWT, checks user membership, then proxies live upstream reads for that tenant’s `source_account_id`.
-
-Endpoints:
-
-- `GET /api/snapshots/health` — no auth required
-- `GET /api/snapshots/accounts` — list accessible tenants
-- `GET /api/snapshots/tenant` — tenant metadata + last scan day
-- `GET /api/snapshots/geo/*` — GEO screens (dashboard, mentions, sentiment, prompts, competitors, responses)
-- `GET /api/snapshots/traffic` — AI traffic dashboard
-- `GET /api/snapshots/crawlers` — Cloudflare crawler analytics
-
-### Account Switching
-
-Users with access to multiple tenants can switch via the sidebar account switcher (under the Alora logo). On switch:
-- `selectedAccount` is updated in localStorage (`alora-selected-account`)
-- All React Query caches are invalidated
-- Data re-fetches for the new tenant
-
-Admins see all enabled tenants; non-admins see only their explicit memberships.
-
-## Deploy to Amplify
-
-### 1. Lambda snapshots API
+## Deploy server (`npm run deploy:prod`)
 
 ```bash
-cd functions/snapshots-api
-npm install --omit=dev
-zip -r snapshots-api.zip index.mjs db.mjs geo.mjs sourceClient.mjs mcpClient.mjs auth.mjs accounts.mjs package.json node_modules
+cd apps/server
+npm run deploy:prod
+# = fetch-secrets:prod → prisma:deploy:prod → ecr:login → serverless deploy --stage prod
 ```
 
-Create a Lambda (Node.js 20.x), upload the zip, set handler `index.handler`, and env:
+Prerequisites:
 
-- `DATABASE_URL`
-- `SOURCE_API_BASE`
-- `SOURCE_API_KEY` (or store per-tenant keys)
-- optional `ALLOWED_ORIGIN`
+1. Create Secrets Manager secret `alora-prod` in us-east-1 with:
+   `DATABASE_URL`, `DESCOPE_PROJECT_ID`, `SOURCE_API_BASE`, `SOURCE_API_KEY`,
+   `MCP_URL`, `MCP_API_KEY`, `ALLOWED_ORIGIN`
+2. Hand-maintain `apps/server/.env.prod.local` for `prisma migrate deploy` (may use a tunneled DB host)
+3. Docker running locally; AWS credentials via `AWS_PROFILE` (default: `default`)
+4. After first deploy, paste the Function URL into [`amplify-redirects.json`](amplify-redirects.json)
 
-Create a **Function URL** (Auth type: NONE).
+## Deploy client (Amplify)
 
-### 2. Amplify rewrites
+[`amplify.yml`](amplify.yml) builds `@alora/client` and publishes `apps/client/dist`.
 
-Paste [`amplify-redirects.json`](amplify-redirects.json), replacing `YOUR_LAMBDA_FUNCTION_URL` with the Function URL host. Keep the API rule above the SPA catch-all.
+## Auth model
 
-### 3. Amplify build
+- `Authorization: Bearer <Descope JWT>`
+- `X-Alora-Tenant-Id: <tenant-uuid>` on tenant-scoped routes
 
-[`amplify.yml`](amplify.yml) runs `npm ci` + `npm run build` and publishes `dist/`. No `VITE_` secrets are required for the snapshot UI.
+## API surface
 
-## Scripts
-
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Vite + local `/api/snapshots` middleware |
-| `npm run build` | Typecheck + production bundle |
-| `npm run lint` | oxlint |
-| `npm test` | Vitest unit tests |
-
-## Data model
-
-- `whitelabel_tenants` — tenant registry (`source_account_id` = upstream workspace, optional `mcp_api_key`)
-- `wl_users` / `wl_user_tenants` — Descope users and memberships
+- `GET /api/snapshots/*` — accounts, tenant, snapshots, traffic, crawlers, geo/*

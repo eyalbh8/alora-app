@@ -6,11 +6,12 @@ frontend:
         - npm ci
     build:
       commands:
-        - npm run build
+        - npm run build --workspace=@alora/client
   artifacts:
-    baseDirectory: dist
+    baseDirectory: apps/client/dist
     files:
       - '**/*'
   cache:
     paths:
       - node_modules/**/*
+      - apps/client/node_modules/**/*
