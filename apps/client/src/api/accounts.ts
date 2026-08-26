@@ -15,7 +15,10 @@ export async function getAccounts(): Promise<Account[]> {
 export async function createFirstAccount(connectionUrl: string): Promise<Account> {
   const token = getSessionToken()
   const headers: HeadersInit = { 'Content-Type': 'application/json' }
-  if (token) headers.Authorization = `Bearer ${token}`
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+    headers['X-Alora-Authorization'] = `Bearer ${token}`
+  }
 
   const response = await fetch(`${API_BASE_PATH}/accounts`, {
     method: 'POST',

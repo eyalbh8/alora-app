@@ -36,7 +36,7 @@
     "class-validator": "^0.14.1",
     "cross-env": "^10.0.0",
     "dotenv-cli": "^10.0.0",
-    "jose": "^6.0.10",
+    "jose": "^4.15.9",
     "lodash": "^4.17.21",
     "nestjs-zod": "^4.3.1",
     "reflect-metadata": "^0.2.2",

@@ -26,7 +26,9 @@ export class DescopeAuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<AuthRequest>();
-    const authHeader = request.headers.authorization;
+    const authHeader =
+      request.headers.authorization ||
+      (request.headers['x-alora-authorization'] as string | undefined);
 
     try {
       const claims = await this.descopeService.verifyToken(authHeader);

@@ -9,7 +9,8 @@ export async function bootstrapApp() {
     origin: '*',
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     credentials: true,
-    allowedHeaders: 'Content-Type,Authorization,X-Alora-Tenant-Id',
+    allowedHeaders:
+      'Content-Type,Authorization,X-Alora-Authorization,X-Alora-Tenant-Id',
   });
 
   await app.init();

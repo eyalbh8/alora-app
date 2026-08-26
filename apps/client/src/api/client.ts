@@ -25,6 +25,8 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     
     if (token) {
       headers.Authorization = `Bearer ${token}`
+      // Amplify Hosting strips Authorization on external rewrites; custom header is forwarded.
+      headers['X-Alora-Authorization'] = `Bearer ${token}`
     }
     
     if (selectedAccount?.id) {

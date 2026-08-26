@@ -1,7 +1,8 @@
 /**
  * Frontend config for the Alora analytics app.
- * All reads go through `/api/snapshots/*` (Vite middleware in development,
- * Lambda in production), which proxies live upstream Public API data.
- * DATABASE_URL, SOURCE_API_KEY, and SOURCE_API_BASE are server-only.
+ * Dev: Vite proxies `/api` → Nest.
+ * Prod: prefer VITE_API_BASE (Lambda Function URL) so Amplify does not strip Authorization.
+ * Falls back to `/api/snapshots` (same-origin rewrite) when unset.
  */
-export const API_BASE_PATH = '/api/snapshots'
+const configured = (import.meta.env.VITE_API_BASE as string | undefined)?.trim()
+export const API_BASE_PATH = (configured || '/api/snapshots').replace(/\/$/, '')

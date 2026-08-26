@@ -30,6 +30,16 @@ COPY --from=builder /app/apps/server/dist ./dist
 COPY --from=builder /app/apps/server/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
 
+# Workspace installs may nest deps under apps/server/node_modules (e.g. jose).
+COPY --from=builder /app/apps/server/node_modules ./_server_nm
+RUN if [ -d ./_server_nm ]; then \
+      for d in ./_server_nm/* ./_server_nm/.[!.]*; do \
+        [ -e "$d" ] || continue; \
+        name=$(basename "$d"); \
+        if [ ! -e "./node_modules/$name" ]; then cp -a "$d" "./node_modules/$name"; fi; \
+      done; \
+    fi && rm -rf ./_server_nm
+
 # Replace workspace symlink with real package files
 RUN rm -rf ./node_modules/@alora/shared
 COPY --from=builder /app/packages/shared/package.json ./node_modules/@alora/shared/package.json

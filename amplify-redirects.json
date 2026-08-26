@@ -1,7 +1,7 @@
 [
   {
     "source": "/api/snapshots/<*>",
-    "target": "https://REPLACE_AFTER_DEPLOY.lambda-url.us-east-1.on.aws/api/snapshots/<*>",
+    "target": "https://ydygktinkjgc22p6bxmwhohode0mvwri.lambda-url.us-east-1.on.aws/api/snapshots/<*>",
     "status": "200",
     "condition": null
   },
