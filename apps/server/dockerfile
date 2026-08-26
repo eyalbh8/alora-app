@@ -1,19 +1,4 @@
-# Stage 1: Production dependencies
-FROM node:22-slim AS deps
-WORKDIR /app
-
-RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
-
-ARG DATABASE_URL
-RUN test -n "$DATABASE_URL" || (echo "DATABASE_URL build arg is EMPTY" && exit 1)
-
-COPY package*.json ./
-COPY prisma ./prisma/
-
-# Install production deps (workspace root may hoist — copy lock if present)
-RUN npm ci --omit=dev || npm install --omit=dev
-
-# Stage 2: Builder
+# Build context must be the monorepo root (see serverless.yml ecr.images.path).
 FROM node:22-slim AS builder
 WORKDIR /app
 
@@ -21,24 +6,34 @@ RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists
 
 ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
+RUN test -n "$DATABASE_URL" || (echo "DATABASE_URL build arg is EMPTY" && exit 1)
 
-COPY . .
-COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json ./
+COPY packages/shared ./packages/shared
+COPY apps/server/package.json ./apps/server/
+COPY apps/client/package.json ./apps/client/
 
+# prepare scripts need shared sources present (@alora/shared runs tsc)
+RUN npm ci
+
+COPY apps/server ./apps/server
+
+WORKDIR /app/apps/server
 RUN npx prisma generate
-RUN npm run build
+RUN npx nest build
 
-# Stage 3: Lambda runtime
 FROM public.ecr.aws/lambda/nodejs:22
 
 WORKDIR ${LAMBDA_TASK_ROOT}
 
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=deps /app/node_modules/@prisma/client ./node_modules/@prisma/client
-COPY --from=deps /app/node_modules/prisma ./node_modules/prisma
-COPY --from=deps /app/node_modules ./node_modules
-COPY package*.json ./
+COPY --from=builder /app/apps/server/dist ./dist
+COPY --from=builder /app/apps/server/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
+
+# Replace workspace symlink with real package files
+RUN rm -rf ./node_modules/@alora/shared
+COPY --from=builder /app/packages/shared/package.json ./node_modules/@alora/shared/package.json
+COPY --from=builder /app/packages/shared/dist ./node_modules/@alora/shared/dist
 
 ENV NODE_ENV=production
 

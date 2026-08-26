@@ -16,6 +16,9 @@ dist-ssr
 .env
 .env.*
 !.env.example
+*accessKeys.csv
+*_accessKeys.csv
+menchly_accesskey.csv
 
 # Serverless / build artifacts
 apps/server/.serverless/

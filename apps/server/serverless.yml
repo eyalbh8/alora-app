@@ -20,8 +20,8 @@ provider:
   ecr:
     images:
       appimage:
-        path: ./
-        file: dockerfile
+        path: ../..
+        file: apps/server/dockerfile
         platform: linux/amd64
         provenance: false
         buildArgs:

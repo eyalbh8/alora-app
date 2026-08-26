@@ -16,7 +16,7 @@
     "prisma:generate": "prisma generate",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:deploy:prod": "cross-env NODE_ENV=prod dotenv -e .env.prod.local -- prisma migrate deploy",
-    "fetch-secrets:prod": "ts-node fetch-secrets.ts prod",
+    "fetch-secrets:prod": "ts-node --project tsconfig.fetch-secrets.json fetch-secrets.ts prod",
     "ecr:login": "bash ./make-ecr-login.sh",
     "deploy:prod": "npm run fetch-secrets:prod && npm run prisma:deploy:prod && npm run ecr:login && cross-env NODE_ENV=prod AWS_REGION=us-east-1 dotenv -e .env.prod -- serverless deploy --stage prod --force"
   },
