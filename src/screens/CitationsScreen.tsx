@@ -86,7 +86,7 @@ export function CitationsScreen() {
 
   const summary = list.data?.data.summary
   const domains = list.data?.data.domains ?? []
-  if (!list.data || (!summary?.totalCitations && domains.length === 0)) {
+  if (!list.data || !summary || (!summary.totalCitations && domains.length === 0)) {
     return (
       <EmptyState
         title="No citations"
