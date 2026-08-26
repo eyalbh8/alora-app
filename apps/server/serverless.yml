@@ -34,7 +34,7 @@ provider:
           Action:
             - secretsmanager:GetSecretValue
           Resource:
-            - 'arn:aws:secretsmanager:${self:provider.region}:*:secret:alora-${self:provider.stage}*'
+            - 'arn:aws:secretsmanager:${self:provider.region}:*:secret:menchly-${self:provider.stage}*'
         - Effect: Allow
           Action:
             - ecr:GetAuthorizationToken

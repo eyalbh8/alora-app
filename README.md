@@ -41,9 +41,9 @@ npm run deploy:prod
 
 Prerequisites:
 
-1. Create Secrets Manager secret `alora-prod` in us-east-1 with:
-   `DATABASE_URL`, `DESCOPE_PROJECT_ID`, `SOURCE_API_BASE`, `SOURCE_API_KEY`,
-   `MCP_URL`, `MCP_API_KEY`, `ALLOWED_ORIGIN`
+1. Create Secrets Manager secret `menchly-prod` in us-east-1 with at least:
+   `DATABASE_URL`, `DESCOPE_PROJECT_ID`
+   (optional: `SOURCE_API_BASE`, `SOURCE_API_KEY`, `MCP_URL`, `MCP_API_KEY`, `ALLOWED_ORIGIN`)
 2. Hand-maintain `apps/server/.env.prod.local` for `prisma migrate deploy` (may use a tunneled DB host)
 3. Docker running locally; AWS credentials via `AWS_PROFILE` (default: `default`)
 4. After first deploy, paste the Function URL into [`amplify-redirects.json`](amplify-redirects.json)

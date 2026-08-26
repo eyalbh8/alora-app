@@ -3,9 +3,9 @@
  * Fetch secrets from AWS Secrets Manager into .env.<stage>
  * Usage: npm run fetch-secrets:prod
  *
- * Expects secret named `alora-{stage}` in us-east-1 (override with AWS_REGION).
- * Required keys: DATABASE_URL, DESCOPE_PROJECT_ID, SOURCE_API_BASE, SOURCE_API_KEY,
- * MCP_URL, MCP_API_KEY, ALLOWED_ORIGIN
+ * Expects secret named `menchly-{stage}` in us-east-1 (override with AWS_REGION).
+ * Required keys: DATABASE_URL, DESCOPE_PROJECT_ID
+ * Optional: SOURCE_API_BASE, SOURCE_API_KEY, MCP_URL, MCP_API_KEY, ALLOWED_ORIGIN
  */
 import {
   SecretsManagerClient,
@@ -15,7 +15,7 @@ import fs from 'fs';
 import path from 'path';
 
 const stage = process.env.STAGE || process.argv[2] || 'prod';
-const secretName = `alora-${stage}`;
+const secretName = `menchly-${stage}`;
 const region = process.env.AWS_REGION || 'us-east-1';
 
 async function fetchSecrets() {
