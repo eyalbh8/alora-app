@@ -45,11 +45,20 @@ export function brandDomain(row: BrandLogoSource): string | null {
   return KNOWN_BRAND_DOMAINS[trimmed.toLowerCase()] ?? null
 }
 
+/** Second-level labels that only ever appear inside a public suffix (e.g. `com.cy`, `co.uk`). */
+const PUBLIC_SUFFIX_LABELS = new Set(['com', 'co', 'net', 'org', 'gov', 'edu', 'ac', 'or', 'ne', 'gob'])
+
+function isPublicSuffix(host: string): boolean {
+  const parts = host.split('.')
+  return parts.length === 2 && PUBLIC_SUFFIX_LABELS.has(parts[0])
+}
+
 function parentHosts(host: string): string[] {
   const parts = host.split('.').filter(Boolean)
   const out: string[] = []
   for (let i = 1; i < parts.length - 1; i++) {
-    out.push(parts.slice(i).join('.'))
+    const parent = parts.slice(i).join('.')
+    if (!isPublicSuffix(parent)) out.push(parent)
   }
   return out
 }
@@ -89,11 +98,10 @@ export function brandLogoCandidates(row: BrandLogoSource, meta?: BrandLogoMeta |
     domain: row.domain || meta?.domain,
     site: row.site || meta?.site,
   })
-  const hosts = domain ? [domain, ...parentHosts(domain)] : []
-  add(logoDevUrl({ domain, name: row.name }))
+  const hosts = domain && !isPublicSuffix(domain) ? [domain, ...parentHosts(domain)] : []
+  add(logoDevUrl({ domain: hosts[0] ?? null, name: row.name }))
   for (const host of hosts) {
     add(logoDevUrl({ domain: host }))
-    add(`https://logo.clearbit.com/${host}`)
   }
   for (const host of hosts) {
     add(`https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128`)
