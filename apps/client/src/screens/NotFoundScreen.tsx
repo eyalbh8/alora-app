@@ -6,7 +6,7 @@ export function NotFoundScreen() {
       <div>
         <p className="eyebrow">404 — page not found</p>
         <h1>This page is not here.</h1>
-        <p>The route you requested does not exist in Alora. Return to the dashboard or open another screen.</p>
+        <p>The route you requested does not exist in Menchly. Return to the dashboard or open another screen.</p>
         <div className="placeholder-page__actions">
           <Link to="/" className="button button--primary">
             <span>Back to dashboard</span>

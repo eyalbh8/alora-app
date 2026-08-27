@@ -14,14 +14,14 @@ export type PillTone =
 
 const TONE_CLASSES: Record<PillTone, string> = {
   grey: 'text-muted-dark',
-  blue: 'text-muted',
-  green: 'text-accent',
-  orange: 'text-muted',
+  blue: 'text-accent',
+  green: 'text-accent-bright',
+  orange: 'text-accent-mid',
   red: 'text-error',
-  purple: 'text-muted',
+  purple: 'text-ink',
   yellow: 'text-muted',
-  pink: 'text-muted',
-  teal: 'text-accent',
+  pink: 'text-ink-soft',
+  teal: 'text-accent-bright',
   coral: 'text-error',
 }
 

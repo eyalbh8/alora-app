@@ -2,26 +2,26 @@ import { PROVIDER_ORDER } from '../dashboard/constants'
 
 /** Provider palette used by the Mentions summary and trend chart. */
 export const MENTIONS_PROVIDER_COLORS: Record<string, string> = {
-  OPENAI: '#14201a',
-  CHATGPT: '#14201a',
-  CHAT_GPT: '#14201a',
-  GPT: '#14201a',
-  PERPLEXITY: '#1a8a4a',
-  GEMINI: '#5c8f8a',
-  BD_GOOGLE_AI_MODE: '#2ec37a',
-  GOOGLE_AI_MODE: '#2ec37a',
-  GOOGLE_AI_OVERVIEW: '#2a3830',
-  ANTHROPIC: '#7a857e',
-  CLAUDE: '#7a857e',
-  GROK: '#cfe8d6',
-  BD_COPILOT: '#5c8f8a',
-  COPILOT: '#5c8f8a',
-  MICROSOFT_COPILOT: '#5c8f8a',
+  OPENAI: '#07080c',
+  CHATGPT: '#07080c',
+  CHAT_GPT: '#07080c',
+  GPT: '#07080c',
+  PERPLEXITY: '#2d4f9e',
+  GEMINI: '#6f8fd8',
+  BD_GOOGLE_AI_MODE: '#8ca6e0',
+  GOOGLE_AI_MODE: '#8ca6e0',
+  GOOGLE_AI_OVERVIEW: '#4d5568',
+  ANTHROPIC: '#6b7488',
+  CLAUDE: '#6b7488',
+  GROK: '#bfcdf0',
+  BD_COPILOT: '#8ca6e0',
+  COPILOT: '#8ca6e0',
+  MICROSOFT_COPILOT: '#8ca6e0',
 }
 
 export function mentionsProviderColor(provider: string): string {
   const key = provider.toUpperCase().replace(/\s+/g, '_')
-  return MENTIONS_PROVIDER_COLORS[key] ?? '#7a857e'
+  return MENTIONS_PROVIDER_COLORS[key] ?? '#6b7488'
 }
 
 /** Providers shown in mention charts, in display order. */

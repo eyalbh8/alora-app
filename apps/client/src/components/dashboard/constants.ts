@@ -21,15 +21,15 @@ export const PROVIDER_ORDER = [
 ] as const
 
 export const CHART_COLORS = [
-  '#1a8a4a',
-  '#14201a',
-  '#5c8f8a',
-  '#2ec37a',
-  '#cfe8d6',
-  '#7a857e',
-  '#2a3830',
-  '#e8f6c8',
+  '#2d4f9e',
+  '#6f8fd8',
+  '#8ca6e0',
+  '#07080c',
+  '#bfcdf0',
+  '#4d5568',
+  '#d4d8f6',
+  '#6b7488',
 ]
 
-export const CHART_GRID = 'rgba(20, 32, 26, 0.08)'
-export const CHART_AXIS = '#7a857e'
+export const CHART_GRID = 'rgba(45, 79, 158, 0.1)'
+export const CHART_AXIS = '#6b7488'

@@ -12,7 +12,7 @@ describe('buildAccountBrief', () => {
     const competitors: CompetitorPerformance[] = [
       {
         id: 'account',
-        name: 'Alora client',
+        name: 'Menchly client',
         isAccount: true,
         position: 1,
         occurrences: 40,
@@ -42,7 +42,7 @@ describe('buildAccountBrief', () => {
     const competitors: CompetitorPerformance[] = [
       {
         id: 'account',
-        name: 'Alora client',
+        name: 'Menchly client',
         isAccount: true,
         position: 4,
         occurrences: 20,

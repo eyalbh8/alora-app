@@ -165,7 +165,7 @@ export function CitationUrlDrawer({ row, onClose }: CitationUrlDrawerProps) {
                         <Line
                           type="monotone"
                           dataKey="count"
-                          stroke="#14201a"
+                          stroke="#2d4f9e"
                           strokeWidth={1.8}
                           dot={false}
                           activeDot={{ r: 3, strokeWidth: 0 }}

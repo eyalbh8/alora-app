@@ -1,7 +1,7 @@
 {
   "name": "@alora/server",
   "version": "0.0.1",
-  "description": "Alora NestJS API server",
+  "description": "Menchly NestJS API server",
   "author": "",
   "private": true,
   "license": "UNLICENSED",

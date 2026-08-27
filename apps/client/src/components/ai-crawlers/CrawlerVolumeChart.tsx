@@ -11,6 +11,7 @@ import {
 import { daysInRange, shortDateLabel, type DateRange } from '../../lib/dates'
 import { formatNumber } from '../../lib/format'
 import { CHART_AXIS, CHART_GRID } from '../dashboard/constants'
+import { CRAWLER_BAR_COLORS } from './constants'
 
 interface CrawlerVolumeChartProps {
   chartRows: Array<{ date: string; rawDate: string; value: number }>
@@ -78,14 +79,14 @@ function ChartBody({
             }}
             contentStyle={{
               background: '#ffffff',
-              color: '#14201a',
+              color: '#07080c',
               border: `1px solid ${CHART_GRID}`,
               borderRadius: 12,
               fontSize: 12,
             }}
-            cursor={{ fill: 'rgba(26, 138, 74, 0.12)' }}
+            cursor={{ fill: 'rgba(45, 79, 158, 0.12)' }}
           />
-          <Bar dataKey="value" fill="#1a8a4a" maxBarSize={56} radius={[6, 6, 0, 0]} />
+          <Bar dataKey="value" fill={CRAWLER_BAR_COLORS.primary} maxBarSize={56} radius={[6, 6, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

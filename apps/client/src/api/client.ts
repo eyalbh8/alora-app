@@ -36,7 +36,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     response = await fetch(`${API_BASE_PATH}${path}`, { ...init, headers })
   } catch (err) {
     throw new SnapshotApiError(
-      `Network error calling Alora API: ${err instanceof Error ? err.message : String(err)}. Is the dev server running?`,
+      `Network error calling Menchly API: ${err instanceof Error ? err.message : String(err)}. Is the dev server running?`,
     )
   }
 

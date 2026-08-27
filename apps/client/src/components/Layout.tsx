@@ -91,9 +91,9 @@ export function Layout() {
 
       <aside className={`app-sidebar ${navOpen ? "is-open" : ""}`}>
         <div className="mb-5 flex items-start justify-between gap-3 px-1">
-          <Link className="brand" to="/" aria-label="Alora, home">
+          <Link className="brand" to="/" aria-label="Menchly, home">
             <BrandMark />
-            <span className="brand__name">Alora</span>
+            <span className="brand__name">Menchly</span>
           </Link>
           <button
             type="button"
@@ -119,15 +119,6 @@ export function Layout() {
                 end={item.end}
                 className={({ isActive }) =>
                   isActive ? "is-active" : undefined
-                }
-                style={({ isActive }) =>
-                  isActive
-                    ? {
-                        color: "#6b746e",
-                        background: "#e6e9e6",
-                        fontWeight: 500,
-                      }
-                    : undefined
                 }
                 onClick={() => setNavOpen(false)}
               >
@@ -157,9 +148,9 @@ export function Layout() {
             <span className="sr-only">Open navigation</span>
             <span aria-hidden="true">Menu</span>
           </button>
-          <Link className="brand" to="/" aria-label="Alora, home">
+          <Link className="brand" to="/" aria-label="Menchly, home">
             <BrandMark />
-            <span className="brand__name">Alora</span>
+            <span className="brand__name">Menchly</span>
           </Link>
         </header>
 

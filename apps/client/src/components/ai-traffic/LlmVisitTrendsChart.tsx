@@ -61,7 +61,7 @@ function ChartBody({
     <div className={`relative ${expanded ? 'h-[480px]' : 'h-[220px] sm:h-[280px]'}`}>
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <span className="select-none font-display text-5xl font-semibold tracking-tight text-ink-ghost">
-          Alora
+          Menchly
         </span>
       </div>
       <ResponsiveContainer width="100%" height="100%">

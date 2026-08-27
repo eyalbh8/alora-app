@@ -1,11 +1,11 @@
-# Alora App
+# Menchly App
 
 Whitelabel analytics dashboard (GEO / traffic / crawlers).
 
 ## Monorepo layout
 
 ```
-Alora-app/
+Menchly-app/
 ├── apps/
 │   ├── client/          # Vite + React 19 SPA
 │   └── server/          # NestJS + Prisma + Serverless

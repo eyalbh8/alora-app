@@ -31,13 +31,13 @@ export function FirstAccountSetup() {
       <div className="w-full max-w-xl rounded-xl border border-line bg-surface p-8 shadow-hover">
         <div className="mb-6 flex items-center gap-2.5">
           <BrandMark />
-          <span className="brand__name">Alora</span>
+          <span className="brand__name">Menchly</span>
         </div>
         <p className="eyebrow">First-time setup</p>
         <h1 className="screen-title">Connect your first account</h1>
         <p className="mt-4 text-[15px] leading-[1.7] text-muted">
           You&apos;re signed in. Paste the workspace MCP URL. We&apos;ll save the
-          API key and workspace id on your first Alora account.
+          API key and workspace id on your first Menchly account.
         </p>
 
         <form onSubmit={handleSave} className="mt-8 flex flex-col gap-4">

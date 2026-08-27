@@ -38,7 +38,7 @@ export const useAccountStore = create<AccountStore>()(
       },
     }),
     {
-      name: 'alora-selected-account',
+      name: 'menchly-selected-account',
     }
   )
 )

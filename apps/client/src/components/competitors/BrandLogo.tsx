@@ -63,7 +63,7 @@ export function BrandLogo({
   const sizeClass = SIZE_CLASS[size]
   const textClass = TEXT_CLASS[size]
   const imageClass = badge
-    ? 'rounded-full border border-line bg-surface p-1.5 shadow-[0_2px_10px_rgba(15,23,42,0.08)] ring-2 ring-white'
+    ? 'rounded-full border border-line bg-surface p-1.5 shadow-[0_2px_10px_rgba(45,79,158,0.1)] ring-2 ring-white'
     : shape === 'rounded'
       ? 'rounded-md bg-surface object-contain p-0.5 ring-1 ring-line'
       : 'rounded-full bg-surface object-cover'

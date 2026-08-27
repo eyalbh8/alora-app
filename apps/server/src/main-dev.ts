@@ -5,7 +5,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3003;
   await app.listen(port);
-  console.log(`Alora server running on: http://localhost:${port}`);
+  console.log(`Menchly server running on: http://localhost:${port}`);
 }
 
 void bootstrap();

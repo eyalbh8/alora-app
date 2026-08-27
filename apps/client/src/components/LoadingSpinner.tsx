@@ -14,7 +14,7 @@ export function LoadingSpinner({ label = 'Loading…' }: { label?: string }) {
   )
 }
 
-/** Grey shimmer block used in skeleton layouts. */
+/** Shimmer block used in skeleton layouts — tinted for contrast on the Menchly paper background. */
 export function Skeleton({
   className = '',
   style,
@@ -22,7 +22,7 @@ export function Skeleton({
   className?: string
   style?: React.CSSProperties
 }) {
-  return <div className={`animate-pulse rounded-md bg-paper-soft ${className}`} style={style} />
+  return <div className={`skeleton ${className}`} style={style} />
 }
 
 export function ChartSkeleton() {

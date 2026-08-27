@@ -9,7 +9,7 @@ export function CurrentSentimentScore({ score }: CurrentSentimentScoreProps) {
   const value = score != null && !Number.isNaN(score) ? Math.min(100, Math.max(0, Math.round(score))) : null
   const ringBackground =
     value == null
-      ? 'rgba(17, 17, 17, 0.12)'
+      ? 'rgba(45, 79, 158, 0.14)'
       : `conic-gradient(${SENTIMENT_TEAL} 0% ${value}%, ${SENTIMENT_TEAL_LIGHT} ${value}% 100%)`
 
   return (

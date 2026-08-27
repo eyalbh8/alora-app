@@ -5,9 +5,7 @@ import {
   AnalyticsFiltersProvider,
   type FilterBarVariant,
 } from '../context/AnalyticsFiltersContext'
-import { useGeoMeta } from '../context/GeoMetaContext'
 import { ScreenSubheaderProvider } from '../context/ScreenSubheaderContext'
-import { Skeleton } from '../components/LoadingSpinner'
 
 function ScreenTitle({ title }: { title: string }) {
   return <h1 className="screen-title">{title}</h1>
@@ -20,11 +18,7 @@ function ScreenChrome({
   title: string
   variant: FilterBarVariant
 }) {
-  const { loading: geoMetaLoading } = useGeoMeta()
   const [subheader, setSubheader] = useState<ReactNode>(null)
-
-  const isGeoVariant = variant === 'geo'
-  const showLoadingChrome = isGeoVariant && geoMetaLoading
   const isCrawlerVariant = variant === 'crawlers'
 
   return (
@@ -33,14 +27,8 @@ function ScreenChrome({
         <ScreenTitle title={title} />
         {subheader}
         <FilterBar variant={variant} />
-        {showLoadingChrome ? (
-          <div className="flex flex-col gap-3">
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-64 w-full" />
-          </div>
-        ) : (
-          <Outlet />
-        )}
+        {/* Screen-specific skeletons handle pending (incl. geo-meta) via useGeoScreenData. */}
+        <Outlet />
       </div>
     </ScreenSubheaderProvider>
   )

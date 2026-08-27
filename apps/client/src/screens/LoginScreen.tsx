@@ -30,7 +30,7 @@ export function LoginScreen() {
         <div className="mb-8">
           <div className="mb-6 flex items-center gap-2.5">
             <BrandMark />
-            <span className="brand__name">Alora</span>
+            <span className="brand__name">Menchly</span>
           </div>
           <h1 className="screen-title">Sign in</h1>
         </div>

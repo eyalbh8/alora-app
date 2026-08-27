@@ -2,6 +2,6 @@
 export const AI_CRAWLERS_CHART_HEIGHT = '420px'
 
 export const CRAWLER_BAR_COLORS = {
-  primary: '#1a8a4a',
-  alternate: 'rgba(20, 32, 26, 0.08)',
+  primary: '#2d4f9e',
+  alternate: 'rgba(45, 79, 158, 0.14)',
 } as const
