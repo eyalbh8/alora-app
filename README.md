@@ -35,9 +35,15 @@ Copy root `.env.example` → `apps/server/.env` (and `apps/client/.env` for `VIT
 
 ```bash
 cd apps/server
-npm run deploy:prod
+AWS_PROFILE=menchly npm run deploy:prod
 # = fetch-secrets:prod → prisma:deploy:prod → ecr:login → serverless deploy --stage prod
 ```
+
+Produces:
+
+- CloudFormation stack: `menchly-api-prod`
+- Lambda: `menchly-prod-api` (Docker image, handler `dist/lambda.handler`)
+- Function URL (paste into Amplify rewrites + `VITE_API_BASE` after first deploy)
 
 Prerequisites:
 
@@ -45,8 +51,8 @@ Prerequisites:
    `DATABASE_URL`, `DESCOPE_PROJECT_ID`
    (optional: `SOURCE_API_BASE`, `SOURCE_API_KEY`, `MCP_URL`, `MCP_API_KEY`, `ALLOWED_ORIGIN`)
 2. Hand-maintain `apps/server/.env.prod.local` for `prisma migrate deploy` (may use a tunneled DB host)
-3. Docker running locally; AWS credentials via `AWS_PROFILE` (default: `default`)
-4. After first deploy, paste the Function URL into [`amplify-redirects.json`](amplify-redirects.json)
+3. Docker running locally; AWS credentials via `AWS_PROFILE=menchly`
+4. After first deploy, paste the Function URL into [`amplify-redirects.json`](amplify-redirects.json) and Amplify Hosting rewrites / `VITE_API_BASE`
 
 ## Deploy client (Amplify)
 

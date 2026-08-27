@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ECR login for Alora server deploys (us-east-1 by default).
+# ECR login for Menchly server deploys (us-east-1 by default).
 set -euo pipefail
 
 AWS_PROFILE="${AWS_PROFILE:-default}"

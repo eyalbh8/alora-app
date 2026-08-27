@@ -1,4 +1,4 @@
-service: alora-api
+service: menchly-api
 
 provider:
   name: aws
@@ -58,7 +58,7 @@ package:
 
 functions:
   api:
-    name: ${self:service}-${self:provider.stage}-api
+    name: menchly-${self:provider.stage}-api
     image:
       name: appimage
       command:
