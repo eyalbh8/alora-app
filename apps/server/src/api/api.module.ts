@@ -11,9 +11,10 @@ import { AccountsService } from './services/accounts.service';
 import { GeoService } from './services/geo.service';
 import { SnapshotsService } from './services/snapshots.service';
 import { SourceApiService } from './services/source-api.service';
+import { DailyContentModule } from './services/daily-content/daily-content.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, ConfigModule, CommonModule],
+  imports: [PrismaModule, AuthModule, ConfigModule, CommonModule, DailyContentModule],
   controllers: [
     AccountsController,
     TenantController,

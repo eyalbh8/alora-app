@@ -9,22 +9,26 @@ import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Activity,
   Bot,
+  CalendarClock,
   Heart,
   LayoutDashboard,
   Link2,
   MessageSquareText,
+  Newspaper,
   Quote,
   Store,
   Users,
 } from "lucide-react";
 import { AccountSwitcher } from "./AccountSwitcher";
 import { MenchlyLogo } from "./MenchlyLogo";
+import { useIsAdmin } from "../hooks/useCurrentUser";
 
 const NAV: Array<{
   to: string;
   label: string;
   end?: boolean;
   icon: ComponentType<SVGProps<SVGSVGElement>>;
+  adminOnly?: boolean;
 }> = [
   { to: "/", label: "Dashboard", end: true, icon: LayoutDashboard },
   { to: "/prompts", label: "Prompts", icon: MessageSquareText },
@@ -33,6 +37,13 @@ const NAV: Array<{
   { to: "/sentiment", label: "Sentiment", icon: Heart },
   { to: "/competitors", label: "Competitors", icon: Users },
   { to: "/marketplace", label: "Marketplace", icon: Store },
+  { to: "/content", label: "Content", icon: Newspaper },
+  {
+    to: "/daily-automation",
+    label: "Daily automation",
+    icon: CalendarClock,
+    adminOnly: true,
+  },
   { to: "/ai-traffic", label: "AI Traffic", icon: Activity },
   { to: "/ai-crawlers", label: "AI Crawlers", icon: Bot },
 ];
@@ -49,6 +60,8 @@ export function Layout() {
   const { pathname } = useLocation();
   const [navOpen, setNavOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const isAdmin = useIsAdmin();
+  const navItems = NAV.filter((item) => !item.adminOnly || isAdmin);
 
   useEffect(() => {
     setNavOpen(false);
@@ -115,7 +128,7 @@ export function Layout() {
         </div>
 
         <nav className="app-sidebar__links" aria-label="Primary navigation">
-          {NAV.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink

@@ -3,12 +3,15 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from '@descope/react-sdk'
 import { Layout } from './components/Layout'
 import { AuthGuard } from './components/AuthGuard'
+import { AdminOnly } from './components/AdminOnly'
 import { GeoMetaProvider } from './context/GeoMetaContext'
 import { SnapshotProvider } from './context/SnapshotContext'
 import { createQueryClient } from './lib/queryClient'
 import { AiCrawlersScreen } from './screens/AiCrawlersScreen'
 import { AiTrafficScreen } from './screens/AiTrafficScreen'
 import { CompetitorsScreen } from './screens/CompetitorsScreen'
+import { ContentScreen } from './screens/ContentScreen'
+import { DailyAutomationScreen } from './screens/DailyAutomationScreen'
 import { DashboardScreen } from './screens/DashboardScreen'
 import { LoginScreen } from './screens/LoginScreen'
 import { CitationsScreen } from './screens/CitationsScreen'
@@ -65,6 +68,15 @@ export default function App() {
                               <Route path="/marketplace" element={<MarketplaceScreen />} />
                             </Route>
                           </Route>
+                          <Route path="/content" element={<ContentScreen />} />
+                          <Route
+                            path="/daily-automation"
+                            element={
+                              <AdminOnly>
+                                <DailyAutomationScreen />
+                              </AdminOnly>
+                            }
+                          />
                           <Route element={<AnalyticsScreenLayout title="AI Traffic" variant="traffic" />}>
                             <Route path="/ai-traffic" element={<AiTrafficScreen />} />
                           </Route>

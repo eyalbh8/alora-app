@@ -8,6 +8,18 @@ import { rethrowAsHttp } from '../utils/http-error';
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) {}
 
+  @Get('me')
+  getMe(@CurrentUser() user: AuthUser) {
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        isAdmin: user.isAdmin,
+      },
+    };
+  }
+
   @Get('accounts')
   async listAccounts(@CurrentUser() user: AuthUser) {
     try {

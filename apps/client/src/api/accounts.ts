@@ -7,6 +7,18 @@ export interface AccountsResponse {
   accounts: Account[]
 }
 
+export type CurrentUser = {
+  id: string
+  email: string
+  name: string | null
+  isAdmin: boolean
+}
+
+export async function getMe(): Promise<CurrentUser> {
+  const response = await apiGet<{ user: CurrentUser }>('/me')
+  return response.user
+}
+
 export async function getAccounts(): Promise<Account[]> {
   const response = await apiGet<AccountsResponse>('/accounts')
   return response.accounts

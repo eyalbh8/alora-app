@@ -2,9 +2,25 @@ import type { GeoFilters } from './types'
 
 export const queryKeys = {
   accounts: ['accounts'] as const,
+  me: ['me'] as const,
   tenant: (accountId?: string) => ['tenant', accountId] as const,
   snapshots: (accountId: string | undefined, start: string, end: string) =>
     ['snapshots', accountId, start, end] as const,
+  dailyContent: {
+    runs: (accountId?: string, take?: number) =>
+      ['dailyContent', 'runs', accountId, take] as const,
+    days: (accountId?: string, take?: number) =>
+      ['dailyContent', 'days', accountId, take] as const,
+    dayPosts: (accountId: string | undefined, date: string) =>
+      ['dailyContent', 'dayPosts', accountId, date] as const,
+    runPosts: (accountId: string | undefined, runId: string) =>
+      ['dailyContent', 'runPosts', accountId, runId] as const,
+    settings: (accountId?: string) => ['dailyContent', 'settings', accountId] as const,
+    publishTargets: (accountId?: string) =>
+      ['dailyContent', 'publishTargets', accountId] as const,
+    blogSiteCategories: (accountId: string | undefined, siteId: string) =>
+      ['dailyContent', 'blogSiteCategories', accountId, siteId] as const,
+  },
   geo: {
     meta: (accountId?: string) => ['geo', 'meta', accountId] as const,
     dashboard: (accountId: string | undefined, filters: GeoFilters) =>

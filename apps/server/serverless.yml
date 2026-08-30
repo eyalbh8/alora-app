@@ -14,6 +14,10 @@ provider:
     SOURCE_API_KEY: ${env:SOURCE_API_KEY, ''}
     MCP_URL: ${env:MCP_URL, ''}
     MCP_API_KEY: ${env:MCP_API_KEY, ''}
+    OPENAI_API_KEY: ${env:OPENAI_API_KEY, ''}
+    ANTHROPIC_API_KEY: ${env:ANTHROPIC_API_KEY, ''}
+    DAILY_CONTENT_LLM_MODEL: ${env:DAILY_CONTENT_LLM_MODEL, 'gpt-4o-mini'}
+    DAILY_CONTENT_OPTIMIZER_FUNCTION: menchly-${self:provider.stage}-daily-content-optimizer
     ALLOWED_ORIGIN: ${env:ALLOWED_ORIGIN, '*'}
     AWS_LAMBDA_NODEJS_DISABLE_CALLBACK_WARNING: 1
 
@@ -42,6 +46,11 @@ provider:
             - ecr:GetDownloadUrlForLayer
             - ecr:BatchGetImage
           Resource: '*'
+        - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+          Resource:
+            - 'arn:aws:lambda:${self:provider.region}:*:function:menchly-${self:provider.stage}-daily-content-optimizer'
 
 package:
   individually: true
@@ -78,6 +87,25 @@ functions:
     environment:
       NODE_ENV: ${self:provider.stage}
 
+  dailyContentScheduler:
+    name: menchly-${self:provider.stage}-daily-content-scheduler
+    image:
+      name: appimage
+      command:
+        - dist/lambdas/daily-content-scheduler-lambda.handler
+    timeout: 120
+    memorySize: 1024
+    events: ${self:custom.dailyContentScheduleEvents.${self:provider.stage}, []}
+
+  dailyContentOptimizer:
+    name: menchly-${self:provider.stage}-daily-content-optimizer
+    image:
+      name: appimage
+      command:
+        - dist/lambdas/daily-content-optimizer-lambda.handler
+    timeout: 900
+    memorySize: 2048
+
 plugins:
   - serverless-offline
 
@@ -88,3 +116,9 @@ custom:
     noPrependStageInUrl: true
     noTimeout: true
     useInProcess: true
+  dailyContentScheduleEvents:
+    prod:
+      - schedule:
+          rate: cron(*/5 * * * ? *)
+          enabled: true
+    dev: []

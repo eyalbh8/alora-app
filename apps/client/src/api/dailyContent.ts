@@ -1,0 +1,175 @@
+import { apiGet, apiSend } from './client'
+
+export type PlatformRunStatus = 'PENDING' | 'GENERATED' | 'OPTIMIZED' | 'FAILED'
+
+export type PlatformState = {
+  generationId?: string | null
+  postIds: string[]
+  selectedPostId?: string | null
+  discardedPostIds: string[]
+  status: PlatformRunStatus
+  error?: string | null
+}
+
+export type DailyContentRun = {
+  id: string
+  tenantId: string
+  localDate: string
+  status: string
+  skipReason: string | null
+  promptId: string | null
+  promptText: string | null
+  topicId: string | null
+  selectionRationale: string | null
+  visibilityAtSelection: number | null
+  lastContentAt: string | null
+  platforms: Partial<Record<string, PlatformState>>
+  error: string | null
+  startedAt: string
+  completedAt: string | null
+}
+
+export type DailyContentSettings = {
+  dailyContentAutomation: boolean
+  dailyContentTimezone: string
+  dailyContentHour: number
+}
+
+export type DailyContentPost = {
+  platform: string
+  postId: string
+  generationId: string | null
+  title: string | null
+  body: string | null
+  state: string | null
+  slug: string | null
+  metaTitle: string | null
+  metaDescription: string | null
+  focusKeyphrase: string | null
+  createdAt: string | null
+  selected: boolean
+  imagesUrl: string[]
+  tags: string[]
+  topic: string | null
+  readTime: number | null
+  publishAt: string | null
+  isPublished: boolean
+}
+
+export type DailyContentRunPosts = {
+  run: {
+    id: string
+    localDate: string
+    status: string
+    promptText: string | null
+    selectionRationale: string | null
+  } | null
+  posts: DailyContentPost[]
+}
+
+export type DailyContentDay = {
+  localDate: string
+  runId: string
+  status: string
+  promptText: string | null
+  completedAt: string | null
+}
+
+export type DailyContentPostPatch = {
+  body?: string
+  title?: string
+  tags?: string[]
+  focusKeyphrase?: string
+  metaDescription?: string
+  slug?: string
+  publishAt?: string | null
+  removeImages?: boolean
+  state?: string
+}
+
+export type DailyContentPublishTargets = {
+  connected: Record<string, boolean>
+  statuses: Record<string, unknown>
+  blogSites: Array<{ id: string; name: string; url?: string | null }>
+}
+
+export type BlogSiteCategory = {
+  id: number
+  name: string
+  parent: number
+}
+
+export async function getDailyContentRuns(take = 30): Promise<DailyContentRun[]> {
+  const res = await apiGet<{ runs: DailyContentRun[] }>(`/daily-content/runs?take=${take}`)
+  return res.runs
+}
+
+export async function getDailyContentDays(take = 60): Promise<DailyContentDay[]> {
+  const res = await apiGet<{ days: DailyContentDay[] }>(`/daily-content/days?take=${take}`)
+  return res.days
+}
+
+export async function getDailyContentDayPosts(date: string): Promise<DailyContentRunPosts> {
+  return apiGet<DailyContentRunPosts>(
+    `/daily-content/days/${encodeURIComponent(date)}/posts`,
+  )
+}
+
+export async function getDailyContentRunPosts(runId: string): Promise<DailyContentRunPosts> {
+  return apiGet<DailyContentRunPosts>(`/daily-content/runs/${encodeURIComponent(runId)}/posts`)
+}
+
+export async function updateDailyContentPost(
+  runId: string,
+  postId: string,
+  patch: DailyContentPostPatch,
+): Promise<DailyContentPost> {
+  const res = await apiSend<{ post: DailyContentPost }>(
+    `/daily-content/runs/${encodeURIComponent(runId)}/posts/${encodeURIComponent(postId)}`,
+    'PATCH',
+    patch,
+  )
+  return res.post
+}
+
+export async function publishDailyContentPost(
+  runId: string,
+  postId: string,
+  options: {
+    siteIds?: string[]
+    categoryBySite?: Record<string, number>
+  } = {},
+): Promise<{ ok: boolean; provider: string; postId: string }> {
+  return apiSend(
+    `/daily-content/runs/${encodeURIComponent(runId)}/posts/${encodeURIComponent(postId)}/publish`,
+    'POST',
+    options,
+  )
+}
+
+export async function getDailyContentPublishTargets(): Promise<DailyContentPublishTargets> {
+  return apiGet<DailyContentPublishTargets>('/daily-content/publish-targets')
+}
+
+export async function getBlogSiteCategories(siteId: string): Promise<BlogSiteCategory[]> {
+  const res = await apiGet<{ categories: BlogSiteCategory[] }>(
+    `/daily-content/blog-sites/${encodeURIComponent(siteId)}/categories`,
+  )
+  return res.categories
+}
+
+export async function getDailyContentSettings(): Promise<DailyContentSettings> {
+  const res = await apiGet<{ settings: DailyContentSettings }>('/daily-content/settings')
+  return res.settings
+}
+
+export async function updateDailyContentSettings(
+  patch: Partial<DailyContentSettings>,
+): Promise<DailyContentSettings> {
+  const res = await apiSend<{ settings: DailyContentSettings }>(
+    '/daily-content/settings',
+    'PATCH',
+    patch,
+  )
+  return res.settings
+}

@@ -38,16 +38,45 @@ model WlUserTenant {
 
 /// Workspace row: SOURCE account mapping, MCP key, and brand display fields.
 model WhitelabelTenant {
-  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  source_account_id String         @unique @db.Uuid
-  name              String?
-  domain            String?
-  domains           String[]       @default([])
-  logo              String?
-  enabled           Boolean        @default(true)
-  created_at        DateTime       @default(now()) @db.Timestamptz(6)
-  mcp_api_key       String?
-  users             WlUserTenant[]
+  id                     String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  source_account_id      String            @unique @db.Uuid
+  name                   String?
+  domain                 String?
+  domains                String[]          @default([])
+  logo                   String?
+  enabled                Boolean           @default(true)
+  created_at             DateTime          @default(now()) @db.Timestamptz(6)
+  mcp_api_key            String?
+  dailyContentAutomation Boolean           @default(false) @map("daily_content_automation")
+  dailyContentTimezone   String            @default("Asia/Nicosia") @map("daily_content_timezone")
+  dailyContentHour       Int               @default(5) @map("daily_content_hour")
+  users                  WlUserTenant[]
+  dailyContentRuns       DailyContentRun[]
 
   @@map("whitelabel_tenants")
+}
+
+/// One daily automation run per tenant per local calendar day.
+model DailyContentRun {
+  id                    String    @id @default(uuid()) @db.Uuid
+  tenantId              String    @map("tenant_id") @db.Uuid
+  localDate             String    @map("local_date")
+  status                String    @default("GENERATING")
+  skipReason            String?   @map("skip_reason")
+  promptId              String?   @map("prompt_id") @db.Uuid
+  promptText            String?   @map("prompt_text")
+  topicId               String?   @map("topic_id") @db.Uuid
+  selectionRationale    String?   @map("selection_rationale")
+  visibilityAtSelection Int?      @map("visibility_at_selection")
+  lastContentAt         DateTime? @map("last_content_at") @db.Timestamptz(3)
+  platforms             Json      @default("{}")
+  error                 String?
+  startedAt             DateTime  @default(now()) @map("started_at") @db.Timestamptz(3)
+  completedAt           DateTime? @map("completed_at") @db.Timestamptz(3)
+
+  tenant WhitelabelTenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, localDate])
+  @@index([status])
+  @@map("daily_content_runs")
 }

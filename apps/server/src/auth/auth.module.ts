@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '../config/config.module';
 import { ConfigService } from '../config/config.service';
+import { AdminGuard } from './admin.guard';
 import { DescopeAuthGuard } from './descope.auth.guard';
 import { DescopeService } from './descope.service';
 import { TenantGuard } from './tenant.guard';
@@ -13,6 +14,7 @@ import { TenantGuard } from './tenant.guard';
     DescopeService,
     DescopeAuthGuard,
     TenantGuard,
+    AdminGuard,
     // Global auth; routes marked @Public() are skipped.
     // TenantGuard is NOT global — apply per-controller when tenant scoping is required.
     {
@@ -20,6 +22,6 @@ import { TenantGuard } from './tenant.guard';
       useClass: DescopeAuthGuard,
     },
   ],
-  exports: [DescopeService, DescopeAuthGuard, TenantGuard],
+  exports: [DescopeService, DescopeAuthGuard, TenantGuard, AdminGuard],
 })
 export class AuthModule {}

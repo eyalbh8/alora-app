@@ -49,6 +49,14 @@ export class ConfigService {
     return this.optionalTrimmed('MCP_API_KEY') ?? '';
   }
 
+  get openaiApiKey(): string {
+    return this.optionalTrimmed('OPENAI_API_KEY') ?? '';
+  }
+
+  get anthropicApiKey(): string {
+    return this.optionalTrimmed('ANTHROPIC_API_KEY') ?? '';
+  }
+
   /** Env value that is set and not the literal strings "undefined"/"null". */
   private optionalTrimmed(key: string): string | null {
     const value = this.configService.get<string>(key)?.trim();
