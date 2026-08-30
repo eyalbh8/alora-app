@@ -38,6 +38,8 @@ const NAV: Array<{
   { to: "/sentiment", label: "Sentiment", icon: Heart },
   { to: "/competitors", label: "Competitors", icon: Users },
   { to: "/marketplace", label: "Marketplace", icon: Store },
+  { to: "/ai-traffic", label: "AI Traffic", icon: Activity },
+  { to: "/ai-crawlers", label: "AI Crawlers", icon: Bot },
   { to: "/content", label: "Content", icon: Newspaper },
   { to: "/integrations", label: "Integrations", icon: Plug },
   {
@@ -46,8 +48,6 @@ const NAV: Array<{
     icon: CalendarClock,
     adminOnly: true,
   },
-  { to: "/ai-traffic", label: "AI Traffic", icon: Activity },
-  { to: "/ai-crawlers", label: "AI Crawlers", icon: Bot },
 ];
 
 export function BrandMark() {
