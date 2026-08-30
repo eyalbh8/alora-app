@@ -10,13 +10,13 @@
 import {
   SecretsManagerClient,
   GetSecretValueCommand,
-} from '@aws-sdk/client-secrets-manager';
-import fs from 'fs';
-import path from 'path';
+} from "@aws-sdk/client-secrets-manager";
+import fs from "fs";
+import path from "path";
 
-const stage = process.env.STAGE || process.argv[2] || 'prod';
+const stage = process.env.STAGE || process.argv[2] || "prod";
 const secretName = `menchly-${stage}`;
-const region = process.env.AWS_REGION || 'us-east-1';
+const region = process.env.AWS_REGION || "us-east-1";
 
 async function fetchSecrets() {
   const client = new SecretsManagerClient({ region });
@@ -25,7 +25,7 @@ async function fetchSecrets() {
   try {
     const response = await client.send(command);
     if (!response.SecretString) {
-      throw new Error('SecretString is empty');
+      throw new Error("SecretString is empty");
     }
 
     const secretJson = JSON.parse(response.SecretString) as Record<
@@ -37,12 +37,12 @@ async function fetchSecrets() {
     );
     const envFilePath = path.resolve(process.cwd(), `.env.${stage}`);
 
-    fs.writeFileSync(envFilePath, envLines.join('\n'));
+    fs.writeFileSync(envFilePath, envLines.join("\n"));
     console.log(
       `✅ .env file generated for stage '${stage}' at ${envFilePath}`,
     );
   } catch (err) {
-    console.error('❌ Failed to fetch secrets:', err);
+    console.error("❌ Failed to fetch secrets:", err);
     process.exit(1);
   }
 }

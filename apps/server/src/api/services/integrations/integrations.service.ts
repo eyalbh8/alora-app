@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { createHmac, timingSafeEqual } from 'crypto';
-import { PrismaService } from '../../../prisma/prisma.service';
-import { ConfigService } from '../../../config/config.service';
-import { SourceApiService } from '../source-api.service';
-import { ZernioApiError, ZernioService } from './zernio.service';
+import { Injectable, Logger } from "@nestjs/common";
+import { createHmac, timingSafeEqual } from "crypto";
+import { PrismaService } from "../../../prisma/prisma.service";
+import { ConfigService } from "../../../config/config.service";
+import { SourceApiService } from "../source-api.service";
+import { ZernioApiError, ZernioService } from "./zernio.service";
 import {
   CONNECTABLE_ZERNIO_PLATFORMS,
   classifyIgeoBlogSite,
@@ -13,7 +13,7 @@ import {
   toMenchlyPlatform,
   toZernioPlatform,
   type IgeoBlogKind,
-} from './platform-map';
+} from "./platform-map";
 
 type BlogSiteRow = {
   id: string;
@@ -40,7 +40,9 @@ export class IntegrationsService {
       select: { id: true, name: true, zernioProfileId: true },
     });
     if (!tenant) {
-      const err = new Error('Tenant not found') as Error & { statusCode: number };
+      const err = new Error("Tenant not found") as Error & {
+        statusCode: number;
+      };
       err.statusCode = 404;
       throw err;
     }
@@ -59,8 +61,8 @@ export class IntegrationsService {
 
   async listConnections(tenantId: string) {
     const accounts = await this.prisma.zernioAccount.findMany({
-      where: { tenantId, status: 'connected' },
-      orderBy: { platform: 'asc' },
+      where: { tenantId, status: "connected" },
+      orderBy: { platform: "asc" },
     });
 
     const social = MENCHLY_SOCIAL_PLATFORMS.map((menchly) => {
@@ -83,29 +85,29 @@ export class IntegrationsService {
     });
 
     const igeoSites = await this.loadIgeoBlogSites(tenantId);
-    const wordpressSites = igeoSites.filter((s) => s.kind === 'wordpress');
-    const lovableSites = igeoSites.filter((s) => s.kind === 'lovable');
+    const wordpressSites = igeoSites.filter((s) => s.kind === "wordpress");
+    const lovableSites = igeoSites.filter((s) => s.kind === "lovable");
 
-    const shopifyAccount = accounts.find((a) => a.platform === 'shopify');
+    const shopifyAccount = accounts.find((a) => a.platform === "shopify");
 
     const blog = [
       {
-        provider: 'wordpress' as const,
-        managedBy: 'igeo' as const,
+        provider: "wordpress" as const,
+        managedBy: "igeo" as const,
         connected: wordpressSites.length > 0,
         sites: wordpressSites.map(({ id, name, url }) => ({ id, name, url })),
         account: null,
       },
       {
-        provider: 'lovable' as const,
-        managedBy: 'igeo' as const,
+        provider: "lovable" as const,
+        managedBy: "igeo" as const,
         connected: lovableSites.length > 0,
         sites: lovableSites.map(({ id, name, url }) => ({ id, name, url })),
         account: null,
       },
       {
-        provider: 'shopify' as const,
-        managedBy: 'zernio' as const,
+        provider: "shopify" as const,
+        managedBy: "zernio" as const,
         connected: Boolean(shopifyAccount),
         sites: [],
         account: shopifyAccount
@@ -121,13 +123,14 @@ export class IntegrationsService {
     return {
       social,
       blog,
-      connectablePlatforms: [...CONNECTABLE_ZERNIO_PLATFORMS, 'shopify'],
+      connectablePlatforms: [...CONNECTABLE_ZERNIO_PLATFORMS, "shopify"],
     };
   }
 
   private async loadIgeoBlogSites(tenantId: string): Promise<BlogSiteRow[]> {
     try {
-      const { accountId, apiKey } = await this.sourceApi.resolveCredentials(tenantId);
+      const { accountId, apiKey } =
+        await this.sourceApi.resolveCredentials(tenantId);
       const raw = await this.sourceApi.sourceRequest(
         accountId,
         apiKey,
@@ -142,7 +145,7 @@ export class IntegrationsService {
             : [];
       return list
         .map((item) => {
-          if (!item || typeof item !== 'object') return null;
+          if (!item || typeof item !== "object") return null;
           const row = item as Record<string, unknown>;
           const id = row.id ?? row.siteId ?? row.site_id;
           if (id == null) return null;
@@ -172,10 +175,13 @@ export class IntegrationsService {
     }
   }
 
-  async connect(tenantId: string, platformInput: string): Promise<{ authUrl: string }> {
+  async connect(
+    tenantId: string,
+    platformInput: string,
+  ): Promise<{ authUrl: string }> {
     // Accept Menchly (INSTAGRAM / X) or Zernio (instagram / twitter) names
     const upper = platformInput.toUpperCase();
-    const fromMenchly = toZernioPlatform(upper === 'TWITTER' ? 'X' : upper);
+    const fromMenchly = toZernioPlatform(upper === "TWITTER" ? "X" : upper);
     const platform = (fromMenchly || platformInput).toLowerCase();
     if (!isConnectablePlatform(platform)) {
       const err = new Error(
@@ -191,7 +197,7 @@ export class IntegrationsService {
         tenantId_platform: { tenantId, platform },
       },
     });
-    if (existing && existing.status === 'connected') {
+    if (existing && existing.status === "connected") {
       const err = new Error(
         `${toMenchlyPlatform(platform) || platform} is already connected. Disconnect it first to reconnect.`,
       ) as Error & { statusCode: number };
@@ -203,12 +209,12 @@ export class IntegrationsService {
     const publicApp = this.config.publicAppUrl;
     if (!publicApp) {
       throw new ZernioApiError(
-        'PUBLIC_APP_URL is not configured — cannot build OAuth redirect.',
+        "PUBLIC_APP_URL is not configured — cannot build OAuth redirect.",
         503,
-        'PUBLIC_APP_URL_MISSING',
+        "PUBLIC_APP_URL_MISSING",
       );
     }
-    const redirectUrl = `${publicApp.replace(/\/$/, '')}/api/snapshots/integrations/callback`;
+    const redirectUrl = `${publicApp.replace(/\/$/, "")}/api/snapshots/integrations/callback`;
     return this.zernio.getConnectUrl(platform, profileId, redirectUrl);
   }
 
@@ -217,11 +223,11 @@ export class IntegrationsService {
     shop: string,
   ): Promise<{ authUrl: string }> {
     const existing = await this.prisma.zernioAccount.findUnique({
-      where: { tenantId_platform: { tenantId, platform: 'shopify' } },
+      where: { tenantId_platform: { tenantId, platform: "shopify" } },
     });
-    if (existing && existing.status === 'connected') {
+    if (existing && existing.status === "connected") {
       const err = new Error(
-        'Shopify is already connected. Disconnect it first to reconnect.',
+        "Shopify is already connected. Disconnect it first to reconnect.",
       ) as Error & { statusCode: number };
       err.statusCode = 409;
       throw err;
@@ -231,12 +237,12 @@ export class IntegrationsService {
     const publicApp = this.config.publicAppUrl;
     if (!publicApp) {
       throw new ZernioApiError(
-        'PUBLIC_APP_URL is not configured — cannot build OAuth redirect.',
+        "PUBLIC_APP_URL is not configured — cannot build OAuth redirect.",
         503,
-        'PUBLIC_APP_URL_MISSING',
+        "PUBLIC_APP_URL_MISSING",
       );
     }
-    const redirectUrl = `${publicApp.replace(/\/$/, '')}/api/snapshots/integrations/callback`;
+    const redirectUrl = `${publicApp.replace(/\/$/, "")}/api/snapshots/integrations/callback`;
     return this.zernio.getShopifyConnectUrl(profileId, shop, redirectUrl);
   }
 
@@ -248,7 +254,7 @@ export class IntegrationsService {
     tenantId: string,
     providerInput: string,
   ): Promise<{
-    managedBy: 'igeo';
+    managedBy: "igeo";
     provider: IgeoBlogKind;
     connected: boolean;
     sites: Array<{ id: string; name: string; url: string | null }>;
@@ -256,7 +262,7 @@ export class IntegrationsService {
     message?: string;
   }> {
     const provider = providerInput.toLowerCase();
-    if (provider !== 'wordpress' && provider !== 'lovable') {
+    if (provider !== "wordpress" && provider !== "lovable") {
       const err = new Error(
         `Blog provider "${providerInput}" must be wordpress or lovable`,
       ) as Error & { statusCode: number };
@@ -264,32 +270,33 @@ export class IntegrationsService {
       throw err;
     }
 
-    const { accountId, apiKey } = await this.sourceApi.resolveCredentials(tenantId);
+    const { accountId, apiKey } =
+      await this.sourceApi.resolveCredentials(tenantId);
 
     // Probe iGEO for a connect/auth URL (paths vary by upstream version).
     const probePaths = [
       `/accounts/${accountId}/agents/blog/connect?provider=${provider}`,
       `/accounts/${accountId}/agents/blog/sites/connect?provider=${provider}`,
-      `/accounts/${accountId}/agents/auth/connect?provider=${provider === 'lovable' ? 'LOVABLE' : 'BLOG'}`,
+      `/accounts/${accountId}/agents/auth/connect?provider=${provider === "lovable" ? "LOVABLE" : "BLOG"}`,
     ];
     for (const path of probePaths) {
       try {
         const raw = await this.sourceApi.sourceRequest(accountId, apiKey, path);
         const obj =
-          raw && typeof raw === 'object' && !Array.isArray(raw)
+          raw && typeof raw === "object" && !Array.isArray(raw)
             ? (raw as Record<string, unknown>)
             : {};
         const authUrl =
-          typeof obj.authUrl === 'string'
+          typeof obj.authUrl === "string"
             ? obj.authUrl
-            : typeof obj.url === 'string'
+            : typeof obj.url === "string"
               ? obj.url
-              : typeof obj.redirectUrl === 'string'
+              : typeof obj.redirectUrl === "string"
                 ? obj.redirectUrl
                 : null;
         if (authUrl) {
           return {
-            managedBy: 'igeo',
+            managedBy: "igeo",
             provider,
             connected: false,
             sites: [],
@@ -306,30 +313,34 @@ export class IntegrationsService {
       .map(({ id, name, url }) => ({ id, name, url }));
 
     return {
-      managedBy: 'igeo',
+      managedBy: "igeo",
       provider,
       connected: sites.length > 0,
       sites,
       message: sites.length
-        ? `${provider === 'lovable' ? 'Lovable' : 'WordPress'} sites synced from the linked iGEO workspace.`
-        : `No ${provider === 'lovable' ? 'Lovable' : 'WordPress'} sites found. Connect them in the linked iGEO workspace, then sync again.`,
+        ? `${provider === "lovable" ? "Lovable" : "WordPress"} sites synced from the linked iGEO workspace.`
+        : `No ${provider === "lovable" ? "Lovable" : "WordPress"} sites found. Connect them in the linked iGEO workspace, then sync again.`,
     };
   }
 
-  async handleCallback(query: Record<string, string | undefined>): Promise<string> {
-    const clientBase = this.config.publicClientUrl.replace(/\/$/, '');
+  async handleCallback(
+    query: Record<string, string | undefined>,
+  ): Promise<string> {
+    const clientBase = this.config.publicClientUrl.replace(/\/$/, "");
     const successRedirect = `${clientBase}/integrations?connected=1`;
     const errorRedirect = (msg: string) =>
       `${clientBase}/integrations?error=${encodeURIComponent(msg)}`;
 
-    const platform = (query.connected || query.platform || '').toLowerCase();
-    const profileId = query.profileId || '';
-    const accountId = query.accountId || '';
+    const platform = (query.connected || query.platform || "").toLowerCase();
+    const profileId = query.profileId || "";
+    const accountId = query.accountId || "";
     const username = query.username || null;
 
     if (!platform || !profileId || !accountId) {
-      this.logger.warn(`Zernio callback missing params: ${JSON.stringify(query)}`);
-      return errorRedirect('Connection callback was incomplete');
+      this.logger.warn(
+        `Zernio callback missing params: ${JSON.stringify(query)}`,
+      );
+      return errorRedirect("Connection callback was incomplete");
     }
 
     const tenant = await this.prisma.whitelabelTenant.findFirst({
@@ -338,7 +349,7 @@ export class IntegrationsService {
     });
     if (!tenant) {
       this.logger.warn(`No tenant for Zernio profile ${profileId}`);
-      return errorRedirect('Unknown workspace for this connection');
+      return errorRedirect("Unknown workspace for this connection");
     }
 
     // Enforce one-per-platform: disconnect prior row for this platform if any
@@ -355,7 +366,9 @@ export class IntegrationsService {
           }`,
         );
       }
-      await this.prisma.zernioAccount.delete({ where: { id: prior.id } }).catch(() => undefined);
+      await this.prisma.zernioAccount
+        .delete({ where: { id: prior.id } })
+        .catch(() => undefined);
     }
 
     await this.prisma.zernioAccount.upsert({
@@ -366,7 +379,7 @@ export class IntegrationsService {
         platform,
         username,
         displayName: username,
-        status: 'connected',
+        status: "connected",
         connectedAt: new Date(),
         disconnectedAt: null,
       },
@@ -375,7 +388,7 @@ export class IntegrationsService {
         platform,
         username,
         displayName: username,
-        status: 'connected',
+        status: "connected",
         connectedAt: new Date(),
         disconnectedAt: null,
       },
@@ -384,12 +397,15 @@ export class IntegrationsService {
     return successRedirect;
   }
 
-  async disconnect(tenantId: string, accountId: string): Promise<{ ok: boolean }> {
+  async disconnect(
+    tenantId: string,
+    accountId: string,
+  ): Promise<{ ok: boolean }> {
     const account = await this.prisma.zernioAccount.findFirst({
       where: { id: accountId, tenantId },
     });
     if (!account) {
-      const err = new Error('Connected account not found') as Error & {
+      const err = new Error("Connected account not found") as Error & {
         statusCode: number;
       };
       err.statusCode = 404;
@@ -411,7 +427,7 @@ export class IntegrationsService {
 
     await this.prisma.zernioAccount.update({
       where: { id: accountId },
-      data: { status: 'disconnected', disconnectedAt: new Date() },
+      data: { status: "disconnected", disconnectedAt: new Date() },
     });
     return { ok: true };
   }
@@ -424,20 +440,22 @@ export class IntegrationsService {
     const secret = this.config.zernioWebhookSecret;
     if (secret) {
       if (!signatureHeader) {
-        const err = new Error('Missing webhook signature') as Error & {
+        const err = new Error("Missing webhook signature") as Error & {
           statusCode: number;
         };
         err.statusCode = 401;
         throw err;
       }
       const body =
-        typeof rawBody === 'string' ? rawBody : Buffer.from(rawBody).toString('utf8');
-      const expected = createHmac('sha256', secret).update(body).digest('hex');
-      const provided = signatureHeader.replace(/^sha256=/i, '');
+        typeof rawBody === "string"
+          ? rawBody
+          : Buffer.from(rawBody).toString("utf8");
+      const expected = createHmac("sha256", secret).update(body).digest("hex");
+      const provided = signatureHeader.replace(/^sha256=/i, "");
       const a = Buffer.from(expected);
       const b = Buffer.from(provided);
       if (a.length !== b.length || !timingSafeEqual(a, b)) {
-        const err = new Error('Invalid webhook signature') as Error & {
+        const err = new Error("Invalid webhook signature") as Error & {
           statusCode: number;
         };
         err.statusCode = 401;
@@ -445,16 +463,18 @@ export class IntegrationsService {
       }
     }
 
-    const event = String(payload.event || payload.type || '');
+    const event = String(payload.event || payload.type || "");
     const account =
       (payload.account as Record<string, unknown> | undefined) ||
       (payload.data as Record<string, unknown> | undefined) ||
       {};
 
-    if (event === 'account.connected') {
-      const accountId = String(account.accountId || account._id || account.id || '');
-      const profileId = String(account.profileId || '');
-      const platform = String(account.platform || '').toLowerCase();
+    if (event === "account.connected") {
+      const accountId = String(
+        account.accountId || account._id || account.id || "",
+      );
+      const profileId = String(account.profileId || "");
+      const platform = String(account.platform || "").toLowerCase();
       const username =
         account.username != null ? String(account.username) : null;
       if (accountId && profileId && platform) {
@@ -471,11 +491,11 @@ export class IntegrationsService {
               platform,
               username,
               displayName: username,
-              status: 'connected',
+              status: "connected",
               connectedAt: new Date(),
             },
             update: {
-              status: 'connected',
+              status: "connected",
               username,
               disconnectedAt: null,
               connectedAt: new Date(),
@@ -483,13 +503,15 @@ export class IntegrationsService {
           });
         }
       }
-    } else if (event === 'account.disconnected') {
-      const accountId = String(account.accountId || account._id || account.id || '');
+    } else if (event === "account.disconnected") {
+      const accountId = String(
+        account.accountId || account._id || account.id || "",
+      );
       if (accountId) {
         await this.prisma.zernioAccount
           .updateMany({
             where: { id: accountId },
-            data: { status: 'disconnected', disconnectedAt: new Date() },
+            data: { status: "disconnected", disconnectedAt: new Date() },
           })
           .catch(() => undefined);
       }
@@ -508,7 +530,7 @@ export class IntegrationsService {
       where: {
         tenantId,
         platform: zernioPlatform,
-        status: 'connected',
+        status: "connected",
       },
     });
   }
@@ -516,7 +538,7 @@ export class IntegrationsService {
   /** Connected flags keyed by Menchly platform (BLOG excluded). */
   async getConnectedMap(tenantId: string): Promise<Record<string, boolean>> {
     const accounts = await this.prisma.zernioAccount.findMany({
-      where: { tenantId, status: 'connected' },
+      where: { tenantId, status: "connected" },
       select: { platform: true },
     });
     const connected: Record<string, boolean> = {};

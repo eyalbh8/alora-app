@@ -60,7 +60,7 @@ const BLOG_META: Record<
   shopify: {
     label: 'Shopify',
     description: 'Storefront blog via Zernio',
-    color: '#96BF48',
+    color: '#7AB55C',
   },
 }
 
@@ -356,15 +356,16 @@ export function IntegrationsScreen() {
   const data = integrations.data
   if (!data) return null
 
-  const blogRows = Array.isArray(data.blog) ? data.blog : []
+  const blogRows = (Array.isArray(data.blog) ? data.blog : []).filter(
+    (row) => row.provider === 'shopify',
+  )
 
   return (
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="screen-title">Integrations</h1>
         <p className="mt-1 text-sm text-[var(--ink-soft)]">
-          Connect social accounts via Zernio. Blog sites use iGEO for WordPress and
-          Lovable, and Zernio for Shopify.
+          Connect social accounts via Zernio, and Shopify for blog publishing.
         </p>
       </div>
 
@@ -398,10 +399,10 @@ export function IntegrationsScreen() {
         <div>
           <h2 className="text-lg font-semibold text-[var(--ink)]">Blog</h2>
           <p className="text-sm text-[var(--ink-soft)]">
-            WordPress and Lovable sync from iGEO. Shopify connects through Zernio.
+            Shopify connects through Zernio.
           </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid max-w-md gap-4">
           {blogRows.map((row) => (
             <BlogCard key={row.provider} row={row} />
           ))}
