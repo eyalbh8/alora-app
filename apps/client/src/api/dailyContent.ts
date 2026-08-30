@@ -54,6 +54,8 @@ export type DailyContentPost = {
   readTime: number | null
   publishAt: string | null
   isPublished: boolean
+  platformPostUrl?: string | null
+  trackedRecommendationId?: string | null
 }
 
 export type DailyContentRunPosts = {
@@ -92,6 +94,26 @@ export type DailyContentPublishTargets = {
   statusesAvailable: boolean
   statuses: Record<string, unknown>
   blogSites: Array<{ id: string; name: string; url?: string | null }>
+  publishedByPostId?: Record<
+    string,
+    {
+      platform: string
+      platformPostUrl: string | null
+      trackedRecommendationId: string | null
+      linked: boolean
+    }
+  >
+}
+
+export type PublishPlatformResult = {
+  ok: boolean
+  skipped?: boolean
+  provider: string
+  postId: string
+  platformPostUrl?: string | null
+  zernioPostId?: string | null
+  trackedRecommendationId?: string | null
+  error?: string | null
 }
 
 export type BlogSiteCategory = {
@@ -146,9 +168,24 @@ export async function publishDailyContentPost(
     siteIds?: string[]
     categoryBySite?: Record<string, number>
   } = {},
-): Promise<{ ok: boolean; provider: string; postId: string }> {
+): Promise<PublishPlatformResult> {
   return apiSend(
     `/daily-content/runs/${encodeURIComponent(runId)}/posts/${encodeURIComponent(postId)}/publish`,
+    'POST',
+    options,
+  )
+}
+
+export async function publishDailyContentRun(
+  runId: string,
+  options: {
+    platforms?: string[]
+    siteIds?: string[]
+    categoryBySite?: Record<string, number>
+  } = {},
+): Promise<{ results: PublishPlatformResult[] }> {
+  return apiSend(
+    `/daily-content/runs/${encodeURIComponent(runId)}/publish`,
     'POST',
     options,
   )

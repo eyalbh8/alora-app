@@ -57,6 +57,40 @@ export class ConfigService {
     return this.optionalTrimmed('ANTHROPIC_API_KEY') ?? '';
   }
 
+  /** Zernio social publishing API key (also accepts legacy ZERNIO_AOI_KEY). */
+  get zernioApiKey(): string {
+    return (
+      this.optionalTrimmed('ZERNIO_API_KEY') ||
+      this.optionalTrimmed('ZERNIO_AOI_KEY') ||
+      ''
+    );
+  }
+
+  get zernioApiBase(): string {
+    const raw =
+      this.optionalTrimmed('ZERNIO_API_BASE') || 'https://zernio.com/api/v1';
+    return raw.replace(/\/$/, '');
+  }
+
+  /** Public base URL of this API (used for OAuth redirect_url). */
+  get publicAppUrl(): string {
+    return (
+      this.optionalTrimmed('PUBLIC_APP_URL') ||
+      this.optionalTrimmed('API_PUBLIC_URL') ||
+      ''
+    );
+  }
+
+  /** Public base URL of the Menchly client (OAuth return landing). */
+  get publicClientUrl(): string {
+    return this.optionalTrimmed('PUBLIC_CLIENT_URL') || 'http://localhost:5173';
+  }
+
+  /** Optional webhook signing secret from Zernio. */
+  get zernioWebhookSecret(): string {
+    return this.optionalTrimmed('ZERNIO_WEBHOOK_SECRET') || '';
+  }
+
   /** Env value that is set and not the literal strings "undefined"/"null". */
   private optionalTrimmed(key: string): string | null {
     const value = this.configService.get<string>(key)?.trim();

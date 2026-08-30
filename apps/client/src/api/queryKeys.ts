@@ -21,6 +21,9 @@ export const queryKeys = {
     blogSiteCategories: (accountId: string | undefined, siteId: string) =>
       ['dailyContent', 'blogSiteCategories', accountId, siteId] as const,
   },
+  integrations: {
+    list: (accountId?: string) => ['integrations', accountId] as const,
+  },
   geo: {
     meta: (accountId?: string) => ['geo', 'meta', accountId] as const,
     dashboard: (accountId: string | undefined, filters: GeoFilters) =>

@@ -1,6 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import { Prisma } from '@prisma/client';
+import { createHash } from 'crypto';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { ConfigService } from '../../../config/config.service';
 import { SourceApiService } from '../source-api.service';
@@ -26,6 +27,10 @@ import {
   type PlatformState,
   type SocialMediaProvider,
 } from './mcp-posts.client';
+import { IntegrationsService } from '../integrations/integrations.service';
+import { ZernioService } from '../integrations/zernio.service';
+import { toZernioPlatform } from '../integrations/platform-map';
+import { linkPublishedUrlToPosts } from '../monitored-proposals.util';
 
 const STALE_DAYS = 50;
 const GENERATING_TIMEOUT_MS = 60 * 60 * 1000;
@@ -39,6 +44,30 @@ type EligibleTenant = {
   name: string | null;
 };
 
+type PublishPlatformResult = {
+  ok: boolean;
+  skipped?: boolean;
+  provider: string;
+  postId: string;
+  platformPostUrl?: string | null;
+  zernioPostId?: string | null;
+  trackedRecommendationId?: string | null;
+  error?: string | null;
+  result?: unknown;
+};
+
+function requestIdFor(parts: string[]): string {
+  const hash = createHash('sha256').update(parts.join(':')).digest('hex');
+  // UUID-shaped for Zernio x-request-id format
+  return [
+    hash.slice(0, 8),
+    hash.slice(8, 12),
+    '4' + hash.slice(13, 16),
+    'a' + hash.slice(17, 20),
+    hash.slice(20, 32),
+  ].join('-');
+}
+
 @Injectable()
 export class DailyContentService {
   private readonly logger = new Logger(DailyContentService.name);
@@ -48,6 +77,9 @@ export class DailyContentService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
     private readonly sourceApi: SourceApiService,
+    @Inject(forwardRef(() => IntegrationsService))
+    private readonly integrations: IntegrationsService,
+    private readonly zernio: ZernioService,
   ) {}
 
   /** Cron entry: start due tenants + sweep in-flight runs. */
@@ -259,9 +291,11 @@ export class DailyContentService {
 
   private async loadPostsForRun(
     run: {
+      id?: string;
       platforms: unknown;
     },
     tenant: {
+      id?: string;
       source_account_id: string;
       mcp_api_key: string | null;
     },
@@ -287,6 +321,8 @@ export class DailyContentService {
       readTime: number | null;
       publishAt: string | null;
       isPublished: boolean;
+      platformPostUrl: string | null;
+      trackedRecommendationId: string | null;
     }> = [];
 
     for (const provider of DAILY_CONTENT_PLATFORMS) {
@@ -327,7 +363,32 @@ export class DailyContentService {
         readTime: post.readTime ?? null,
         publishAt: post.publishAt ?? null,
         isPublished: Boolean(post.isPublished),
+        platformPostUrl: null,
+        trackedRecommendationId: null,
       });
+    }
+
+    if (posts.length && tenant.id) {
+      const published = await this.prisma.publishedPost.findMany({
+        where: {
+          tenantId: tenant.id,
+          igeoPostId: { in: posts.map((p) => p.postId) },
+        },
+        select: {
+          igeoPostId: true,
+          platformPostUrl: true,
+          trackedRecommendationId: true,
+        },
+      });
+      const byId = new Map(published.map((p) => [p.igeoPostId, p]));
+      for (const post of posts) {
+        const hit = byId.get(post.postId);
+        if (hit) {
+          post.platformPostUrl = hit.platformPostUrl;
+          post.trackedRecommendationId = hit.trackedRecommendationId;
+          if (hit.platformPostUrl) post.isPublished = true;
+        }
+      }
     }
 
     return posts;
@@ -386,25 +447,125 @@ export class DailyContentService {
       siteIds?: string[];
       categoryBySite?: Record<string, number>;
     } = {},
-  ) {
-    const { tenant, provider } = await this.requireOwnedPost(tenantId, runId, postId);
+  ): Promise<PublishPlatformResult> {
+    const { tenant, provider, run } = await this.requireOwnedPost(
+      tenantId,
+      runId,
+      postId,
+    );
+
+    if (provider === 'BLOG') {
+      return this.publishBlogViaIgeo(tenant, runId, postId, options);
+    }
+
+    const client = this.mcpClientFor(tenant);
+    const post = await client.getPost(postId);
+    if (!post) {
+      const err = new Error('Post not found upstream') as Error & {
+        statusCode: number;
+      };
+      err.statusCode = 404;
+      throw err;
+    }
+
+    const results = await this.publishSocialViaZernio(tenantId, run.id, [
+      {
+        provider,
+        postId,
+        title: post.title ?? null,
+        body: post.body ?? null,
+        imagesUrl: post.imagesUrl ?? [],
+      },
+    ]);
+    return results[0];
+  }
+
+  /**
+   * Publish every selected, not-yet-published post in a run.
+   * Social platforms go out in one Zernio call; BLOG goes through iGEO.
+   */
+  async publishRun(
+    tenantId: string,
+    runId: string,
+    options: {
+      platforms?: string[];
+      siteIds?: string[];
+      categoryBySite?: Record<string, number>;
+    } = {},
+  ): Promise<{ results: PublishPlatformResult[] }> {
+    const { run, tenant } = await this.requireRunWithTenant(tenantId, runId);
+    const posts = await this.loadPostsForRun(run, tenant);
+    const filter = options.platforms?.map((p) => p.toUpperCase());
+    const eligible = posts.filter((p) => {
+      if (p.isPublished || String(p.state).toUpperCase() === 'POSTED') return false;
+      if (filter && !filter.includes(p.platform)) return false;
+      return true;
+    });
+
+    const results: PublishPlatformResult[] = [];
+    const social = eligible.filter((p) => p.platform !== 'BLOG');
+    const blog = eligible.find((p) => p.platform === 'BLOG');
+
+    if (social.length) {
+      const socialResults = await this.publishSocialViaZernio(
+        tenantId,
+        runId,
+        social.map((p) => ({
+          provider: p.platform,
+          postId: p.postId,
+          title: p.title,
+          body: p.body,
+          imagesUrl: p.imagesUrl,
+        })),
+      );
+      results.push(...socialResults);
+    }
+
+    if (blog) {
+      try {
+        results.push(
+          await this.publishBlogViaIgeo(tenant, runId, blog.postId, {
+            siteIds: options.siteIds,
+            categoryBySite: options.categoryBySite,
+          }),
+        );
+      } catch (err) {
+        results.push({
+          ok: false,
+          provider: 'BLOG',
+          postId: blog.postId,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+
+    return { results };
+  }
+
+  private async publishBlogViaIgeo(
+    tenant: { source_account_id: string; mcp_api_key: string | null },
+    runId: string,
+    postId: string,
+    options: {
+      siteIds?: string[];
+      categoryBySite?: Record<string, number>;
+    },
+  ): Promise<PublishPlatformResult> {
     const accountId = tenant.source_account_id;
     const apiKey = tenant.mcp_api_key!;
+    if (!options.siteIds?.length) {
+      const err = new Error('Select at least one WordPress site to publish') as Error & {
+        statusCode: number;
+      };
+      err.statusCode = 400;
+      throw err;
+    }
     const body: Record<string, unknown> = {
       postId,
-      provider,
+      provider: 'BLOG',
+      siteIds: options.siteIds,
     };
-    if (provider === 'BLOG') {
-      if (!options.siteIds?.length) {
-        const err = new Error('Select at least one WordPress site to publish') as Error & {
-          statusCode: number;
-        };
-        err.statusCode = 400;
-        throw err;
-      }
-      body.siteIds = options.siteIds;
-      if (options.categoryBySite) body.categoryBySite = options.categoryBySite;
-    }
+    if (options.categoryBySite) body.categoryBySite = options.categoryBySite;
 
     const result = await this.sourceApi.sourceRequest(
       accountId,
@@ -412,32 +573,214 @@ export class DailyContentService {
       `/accounts/${accountId}/agents/publish`,
       { method: 'POST', body },
     );
-    return { ok: true, provider, postId, result };
+    void runId;
+    return { ok: true, provider: 'BLOG', postId, result };
+  }
+
+  private async publishSocialViaZernio(
+    tenantId: string,
+    runId: string,
+    items: Array<{
+      provider: SocialMediaProvider | string;
+      postId: string;
+      title: string | null;
+      body: string | null;
+      imagesUrl: string[];
+    }>,
+  ): Promise<PublishPlatformResult[]> {
+    const { accountId, apiKey } = await this.sourceApi.resolveCredentials(tenantId);
+    const results: PublishPlatformResult[] = [];
+    const platformEntries: Array<{
+      platform: string;
+      accountId: string;
+      customContent?: string;
+      menchly: string;
+      postId: string;
+      zernioAccountId: string;
+    }> = [];
+
+    for (const item of items) {
+      const zernioPlatform = toZernioPlatform(item.provider);
+      if (!zernioPlatform) {
+        results.push({
+          ok: false,
+          skipped: true,
+          provider: item.provider,
+          postId: item.postId,
+          error: `Platform ${item.provider} is not supported via Zernio`,
+        });
+        continue;
+      }
+      const account = await this.integrations.getConnectedAccount(
+        tenantId,
+        item.provider,
+      );
+      if (!account) {
+        results.push({
+          ok: false,
+          skipped: true,
+          provider: item.provider,
+          postId: item.postId,
+          error: `${item.provider} is not connected. Connect it in Integrations first.`,
+        });
+        continue;
+      }
+      const content = (item.body || item.title || '').trim();
+      platformEntries.push({
+        platform: zernioPlatform,
+        accountId: account.id,
+        customContent: content || undefined,
+        menchly: item.provider,
+        postId: item.postId,
+        zernioAccountId: account.id,
+      });
+    }
+
+    if (!platformEntries.length) return results;
+
+    // Collect media from first item that has images (shared when present)
+    const mediaItems = items
+      .flatMap((i) => i.imagesUrl || [])
+      .filter(Boolean)
+      .slice(0, 4)
+      .map((url) => ({ type: 'image', url }));
+
+    const requestId = requestIdFor([
+      runId,
+      ...platformEntries.map((p) => p.postId).sort(),
+    ]);
+
+    let zernioResult;
+    try {
+      zernioResult = await this.zernio.createPost({
+        // Fallback content when customContent is absent on an entry
+        content:
+          platformEntries[0]?.customContent ||
+          items[0]?.title ||
+          ' ',
+        platforms: platformEntries.map((p) => ({
+          platform: p.platform,
+          accountId: p.accountId,
+          customContent: p.customContent,
+        })),
+        mediaItems: mediaItems.length ? mediaItems : undefined,
+        publishNow: true,
+        requestId,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      for (const entry of platformEntries) {
+        results.push({
+          ok: false,
+          provider: entry.menchly,
+          postId: entry.postId,
+          error: message,
+        });
+      }
+      return results;
+    }
+
+    for (const entry of platformEntries) {
+      const platformHit =
+        zernioResult.platforms.find(
+          (p) =>
+            p.platform === entry.platform ||
+            p.accountId === entry.zernioAccountId,
+        ) || null;
+      const platformPostUrl = platformHit?.platformPostUrl ?? null;
+      const failed =
+        platformHit?.status === 'failed' ||
+        Boolean(platformHit?.error) ||
+        (!platformPostUrl &&
+          platformHit?.status !== 'published' &&
+          platformHit?.status !== 'publishing');
+
+      if (failed && !platformPostUrl) {
+        results.push({
+          ok: false,
+          provider: entry.menchly,
+          postId: entry.postId,
+          zernioPostId: zernioResult.postId,
+          error: platformHit?.error || `Publish failed for ${entry.menchly}`,
+        });
+        continue;
+      }
+
+      // Persist published_posts row (unique on igeoPostId+platform guards duplicates)
+      const row = await this.prisma.publishedPost.upsert({
+        where: {
+          igeoPostId_platform: {
+            igeoPostId: entry.postId,
+            platform: entry.menchly,
+          },
+        },
+        create: {
+          tenantId,
+          runId,
+          igeoPostId: entry.postId,
+          platform: entry.menchly,
+          zernioPostId: zernioResult.postId,
+          zernioAccountId: entry.zernioAccountId,
+          platformPostUrl,
+          publishedAt: new Date(),
+        },
+        update: {
+          zernioPostId: zernioResult.postId,
+          zernioAccountId: entry.zernioAccountId,
+          platformPostUrl: platformPostUrl ?? undefined,
+        },
+      });
+
+      let trackedRecommendationId = row.trackedRecommendationId;
+      if (platformPostUrl && !row.igeoLinkedAt) {
+        try {
+          const linked = await linkPublishedUrlToPosts(this.sourceApi, {
+            accountId,
+            apiKey,
+            url: platformPostUrl,
+            postIds: [entry.postId],
+          });
+          trackedRecommendationId = linked.id;
+          await this.prisma.publishedPost.update({
+            where: { id: row.id },
+            data: {
+              igeoLinkedAt: new Date(),
+              trackedRecommendationId: linked.id,
+              linkError: null,
+            },
+          });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          this.logger.warn(
+            `Failed to link ${platformPostUrl} to iGEO post ${entry.postId}: ${message}`,
+          );
+          await this.prisma.publishedPost.update({
+            where: { id: row.id },
+            data: { linkError: message },
+          });
+        }
+      }
+
+      results.push({
+        ok: true,
+        provider: entry.menchly,
+        postId: entry.postId,
+        platformPostUrl,
+        zernioPostId: zernioResult.postId,
+        trackedRecommendationId,
+      });
+    }
+
+    return results;
   }
 
   async getPublishTargets(tenantId: string) {
-    const { accountId, apiKey } = await this.sourceApi.resolveCredentials(tenantId);
-    let statuses: Record<string, unknown> = {};
-    let statusesAvailable = false;
+    const connectedSocial = await this.integrations.getConnectedMap(tenantId);
+    const statusesAvailable = true;
     let blogSites: Array<{ id: string; name: string; url?: string | null }> = [];
 
     try {
-      const raw = await this.sourceApi.sourceRequest(
-        accountId,
-        apiKey,
-        `/accounts/${accountId}/agents/auth/statuses`,
-      );
-      if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
-        statuses = raw as Record<string, unknown>;
-        statusesAvailable = true;
-      }
-    } catch (err) {
-      this.logger.warn(
-        `Failed to load auth statuses for ${tenantId}: ${err instanceof Error ? err.message : err}`,
-      );
-    }
-
-    try {
+      const { accountId, apiKey } = await this.sourceApi.resolveCredentials(tenantId);
       const raw = await this.sourceApi.sourceRequest(
         accountId,
         apiKey,
@@ -469,19 +812,42 @@ export class DailyContentService {
       );
     }
 
-    const connected: Record<string, boolean> = {};
-    for (const provider of DAILY_CONTENT_PLATFORMS) {
-      const value = statuses[provider];
-      connected[provider] =
-        value === true ||
-        value === 'true' ||
-        (typeof value === 'object' &&
-          value != null &&
-          ((value as { connected?: boolean }).connected === true ||
-            (value as { isConnected?: boolean }).isConnected === true));
-    }
+    const connected: Record<string, boolean> = {
+      ...connectedSocial,
+      BLOG: blogSites.length > 0,
+    };
 
-    return { connected, statusesAvailable, statuses, blogSites };
+    // Enrich with published URLs for this tenant (recent)
+    const published = await this.prisma.publishedPost.findMany({
+      where: { tenantId },
+      orderBy: { publishedAt: 'desc' },
+      take: 200,
+      select: {
+        igeoPostId: true,
+        platform: true,
+        platformPostUrl: true,
+        trackedRecommendationId: true,
+        igeoLinkedAt: true,
+      },
+    });
+
+    return {
+      connected,
+      statusesAvailable,
+      statuses: connected,
+      blogSites,
+      publishedByPostId: Object.fromEntries(
+        published.map((p) => [
+          p.igeoPostId,
+          {
+            platform: p.platform,
+            platformPostUrl: p.platformPostUrl,
+            trackedRecommendationId: p.trackedRecommendationId,
+            linked: Boolean(p.igeoLinkedAt),
+          },
+        ]),
+      ),
+    };
   }
 
   async addPostImage(tenantId: string, runId: string, postId: string) {

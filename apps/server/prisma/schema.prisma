@@ -50,10 +50,55 @@ model WhitelabelTenant {
   dailyContentAutomation Boolean           @default(false) @map("daily_content_automation")
   dailyContentTimezone   String            @default("Asia/Nicosia") @map("daily_content_timezone")
   dailyContentHour       Int               @default(5) @map("daily_content_hour")
+  /// Zernio multi-tenant profile id (one per Menchly workspace).
+  zernioProfileId        String?           @map("zernio_profile_id")
   users                  WlUserTenant[]
   dailyContentRuns       DailyContentRun[]
+  zernioAccounts         ZernioAccount[]
+  publishedPosts         PublishedPost[]
 
   @@map("whitelabel_tenants")
+}
+
+/// Connected social account owned by a Menchly tenant via Zernio (one per platform in v1).
+model ZernioAccount {
+  id             String    @id
+  tenantId       String    @map("tenant_id") @db.Uuid
+  platform       String
+  username       String?
+  displayName    String?   @map("display_name")
+  status         String    @default("connected")
+  connectedAt    DateTime  @default(now()) @map("connected_at") @db.Timestamptz(6)
+  disconnectedAt DateTime? @map("disconnected_at") @db.Timestamptz(6)
+
+  tenant WhitelabelTenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, platform])
+  @@index([tenantId])
+  @@map("zernio_accounts")
+}
+
+/// Record of a post published via Zernio, with the live URL linked back to iGEO.
+model PublishedPost {
+  id                       String    @id @default(uuid()) @db.Uuid
+  tenantId                 String    @map("tenant_id") @db.Uuid
+  runId                    String?   @map("run_id") @db.Uuid
+  igeoPostId               String    @map("igeo_post_id") @db.Uuid
+  platform                 String
+  zernioPostId             String?   @map("zernio_post_id")
+  zernioAccountId          String?   @map("zernio_account_id")
+  platformPostUrl          String?   @map("platform_post_url")
+  publishedAt              DateTime  @default(now()) @map("published_at") @db.Timestamptz(6)
+  igeoLinkedAt             DateTime? @map("igeo_linked_at") @db.Timestamptz(6)
+  trackedRecommendationId  String?   @map("tracked_recommendation_id")
+  linkError                String?   @map("link_error")
+
+  tenant WhitelabelTenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([igeoPostId, platform])
+  @@index([tenantId])
+  @@index([runId])
+  @@map("published_posts")
 }
 
 /// One daily automation run per tenant per local calendar day.

@@ -15,6 +15,7 @@ import {
   Link2,
   MessageSquareText,
   Newspaper,
+  Plug,
   Quote,
   Store,
   Users,
@@ -38,6 +39,7 @@ const NAV: Array<{
   { to: "/competitors", label: "Competitors", icon: Users },
   { to: "/marketplace", label: "Marketplace", icon: Store },
   { to: "/content", label: "Content", icon: Newspaper },
+  { to: "/integrations", label: "Integrations", icon: Plug },
   {
     to: "/daily-automation",
     label: "Daily automation",

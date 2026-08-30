@@ -8,6 +8,7 @@ import {
   getDailyContentRuns,
   getDailyContentSettings,
   publishDailyContentPost,
+  publishDailyContentRun,
   removePostImage,
   requestPostImageUpload,
   updateDailyContentPost,
@@ -145,6 +146,33 @@ export function usePublishDailyContentPost(runId: string) {
       })
       void queryClient.invalidateQueries({
         queryKey: ['dailyContent', 'dayPosts', selectedAccount?.id],
+      })
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.dailyContent.publishTargets(selectedAccount?.id),
+      })
+    },
+  })
+}
+
+export function usePublishDailyContentRun(runId: string | null) {
+  const queryClient = useQueryClient()
+  const { selectedAccount } = useAccountStore()
+  return useMutation({
+    mutationFn: (options: {
+      platforms?: string[]
+      siteIds?: string[]
+      categoryBySite?: Record<string, number>
+    } = {}) => publishDailyContentRun(runId!, options),
+    onSuccess: () => {
+      if (!runId) return
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.dailyContent.runPosts(selectedAccount?.id, runId),
+      })
+      void queryClient.invalidateQueries({
+        queryKey: ['dailyContent', 'dayPosts', selectedAccount?.id],
+      })
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.dailyContent.publishTargets(selectedAccount?.id),
       })
     },
   })

@@ -18,6 +18,11 @@ provider:
     ANTHROPIC_API_KEY: ${env:ANTHROPIC_API_KEY, ''}
     DAILY_CONTENT_LLM_MODEL: ${env:DAILY_CONTENT_LLM_MODEL, 'gpt-4o-mini'}
     DAILY_CONTENT_OPTIMIZER_FUNCTION: menchly-${self:provider.stage}-daily-content-optimizer
+    ZERNIO_API_KEY: ${env:ZERNIO_API_KEY, ''}
+    ZERNIO_API_BASE: ${env:ZERNIO_API_BASE, 'https://zernio.com/api/v1'}
+    ZERNIO_WEBHOOK_SECRET: ${env:ZERNIO_WEBHOOK_SECRET, ''}
+    PUBLIC_APP_URL: ${env:PUBLIC_APP_URL, ''}
+    PUBLIC_CLIENT_URL: ${env:PUBLIC_CLIENT_URL, ''}
     ALLOWED_ORIGIN: ${env:ALLOWED_ORIGIN, '*'}
     AWS_LAMBDA_NODEJS_DISABLE_CALLBACK_WARNING: 1
 

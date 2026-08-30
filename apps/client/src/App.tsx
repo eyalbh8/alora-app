@@ -13,6 +13,7 @@ import { CompetitorsScreen } from './screens/CompetitorsScreen'
 import { ContentScreen } from './screens/ContentScreen'
 import { DailyAutomationScreen } from './screens/DailyAutomationScreen'
 import { DashboardScreen } from './screens/DashboardScreen'
+import { IntegrationsScreen } from './screens/IntegrationsScreen'
 import { LoginScreen } from './screens/LoginScreen'
 import { CitationsScreen } from './screens/CitationsScreen'
 import { MarketplaceScreen } from './screens/MarketplaceScreen'
@@ -70,6 +71,7 @@ export default function App() {
                             </Route>
                           </Route>
                           <Route path="/content" element={<ContentScreen />} />
+                          <Route path="/integrations" element={<IntegrationsScreen />} />
                           <Route
                             path="/daily-automation"
                             element={

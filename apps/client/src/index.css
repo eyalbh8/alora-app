@@ -713,7 +713,7 @@ p {
 
 .table-bleed th:last-child,
 .table-bleed td:last-child {
-  padding-right: 16px;
+  padding-right: 20px;
 }
 
 @media (max-width: 1023px) {

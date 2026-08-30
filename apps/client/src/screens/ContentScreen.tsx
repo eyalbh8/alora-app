@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight, Eye, Send } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ChevronLeft, ChevronRight, ExternalLink, Eye, Send } from 'lucide-react'
 import { PageLoader } from '../components/loading'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
@@ -7,13 +8,14 @@ import {
   PostPreviewDrawer,
   StatusPill,
 } from '../components/dailyContent/PostPreviewDrawer'
-import type { DailyContentPost } from '../api/dailyContent'
+import type { DailyContentPost, PublishPlatformResult } from '../api/dailyContent'
 import { stripUnsplashCredit } from '../lib/blogHtml'
 import {
   useDailyContentDayPosts,
   useDailyContentDays,
   useDailyContentPublishTargets,
   usePublishDailyContentPost,
+  usePublishDailyContentRun,
 } from '../hooks/use-daily-content-runs'
 
 const PLATFORM_DOT: Record<string, string> = {
@@ -50,12 +52,22 @@ function RowPublishButton({
 }) {
   const publish = usePublishDailyContentPost(runId)
   const [message, setMessage] = useState<string | null>(null)
-  const published = post.isPublished || post.state === 'POSTED'
-  /** When auth/statuses is unreachable via MCP, allow publish and surface server errors. */
+  const [liveUrl, setLiveUrl] = useState<string | null>(post.platformPostUrl ?? null)
+  const published = post.isPublished || post.state === 'POSTED' || Boolean(liveUrl)
   const canTryPublish = !statusesAvailable || connected
 
   if (published) {
-    return (
+    return liveUrl ? (
+      <a
+        href={liveUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center gap-1 rounded-full border border-emerald-500 px-2.5 py-0.5 text-[10px] font-medium text-emerald-700"
+        onClick={(e) => e.stopPropagation()}
+      >
+        Live <ExternalLink className="size-2.5" />
+      </a>
+    ) : (
       <span className="inline-flex rounded-full border border-emerald-500 px-2.5 py-0.5 text-[10px] font-medium text-emerald-600">
         Published
       </span>
@@ -66,12 +78,12 @@ function RowPublishButton({
     return (
       <button
         type="button"
-        className="inline-flex items-center gap-1 rounded-full border border-[var(--line)] bg-white px-2.5 py-1 text-xs font-medium text-[var(--ink)] disabled:opacity-50"
+        className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--line)] bg-white px-2.5 py-1 text-xs font-medium text-[var(--ink)] disabled:opacity-50"
         disabled={!canTryPublish}
         title={
           canTryPublish
             ? 'Open preview to choose WordPress site and publish'
-            : 'BLOG is not connected on this workspace. Connect it in iGEO first.'
+            : 'BLOG is not connected. Connect a WordPress site in Integrations.'
         }
         onClick={(e) => {
           e.stopPropagation()
@@ -88,19 +100,22 @@ function RowPublishButton({
     <div className="flex flex-col items-end gap-1">
       <button
         type="button"
-        className="inline-flex items-center gap-1 rounded-full bg-[var(--accent)] px-2.5 py-1 text-xs font-medium text-white disabled:opacity-50"
+        className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--accent)] px-2.5 py-1 text-xs font-medium text-white disabled:opacity-50"
         disabled={!canTryPublish || publish.isPending}
         title={
           canTryPublish
             ? `Publish to ${post.platform}`
-            : `${post.platform} is not connected on this workspace. Connect it in iGEO first.`
+            : `${post.platform} is not connected. Connect it in Integrations first.`
         }
         onClick={(e) => {
           e.stopPropagation()
           setMessage(null)
           void publish
             .mutateAsync({ postId: post.postId })
-            .then(() => setMessage('Published'))
+            .then((res) => {
+              if (res.platformPostUrl) setLiveUrl(res.platformPostUrl)
+              setMessage(res.ok ? 'Published' : res.error || 'Failed')
+            })
             .catch((err) =>
               setMessage(err instanceof Error ? err.message : 'Publish failed'),
             )
@@ -117,6 +132,114 @@ function RowPublishButton({
         >
           {message}
         </span>
+      ) : null}
+    </div>
+  )
+}
+
+function PublishAllBar({
+  runId,
+  posts,
+  connected,
+}: {
+  runId: string
+  posts: DailyContentPost[]
+  connected: Record<string, boolean>
+}) {
+  const publishAll = usePublishDailyContentRun(runId)
+  const [results, setResults] = useState<PublishPlatformResult[] | null>(null)
+
+  const pending = posts.filter(
+    (p) =>
+      !(p.isPublished || p.state === 'POSTED' || p.platformPostUrl) &&
+      p.platform !== 'BLOG' &&
+      connected[p.platform],
+  )
+  const disconnected = posts.filter(
+    (p) =>
+      !(p.isPublished || p.state === 'POSTED' || p.platformPostUrl) &&
+      p.platform !== 'BLOG' &&
+      !connected[p.platform],
+  )
+
+  if (pending.length === 0 && disconnected.length === 0) return null
+
+  return (
+    <div className="flex flex-col gap-2 rounded-[var(--r-card)] border border-[var(--line)] bg-[var(--surface)] p-4 shadow-[var(--card-shadow)]">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-[var(--ink)]">Publish all social</p>
+          <p className="text-xs text-[var(--ink-soft)]">
+            {pending.length
+              ? `Will publish: ${pending.map((p) => p.platform).join(', ')}`
+              : 'No connected social platforms ready to publish.'}
+            {disconnected.length ? (
+              <>
+                {' '}
+                Skipped (not connected): {disconnected.map((p) => p.platform).join(', ')}.{' '}
+                <Link to="/integrations" className="text-[var(--accent)] underline">
+                  Connect
+                </Link>
+              </>
+            ) : null}
+          </p>
+        </div>
+        <button
+          type="button"
+          className="button button--primary inline-flex items-center gap-1.5"
+          disabled={pending.length === 0 || publishAll.isPending}
+          onClick={() => {
+            setResults(null)
+            void publishAll
+              .mutateAsync({
+                platforms: pending.map((p) => p.platform),
+              })
+              .then((res) => setResults(res.results))
+              .catch((err) =>
+                setResults([
+                  {
+                    ok: false,
+                    provider: 'ALL',
+                    postId: '',
+                    error: err instanceof Error ? err.message : 'Publish all failed',
+                  },
+                ]),
+              )
+          }}
+        >
+          <Send className="size-3.5" />
+          {publishAll.isPending ? 'Publishing…' : 'Publish all'}
+        </button>
+      </div>
+      {results ? (
+        <ul className="flex flex-col gap-1 text-xs">
+          {results.map((r) => (
+            <li
+              key={`${r.provider}-${r.postId}`}
+              className={r.ok ? 'text-emerald-700' : 'text-amber-800'}
+            >
+              {r.provider}:{' '}
+              {r.ok ? (
+                r.platformPostUrl ? (
+                  <a
+                    href={r.platformPostUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline"
+                  >
+                    live post
+                  </a>
+                ) : (
+                  'published'
+                )
+              ) : r.skipped ? (
+                `skipped — ${r.error}`
+              ) : (
+                r.error || 'failed'
+              )}
+            </li>
+          ))}
+        </ul>
       ) : null}
     </div>
   )
@@ -232,6 +355,14 @@ export function ContentScreen() {
         </p>
       ) : null}
 
+      {run?.id && posts.length > 0 ? (
+        <PublishAllBar
+          runId={run.id}
+          posts={posts}
+          connected={targets.data?.connected ?? {}}
+        />
+      ) : null}
+
       {days.length === 0 ? (
         <EmptyState
           title="No content yet"
@@ -256,22 +387,22 @@ export function ContentScreen() {
       ) : (
         <div className={`table-bleed${postsQuery.isFetching ? ' opacity-70' : ''}`}>
           <div className="table-bleed__scroll">
-            <table className="w-full min-w-0 border-collapse text-sm">
+            <table className="w-full min-w-[44rem] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-line bg-paper-soft">
-                  <th className="pb-2.5 pr-3 text-left text-[12px] font-medium text-muted">
+                  <th className="whitespace-nowrap px-4 py-3 text-left text-[12px] font-medium text-muted">
                     Platform
                   </th>
-                  <th className="min-w-0 pb-2.5 pr-3 text-left text-[12px] font-medium text-muted">
+                  <th className="min-w-0 px-4 py-3 text-left text-[12px] font-medium text-muted">
                     Title / excerpt
                   </th>
-                  <th className="pb-2.5 pr-3 text-left text-[12px] font-medium text-muted">
+                  <th className="whitespace-nowrap px-4 py-3 text-left text-[12px] font-medium text-muted">
                     Status
                   </th>
-                  <th className="pb-2.5 pr-3 text-left text-[12px] font-medium text-muted">
+                  <th className="px-4 py-3 text-left text-[12px] font-medium text-muted">
                     Tags
                   </th>
-                  <th className="pb-2.5 text-right text-[12px] font-medium text-muted">
+                  <th className="w-px whitespace-nowrap px-4 py-3 text-right text-[12px] font-medium text-muted">
                     Actions
                   </th>
                 </tr>
@@ -282,7 +413,7 @@ export function ContentScreen() {
                   const shown = tags.slice(0, 2)
                   const rest = tags.length - shown.length
                   const status =
-                    post.isPublished || post.state === 'POSTED'
+                    post.isPublished || post.state === 'POSTED' || post.platformPostUrl
                       ? 'POSTED'
                       : post.state || 'UNKNOWN'
                   return (
@@ -291,7 +422,7 @@ export function ContentScreen() {
                       className="cursor-pointer border-b border-line transition hover:bg-paper-soft/70"
                       onClick={() => openDrawer(post.platform)}
                     >
-                      <td className="py-3 pr-3">
+                      <td className="whitespace-nowrap px-4 py-3.5">
                         <span className="inline-flex items-center gap-2 font-medium text-ink">
                           <span
                             className="inline-block size-2.5 rounded-full"
@@ -302,13 +433,13 @@ export function ContentScreen() {
                           {post.platform}
                         </span>
                       </td>
-                      <td className="max-w-md py-3 pr-3 text-ink">
+                      <td className="max-w-md min-w-0 px-4 py-3.5 text-ink">
                         <span className="line-clamp-2">{postExcerpt(post)}</span>
                       </td>
-                      <td className="py-3 pr-3">
+                      <td className="whitespace-nowrap px-4 py-3.5">
                         <StatusPill status={status} />
                       </td>
-                      <td className="py-3 pr-3">
+                      <td className="px-4 py-3.5">
                         {shown.length ? (
                           <div className="flex flex-wrap gap-1">
                             {shown.map((tag) => (
@@ -329,14 +460,14 @@ export function ContentScreen() {
                           <span className="text-muted">—</span>
                         )}
                       </td>
-                      <td className="py-3">
+                      <td className="w-px whitespace-nowrap px-4 py-3.5">
                         <div
-                          className="flex items-center justify-end gap-2"
+                          className="flex shrink-0 items-center justify-end gap-2"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <button
                             type="button"
-                            className="inline-flex items-center gap-1 rounded-full border border-[var(--line)] bg-white px-2.5 py-1 text-xs font-medium text-[var(--ink)]"
+                            className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--line)] bg-white px-2.5 py-1 text-xs font-medium text-[var(--ink)]"
                             onClick={() => openDrawer(post.platform)}
                           >
                             <Eye className="size-3" />

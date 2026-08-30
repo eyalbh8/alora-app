@@ -139,6 +139,24 @@ export class DailyContentController {
     }
   }
 
+  @Post('runs/:runId/publish')
+  async publishRun(
+    @TenantId() tenantId: string,
+    @Param('runId') runId: string,
+    @Body()
+    body: {
+      platforms?: string[];
+      siteIds?: string[];
+      categoryBySite?: Record<string, number>;
+    },
+  ) {
+    try {
+      return await this.dailyContent.publishRun(tenantId, runId, body ?? {});
+    } catch (err) {
+      rethrowAsHttp(err);
+    }
+  }
+
   @Post('runs/:runId/posts/:postId/image-upload')
   async addPostImage(
     @TenantId() tenantId: string,

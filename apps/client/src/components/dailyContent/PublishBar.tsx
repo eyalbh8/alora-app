@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Send } from 'lucide-react'
+import { ExternalLink, Send } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import type { DailyContentPost } from '../../api/dailyContent'
 import {
   useBlogSiteCategories,
@@ -70,14 +71,14 @@ export function PublishBar({
   const [selectedSiteIds, setSelectedSiteIds] = useState<string[]>([])
   const [categoryBySite, setCategoryBySite] = useState<Record<string, number>>({})
   const [message, setMessage] = useState<string | null>(null)
+  const [liveUrl, setLiveUrl] = useState<string | null>(post.platformPostUrl ?? null)
 
   const statusesAvailable = targets.data?.statusesAvailable === true
   const connectedKnown = targets.data?.connected?.[post.platform] === true
-  /** When auth/statuses is unreachable via MCP, allow publish and surface server errors. */
   const canTryPublish = !statusesAvailable || connectedKnown
   const blogSites = targets.data?.blogSites ?? []
   const isBlog = post.platform === 'BLOG'
-  const alreadyPublished = post.isPublished || post.state === 'POSTED'
+  const alreadyPublished = post.isPublished || post.state === 'POSTED' || Boolean(liveUrl)
 
   const canPublishBlog =
     isBlog &&
@@ -90,12 +91,13 @@ export function PublishBar({
   const handlePublish = async () => {
     setMessage(null)
     try {
-      await publish.mutateAsync({
+      const result = await publish.mutateAsync({
         postId: post.postId,
         siteIds: isBlog ? selectedSiteIds : undefined,
         categoryBySite: isBlog ? categoryBySite : undefined,
       })
-      setMessage('Published successfully.')
+      if (result.platformPostUrl) setLiveUrl(result.platformPostUrl)
+      setMessage(result.ok ? 'Published successfully.' : result.error || 'Publish failed')
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Publish failed')
     }
@@ -103,8 +105,18 @@ export function PublishBar({
 
   if (alreadyPublished) {
     return (
-      <div className="rounded-[var(--r-row)] border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-        This post is already published.
+      <div className="flex flex-col gap-2 rounded-[var(--r-row)] border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+        <span>This post is already published.</span>
+        {liveUrl ? (
+          <a
+            href={liveUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-xs font-medium text-emerald-900 underline"
+          >
+            View live post <ExternalLink className="size-3" />
+          </a>
+        ) : null}
       </div>
     )
   }
@@ -121,12 +133,15 @@ export function PublishBar({
           ) : !statusesAvailable ? (
             <p className="text-xs text-[var(--ink-soft)]">
               Connection status unavailable — publish will fail if {post.platform}{' '}
-              is not connected in iGEO.
+              is not connected.
             </p>
           ) : (
             <p className="text-xs text-amber-800">
-              {post.platform} is not connected on this workspace. Connect it in
-              iGEO (Integrations) first.
+              {post.platform} is not connected on this workspace.{' '}
+              <Link to="/integrations" className="underline">
+                Connect it in Integrations
+              </Link>{' '}
+              first.
             </p>
           )}
         </div>
@@ -200,11 +215,23 @@ export function PublishBar({
       {message ? (
         <p
           className={`text-xs ${
-            message.includes('success') ? 'text-emerald-700' : 'text-[var(--error)]'
+            message.includes('success') || message === 'Published successfully.'
+              ? 'text-emerald-700'
+              : 'text-[var(--error)]'
           }`}
         >
           {message}
         </p>
+      ) : null}
+      {liveUrl ? (
+        <a
+          href={liveUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1 text-xs text-[var(--accent)] underline"
+        >
+          View live post <ExternalLink className="size-3" />
+        </a>
       ) : null}
     </div>
   )
