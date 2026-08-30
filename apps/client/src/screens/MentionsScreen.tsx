@@ -2,7 +2,7 @@ import { ErrorState } from '../components/ErrorState'
 import { MentionsSummary } from '../components/mentions/MentionsSummary'
 import { MentionsOverTimeChart } from '../components/mentions/MentionsOverTimeChart'
 import { ResponsesTable } from '../components/mentions/ResponsesTable'
-import { MentionsScreenSkeleton } from '../components/ScreenSkeletons'
+import { PageLoader } from '../components/loading'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
 import { getGeoMentions } from '../api/geo'
 import { queryKeys } from '../api/queryKeys'
@@ -22,7 +22,7 @@ export function MentionsScreen() {
   )
 
   if (geo.pending || responses.pending) {
-    return <MentionsScreenSkeleton />
+    return <PageLoader />
   }
   if (geo.error) {
     return <ErrorState message={geo.error} onRetry={geo.retry} />

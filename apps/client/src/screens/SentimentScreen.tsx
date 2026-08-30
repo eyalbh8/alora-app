@@ -2,7 +2,7 @@ import { ErrorState } from '../components/ErrorState'
 import { CurrentSentimentScore } from '../components/sentiment/CurrentSentimentScore'
 import { SentimentResponsesTable } from '../components/sentiment/SentimentResponsesTable'
 import { SentimentTrendChart } from '../components/sentiment/SentimentTrendChart'
-import { SentimentScreenSkeleton } from '../components/ScreenSkeletons'
+import { PageLoader } from '../components/loading'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
 import { getGeoSentiment } from '../api/geo'
 import { queryKeys } from '../api/queryKeys'
@@ -21,7 +21,7 @@ export function SentimentScreen() {
   const previousOverall = fromHistory.previous ?? geo.data?.data.previousOverallScore ?? null
 
   if (geo.pending || responses.pending) {
-    return <SentimentScreenSkeleton />
+    return <PageLoader />
   }
   if (geo.error) {
     return <ErrorState message={geo.error} onRetry={geo.retry} />

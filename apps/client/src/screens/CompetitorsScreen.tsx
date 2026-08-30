@@ -4,7 +4,7 @@ import { ErrorState } from '../components/ErrorState'
 import { BrandVisibilityChart } from '../components/dashboard/BrandVisibilityChart'
 import { CompetitorsListTable } from '../components/competitors/CompetitorsListTable'
 import { ShareOfVoiceDonut } from '../components/competitors/ShareOfVoiceDonut'
-import { CompetitorsScreenSkeleton } from '../components/ScreenSkeletons'
+import { PageLoader } from '../components/loading'
 import { CompetitorHoverProvider } from '../context/CompetitorHoverContext'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
 import { getGeoCompetitors } from '../api/geo'
@@ -26,7 +26,7 @@ export function CompetitorsScreen() {
   )
 
   if (geo.pending) {
-    return <CompetitorsScreenSkeleton />
+    return <PageLoader />
   }
   if (geo.error) return <ErrorState message={geo.error} onRetry={geo.retry} />
   if (!geo.data) {

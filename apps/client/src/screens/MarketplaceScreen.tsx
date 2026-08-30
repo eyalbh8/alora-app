@@ -3,7 +3,7 @@ import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
 import { CatalogTable } from '../components/marketplace/CatalogTable'
 import { CitedSitesTable } from '../components/marketplace/CitedSitesTable'
-import { MarketplaceScreenSkeleton } from '../components/ScreenSkeletons'
+import { PageLoader } from '../components/loading'
 import { getGeoMarketplace } from '../api/geo'
 import { queryKeys } from '../api/queryKeys'
 import { useGeoScreenData } from '../hooks/useGeoScreen'
@@ -23,7 +23,7 @@ export function MarketplaceScreen() {
   }, [matches])
 
   if (geo.pending) {
-    return <MarketplaceScreenSkeleton />
+    return <PageLoader />
   }
   if (geo.error) return <ErrorState message={geo.error} onRetry={geo.retry} />
   if (!geo.data || sites.length === 0) {

@@ -14,7 +14,7 @@ import { DomainsTable } from '../components/citations/DomainsTable'
 import { DomainUrlsTable } from '../components/citations/DomainUrlsTable'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
-import { CitationsScreenSkeleton } from '../components/ScreenSkeletons'
+import { PageLoader } from '../components/loading'
 import { useGeoScreenData } from '../hooks/useGeoScreen'
 import { useAccountStore } from '../store/useAccountStore'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
@@ -35,8 +35,8 @@ export function CitationsScreen() {
     { enabled: Boolean(domain) && list.geoMode },
   )
 
-  if (!domain && list.pending) return <CitationsScreenSkeleton />
-  if (domain && drill.loading && drill.data == null) return <CitationsScreenSkeleton />
+  if (!domain && list.pending) return <PageLoader />
+  if (domain && drill.loading && drill.data == null) return <PageLoader />
   if (!domain && list.error) return <ErrorState message={list.error} onRetry={list.retry} />
   if (domain && drill.error && drill.data == null) {
     return <ErrorState message={drill.error} onRetry={drill.retry} />

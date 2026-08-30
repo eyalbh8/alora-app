@@ -23,11 +23,12 @@ function ScreenChrome({
 
   return (
     <ScreenSubheaderProvider setSubheader={setSubheader}>
-      <div className={`flex flex-col ${isCrawlerVariant ? 'gap-7' : 'gap-4'}`}>
+      <div className={`screen-chrome flex flex-col ${isCrawlerVariant ? 'gap-7' : 'gap-4'}`}>
         <ScreenTitle title={title} />
         {subheader}
-        <FilterBar variant={variant} />
-        {/* Screen-specific skeletons handle pending (incl. geo-meta) via useGeoScreenData. */}
+        <div className="screen-chrome__filters">
+          <FilterBar variant={variant} />
+        </div>
         <Outlet />
       </div>
     </ScreenSubheaderProvider>

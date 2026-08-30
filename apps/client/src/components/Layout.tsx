@@ -18,6 +18,7 @@ import {
   Users,
 } from "lucide-react";
 import { AccountSwitcher } from "./AccountSwitcher";
+import { MenchlyLogo } from "./MenchlyLogo";
 
 const NAV: Array<{
   to: string;
@@ -37,7 +38,11 @@ const NAV: Array<{
 ];
 
 export function BrandMark() {
-  return <span className="brand__mark" aria-hidden="true" />;
+  return (
+    <span className="brand__mark" aria-hidden="true">
+      <MenchlyLogo />
+    </span>
+  );
 }
 
 export function Layout() {

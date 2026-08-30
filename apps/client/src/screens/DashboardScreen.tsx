@@ -5,7 +5,7 @@ import { AccountSnapshot } from '../components/dashboard/AccountSnapshot'
 import { IndustryRankingCard } from '../components/dashboard/IndustryRankingCard'
 import { ProviderMentionCardsRow } from '../components/dashboard/ProviderMentionCardsRow'
 import { SourcesCard } from '../components/dashboard/SourcesCard'
-import { DashboardScreenSkeleton } from '../components/ScreenSkeletons'
+import { PageLoader } from '../components/loading'
 import { CompetitorHoverProvider } from '../context/CompetitorHoverContext'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
 import { buildAccountBrief } from '../lib/dashboard/briefInsights'
@@ -19,7 +19,7 @@ export function DashboardScreen() {
   const geo = useGeoScreenData(queryKeys.geo.dashboard, getGeoDashboard)
 
   if (geo.pending) {
-    return <DashboardScreenSkeleton />
+    return <PageLoader />
   }
   if (geo.error) {
     return <ErrorState message={geo.error} onRetry={geo.retry} />

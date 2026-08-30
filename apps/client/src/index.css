@@ -238,13 +238,44 @@ p {
 }
 
 .brand__mark {
-  width: 16px;
-  height: 16px;
-  border: 0;
-  border-radius: 5px;
-  background: var(--accent);
-  position: relative;
+  display: block;
+  height: 22px;
+  width: auto;
+  aspect-ratio: 435 / 359;
   flex: none;
+}
+
+.brand__mark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pulsing-logo {
+  display: grid;
+  place-items: center;
+  flex: none;
+  overflow: visible;
+  width: auto;
+  aspect-ratio: 435 / 359;
+}
+
+.pulsing-logo__mark {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 50%;
+  animation: logo-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes logo-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
 }
 
 .brand__name {
@@ -649,6 +680,16 @@ p {
   padding-bottom: 80px;
 }
 
+.screen-chrome:has(.page-loader) .screen-chrome__filters {
+  display: none;
+}
+
+.page-loader {
+  display: grid;
+  place-items: center;
+  min-height: calc(100dvh - 12rem);
+}
+
 .table-bleed {
   overflow: hidden;
   border: 1px solid var(--line);
@@ -824,5 +865,9 @@ p {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .pulsing-logo__mark {
+    animation: none !important;
   }
 }

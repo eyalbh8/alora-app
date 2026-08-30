@@ -4,7 +4,7 @@ import { TrafficBreakdownCards } from '../components/ai-traffic/TrafficBreakdown
 import { TrafficEntryCardsRow } from '../components/ai-traffic/TrafficEntryCardsRow'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
-import { AiTrafficScreenSkeleton } from '../components/ScreenSkeletons'
+import { PageLoader } from '../components/loading'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
 import { useAccountStore } from '../store/useAccountStore'
 import { getTraffic } from '../api/traffic'
@@ -28,7 +28,7 @@ export function AiTrafficScreen() {
   }, [payload, filters])
 
   if (loading && !payload) {
-    return <AiTrafficScreenSkeleton />
+    return <PageLoader />
   }
   if (error) {
     return <ErrorState message={error} onRetry={retry} />

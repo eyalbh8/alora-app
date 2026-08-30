@@ -4,7 +4,7 @@ import { CrawlerVolumeChart } from '../components/ai-crawlers/CrawlerVolumeChart
 import { DistributionCard } from '../components/ai-crawlers/DistributionCard'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
-import { AiCrawlersScreenSkeleton } from '../components/ScreenSkeletons'
+import { PageLoader } from '../components/loading'
 import { useAnalyticsFilters } from '../context/AnalyticsFiltersContext'
 import { useAccountStore } from '../store/useAccountStore'
 import { getCrawlers } from '../api/traffic'
@@ -48,7 +48,7 @@ export function AiCrawlersScreen() {
   }, [payload, setFilterMeta])
 
   if (loading && !payload) {
-    return <AiCrawlersScreenSkeleton />
+    return <PageLoader />
   }
   if (error) {
     return <ErrorState message={error} onRetry={retry} />

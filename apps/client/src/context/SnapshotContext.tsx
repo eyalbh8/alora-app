@@ -12,7 +12,7 @@ import { queryKeys } from '../api/queryKeys'
 import { getTenant } from '../api/snapshots'
 import type { AvailableDay, ScreenKey, ScreenSnapshot, TenantInfo } from '../api/types'
 import { ErrorState } from '../components/ErrorState'
-import { Skeleton } from '../components/LoadingSpinner'
+import { FullScreenLoader } from '../components/loading'
 import { lastNDaysEnding, yesterdayISO, type DateRange } from '../lib/dates'
 import { useAccountStore } from '../store/useAccountStore'
 
@@ -74,13 +74,7 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
         : null
 
   if (bootLoading) {
-    return (
-      <div className="flex flex-col gap-3 py-6">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-10 w-full max-w-3xl" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    )
+    return <FullScreenLoader />
   }
 
   if (bootError || !tenant) {

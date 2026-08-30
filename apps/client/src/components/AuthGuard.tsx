@@ -6,17 +6,7 @@ import { getAccounts } from '../api/accounts'
 import { useAccountStore } from '../store/useAccountStore'
 import { queryKeys } from '../api/queryKeys'
 import { FirstAccountSetup } from './FirstAccountSetup'
-
-function LoadingScreen() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-bg">
-      <div className="flex flex-col items-center gap-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-accent" />
-        <p className="text-[13px] font-medium text-muted">Loading...</p>
-      </div>
-    </div>
-  )
-}
+import { FullScreenLoader } from './loading'
 
 export function AuthGuard({ children }: PropsWithChildren) {
   const { isAuthenticated, isSessionLoading } = useSession()
@@ -73,7 +63,7 @@ export function AuthGuard({ children }: PropsWithChildren) {
   }, [accounts, selectedAccount, setSelectedAccount, refreshSelectedAccount])
 
   if (isSessionLoading) {
-    return <LoadingScreen />
+    return <FullScreenLoader />
   }
 
   if (!isAuthenticated) {
@@ -82,7 +72,7 @@ export function AuthGuard({ children }: PropsWithChildren) {
   }
 
   if (accountsLoading) {
-    return <LoadingScreen />
+    return <FullScreenLoader />
   }
 
   if (accountsError) {
@@ -104,7 +94,7 @@ export function AuthGuard({ children }: PropsWithChildren) {
   }
 
   if (!selectedAccount) {
-    return <LoadingScreen />
+    return <FullScreenLoader />
   }
 
   return <>{children}</>

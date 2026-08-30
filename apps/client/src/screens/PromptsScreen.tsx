@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
-import { PromptsScreenSkeleton } from '../components/ScreenSkeletons'
+import { PageLoader } from '../components/loading'
 import { TablePagination, type PageSize } from '../components/TablePagination'
 import { ResponseDrawer } from '../components/mentions/ResponseDrawer'
 import { DeltaLabel } from '../components/prompts/DeltaLabel'
@@ -193,7 +193,7 @@ export function PromptsScreen() {
   }
 
   if (geo.pending) {
-    return <PromptsScreenSkeleton />
+    return <PageLoader />
   }
   if (geo.error) {
     return <ErrorState message={geo.error} onRetry={geo.retry} />
