@@ -49,6 +49,7 @@ export function DateRangePicker({
   endDay,
   minDay,
   maxDay,
+  align = 'end',
 }: {
   range: DateRange
   onChange: (next: DateRange) => void
@@ -57,6 +58,8 @@ export function DateRangePicker({
   endDay: string
   minDay?: string
   maxDay?: string
+  /** `start` opens to the right of the trigger; `end` opens to the left on desktop. */
+  align?: 'start' | 'end'
 }) {
   const [open, setOpen] = useState(false)
   const [viewMonth, setViewMonth] = useState(() => parseISO(range.endDate))
@@ -152,7 +155,7 @@ export function DateRangePicker({
       !(isSameDay(rangeStart, rangeEnd) && isStart)
 
     let cls =
-      'relative flex h-8 w-8 items-center justify-center rounded-full text-xs transition-colors '
+      'relative flex h-8 w-full min-w-0 items-center justify-center rounded-full text-xs tabular-nums transition-colors '
     if (disabled) cls += 'cursor-not-allowed text-muted-dark/40 '
     else cls += 'cursor-pointer '
     if (outside && !inSpan && !isStart && !isEnd) cls += 'text-muted-dark/50 '
@@ -185,8 +188,12 @@ export function DateRangePicker({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 flex overflow-hidden rounded-lg border border-line bg-surface shadow-soft lg:left-auto lg:right-0">
-          <div className="flex w-44 flex-col border-r border-line py-2">
+        <div
+          className={`absolute top-full z-[110] mt-1 flex w-max overflow-hidden rounded-lg border border-line bg-surface shadow-soft ${
+            align === 'end' ? 'left-0 lg:left-auto lg:right-0' : 'left-0'
+          }`}
+        >
+          <div className="flex w-44 shrink-0 flex-col border-r border-line py-2">
             {TIME_PRESET_OPTIONS.map(({ days, label }) => (
               <button
                 key={days}
@@ -218,7 +225,7 @@ export function DateRangePicker({
             </div>
           </div>
 
-          <div className="w-72 p-3">
+          <div className="w-72 shrink-0 p-3">
             <div className="mb-3 flex items-center justify-between">
               <button
                 type="button"

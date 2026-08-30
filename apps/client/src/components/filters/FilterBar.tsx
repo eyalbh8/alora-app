@@ -350,6 +350,7 @@ export function FilterBar({ variant }: { variant: FilterBarVariant }) {
       onChange={setRange}
       onPreset={setPresetDays}
       onResetDefault={resetDateRange}
+      align={geo ? 'end' : 'start'}
     />
   )
 
