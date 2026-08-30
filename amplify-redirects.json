@@ -6,9 +6,15 @@
     "condition": null
   },
   {
+    "source": "/index.html",
+    "target": "/",
+    "status": "301",
+    "condition": null
+  },
+  {
     "source": "/<*>",
     "target": "/index.html",
-    "status": "404",
+    "status": "404-200",
     "condition": null
   }
 ]

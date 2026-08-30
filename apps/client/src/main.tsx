@@ -11,6 +11,14 @@ import '@fontsource/poppins/latin-700.css'
 import './index.css'
 import App from './App.tsx'
 
+if (window.location.pathname === '/index.html') {
+  window.history.replaceState(
+    null,
+    '',
+    `/${window.location.search}${window.location.hash}`,
+  )
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
