@@ -21,6 +21,7 @@ import {
   emptyPlatformsMap,
   McpPostsClient,
   McpPostsError,
+  PLATFORM_WANTS_IMAGE,
   type PlatformsMap,
   type PlatformState,
   type SocialMediaProvider,
@@ -417,6 +418,7 @@ export class DailyContentService {
   async getPublishTargets(tenantId: string) {
     const { accountId, apiKey } = await this.sourceApi.resolveCredentials(tenantId);
     let statuses: Record<string, unknown> = {};
+    let statusesAvailable = false;
     let blogSites: Array<{ id: string; name: string; url?: string | null }> = [];
 
     try {
@@ -427,6 +429,7 @@ export class DailyContentService {
       );
       if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
         statuses = raw as Record<string, unknown>;
+        statusesAvailable = true;
       }
     } catch (err) {
       this.logger.warn(
@@ -478,7 +481,80 @@ export class DailyContentService {
             (value as { isConnected?: boolean }).isConnected === true));
     }
 
-    return { connected, statuses, blogSites };
+    return { connected, statusesAvailable, statuses, blogSites };
+  }
+
+  async addPostImage(tenantId: string, runId: string, postId: string) {
+    const { tenant } = await this.requireOwnedPost(tenantId, runId, postId);
+    const accountId = tenant.source_account_id;
+    const apiKey = tenant.mcp_api_key!;
+    const raw = await this.sourceApi.sourceRequest(
+      accountId,
+      apiKey,
+      `/accounts/${accountId}/agents/updatePost/${encodeURIComponent(postId)}/addImage`,
+      { method: 'POST' },
+    );
+    const obj =
+      raw && typeof raw === 'object' && !Array.isArray(raw)
+        ? (raw as Record<string, unknown>)
+        : {};
+    const signedUrl =
+      typeof obj.signedUrl === 'string'
+        ? obj.signedUrl
+        : typeof obj.signed_url === 'string'
+          ? obj.signed_url
+          : null;
+    if (!signedUrl) {
+      const err = new Error('addImage did not return a signedUrl') as Error & {
+        statusCode: number;
+      };
+      err.statusCode = 502;
+      throw err;
+    }
+    const imagesRaw = obj.imagesUrl ?? obj.images_url;
+    const imagesUrl = Array.isArray(imagesRaw)
+      ? imagesRaw.map((u) => String(u)).filter(Boolean)
+      : [];
+    return { signedUrl, imagesUrl, message: String(obj.message ?? '') };
+  }
+
+  async removePostImage(
+    tenantId: string,
+    runId: string,
+    postId: string,
+    imageUrl: string,
+  ) {
+    if (!imageUrl?.trim()) {
+      const err = new Error('imageUrl is required') as Error & { statusCode: number };
+      err.statusCode = 400;
+      throw err;
+    }
+    const { tenant } = await this.requireOwnedPost(tenantId, runId, postId);
+    const accountId = tenant.source_account_id;
+    const apiKey = tenant.mcp_api_key!;
+    const raw = await this.sourceApi.sourceRequest(
+      accountId,
+      apiKey,
+      `/accounts/${accountId}/agents/updatePost/${encodeURIComponent(postId)}/removeImages`,
+      {
+        method: 'POST',
+        body: [{ imageUrl: imageUrl.trim() }],
+      },
+    );
+    const obj =
+      raw && typeof raw === 'object' && !Array.isArray(raw)
+        ? (raw as Record<string, unknown>)
+        : {};
+    const imagesRaw = obj.imagesUrl ?? obj.images_url;
+    const imagesUrl = Array.isArray(imagesRaw)
+      ? imagesRaw.map((u) => String(u)).filter(Boolean)
+      : [];
+    return {
+      success: obj.success !== false,
+      postId,
+      imagesUrl,
+      message: String(obj.message ?? 'Images removed'),
+    };
   }
 
   async getBlogSiteCategories(tenantId: string, siteId: string) {
@@ -692,7 +768,7 @@ export class DailyContentService {
           topic: topicName,
           prompt: selection.prompt.prompt,
           socialMediaProvider: provider,
-          generateImage: false,
+          generateImage: PLATFORM_WANTS_IMAGE[provider],
         });
         return { provider, generationId };
       }),

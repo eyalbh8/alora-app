@@ -11,6 +11,7 @@ import {
   stripTitleFromContent,
 } from '../../lib/blogHtml'
 import { PublishBar } from './PublishBar'
+import { ImageWithFallback } from './PostImageControls'
 import { RichTextEditor } from './RichTextEditor'
 
 export function BlogPostPreview({
@@ -227,7 +228,7 @@ export function BlogPostPreview({
               minHeight="64px"
             />
             {heroImage ? (
-              <img
+              <ImageWithFallback
                 src={heroImage}
                 alt=""
                 className="mx-auto max-w-full rounded-lg"
@@ -249,7 +250,7 @@ export function BlogPostPreview({
             />
             {heroImage ? (
               <div className="my-4 text-center">
-                <img
+                <ImageWithFallback
                   src={heroImage}
                   alt=""
                   className="mx-auto max-w-full rounded-lg"

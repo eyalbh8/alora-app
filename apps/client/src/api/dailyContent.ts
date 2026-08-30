@@ -89,6 +89,7 @@ export type DailyContentPostPatch = {
 
 export type DailyContentPublishTargets = {
   connected: Record<string, boolean>
+  statusesAvailable: boolean
   statuses: Record<string, unknown>
   blogSites: Array<{ id: string; name: string; url?: string | null }>
 }
@@ -97,6 +98,12 @@ export type BlogSiteCategory = {
   id: number
   name: string
   parent: number
+}
+
+export type PostImageUploadSlot = {
+  signedUrl: string
+  imagesUrl: string[]
+  message: string
 }
 
 export async function getDailyContentRuns(take = 30): Promise<DailyContentRun[]> {
@@ -145,6 +152,42 @@ export async function publishDailyContentPost(
     'POST',
     options,
   )
+}
+
+export async function requestPostImageUpload(
+  runId: string,
+  postId: string,
+): Promise<PostImageUploadSlot> {
+  return apiSend(
+    `/daily-content/runs/${encodeURIComponent(runId)}/posts/${encodeURIComponent(postId)}/image-upload`,
+    'POST',
+  )
+}
+
+export async function removePostImage(
+  runId: string,
+  postId: string,
+  imageUrl: string,
+): Promise<{ success: boolean; postId: string; imagesUrl: string[]; message: string }> {
+  return apiSend(
+    `/daily-content/runs/${encodeURIComponent(runId)}/posts/${encodeURIComponent(postId)}/image-remove`,
+    'POST',
+    { imageUrl },
+  )
+}
+
+/** Upload raw file bytes to an iGEO presigned S3 PUT URL. Do not use apiSend (JSON Content-Type). */
+export async function uploadFileToSignedUrl(signedUrl: string, file: File): Promise<void> {
+  const response = await fetch(signedUrl, {
+    method: 'PUT',
+    body: file,
+    headers: {
+      'Content-Type': file.type || 'application/octet-stream',
+    },
+  })
+  if (!response.ok) {
+    throw new Error(`S3 upload failed (${response.status})`)
+  }
 }
 
 export async function getDailyContentPublishTargets(): Promise<DailyContentPublishTargets> {

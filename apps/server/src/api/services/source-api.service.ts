@@ -224,7 +224,26 @@ export class SourceApiService {
     }
 
     if (response.status === 204) return null;
-    const body = await response.json();
+    const rawText = await response.text();
+    if (!rawText.trim()) {
+      console.info('[source] OK', {
+        path: pathAndQuery,
+        status: response.status,
+        emptyBody: true,
+      });
+      return null;
+    }
+    let body: unknown;
+    try {
+      body = JSON.parse(rawText);
+    } catch (err) {
+      throw new SourceApiError(
+        `Invalid JSON from source (${response.status}) for ${pathAndQuery}: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+        502,
+      );
+    }
     const unwrapped = this.unwrapSourceBody(body);
     const didUnwrap = unwrapped !== body;
     console.info('[source] OK', {

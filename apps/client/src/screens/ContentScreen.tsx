@@ -39,16 +39,20 @@ function RowPublishButton({
   runId,
   post,
   connected,
+  statusesAvailable,
   onOpenDrawer,
 }: {
   runId: string
   post: DailyContentPost
   connected: boolean
+  statusesAvailable: boolean
   onOpenDrawer: () => void
 }) {
   const publish = usePublishDailyContentPost(runId)
   const [message, setMessage] = useState<string | null>(null)
   const published = post.isPublished || post.state === 'POSTED'
+  /** When auth/statuses is unreachable via MCP, allow publish and surface server errors. */
+  const canTryPublish = !statusesAvailable || connected
 
   if (published) {
     return (
@@ -63,9 +67,9 @@ function RowPublishButton({
       <button
         type="button"
         className="inline-flex items-center gap-1 rounded-full border border-[var(--line)] bg-white px-2.5 py-1 text-xs font-medium text-[var(--ink)] disabled:opacity-50"
-        disabled={!connected}
+        disabled={!canTryPublish}
         title={
-          connected
+          canTryPublish
             ? 'Open preview to choose WordPress site and publish'
             : 'BLOG is not connected on this workspace. Connect it in iGEO first.'
         }
@@ -85,9 +89,9 @@ function RowPublishButton({
       <button
         type="button"
         className="inline-flex items-center gap-1 rounded-full bg-[var(--accent)] px-2.5 py-1 text-xs font-medium text-white disabled:opacity-50"
-        disabled={!connected || publish.isPending}
+        disabled={!canTryPublish || publish.isPending}
         title={
-          connected
+          canTryPublish
             ? `Publish to ${post.platform}`
             : `${post.platform} is not connected on this workspace. Connect it in iGEO first.`
         }
@@ -343,6 +347,7 @@ export function ContentScreen() {
                               runId={run.id}
                               post={post}
                               connected={targets.data?.connected?.[post.platform] === true}
+                              statusesAvailable={targets.data?.statusesAvailable === true}
                               onOpenDrawer={() => openDrawer(post.platform)}
                             />
                           ) : null}

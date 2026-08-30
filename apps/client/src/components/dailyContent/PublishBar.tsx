@@ -71,18 +71,21 @@ export function PublishBar({
   const [categoryBySite, setCategoryBySite] = useState<Record<string, number>>({})
   const [message, setMessage] = useState<string | null>(null)
 
-  const connected = targets.data?.connected?.[post.platform] === true
+  const statusesAvailable = targets.data?.statusesAvailable === true
+  const connectedKnown = targets.data?.connected?.[post.platform] === true
+  /** When auth/statuses is unreachable via MCP, allow publish and surface server errors. */
+  const canTryPublish = !statusesAvailable || connectedKnown
   const blogSites = targets.data?.blogSites ?? []
   const isBlog = post.platform === 'BLOG'
   const alreadyPublished = post.isPublished || post.state === 'POSTED'
 
   const canPublishBlog =
     isBlog &&
-    connected &&
+    canTryPublish &&
     selectedSiteIds.length > 0 &&
     selectedSiteIds.every((id) => categoryBySite[id] != null)
 
-  const canPublishSocial = !isBlog && connected
+  const canPublishSocial = !isBlog && canTryPublish
 
   const handlePublish = async () => {
     setMessage(null)
@@ -113,8 +116,13 @@ export function PublishBar({
           <p className="text-sm font-medium text-[var(--ink)]">Publish</p>
           {targets.isLoading ? (
             <p className="text-xs text-[var(--muted)]">Checking connections…</p>
-          ) : connected ? (
+          ) : connectedKnown ? (
             <p className="text-xs text-emerald-700">{post.platform} connected</p>
+          ) : !statusesAvailable ? (
+            <p className="text-xs text-[var(--ink-soft)]">
+              Connection status unavailable — publish will fail if {post.platform}{' '}
+              is not connected in iGEO.
+            </p>
           ) : (
             <p className="text-xs text-amber-800">
               {post.platform} is not connected on this workspace. Connect it in
@@ -137,7 +145,7 @@ export function PublishBar({
         </button>
       </div>
 
-      {isBlog && connected ? (
+      {isBlog && canTryPublish ? (
         <div className="flex flex-col gap-2">
           {blogSites.length === 0 ? (
             <p className="text-xs text-amber-800">

@@ -15,6 +15,15 @@ export const DAILY_CONTENT_PLATFORMS: SocialMediaProvider[] = [
   'X',
 ];
 
+/** Match iGEO agent defaults: images on for blog/social except X. */
+export const PLATFORM_WANTS_IMAGE: Record<SocialMediaProvider, boolean> = {
+  BLOG: true,
+  LINKEDIN: true,
+  FACEBOOK: true,
+  INSTAGRAM: true,
+  X: false,
+};
+
 export type PlatformRunStatus = 'PENDING' | 'GENERATED' | 'OPTIMIZED' | 'FAILED';
 
 export type PlatformState = {

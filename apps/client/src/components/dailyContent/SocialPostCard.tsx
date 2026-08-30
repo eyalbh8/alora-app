@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Bookmark,
   Heart,
@@ -80,18 +80,29 @@ function PostImage({
   objectFit?: 'cover' | 'contain'
 }) {
   const src = urls.length ? urls[urls.length - 1] : null
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    setFailed(false)
+  }, [src])
+
   if (!src) return null
   return (
     <div
-      className="mt-3 w-full overflow-hidden rounded-lg bg-[#f5f5f5]"
+      className="mt-3 flex w-full items-center justify-center overflow-hidden rounded-lg bg-[#f5f5f5]"
       style={{ height }}
     >
-      <img
-        src={src}
-        alt=""
-        className="h-full w-full"
-        style={{ objectFit }}
-      />
+      {failed ? (
+        <span className="text-xs text-[var(--muted)]">Image unavailable</span>
+      ) : (
+        <img
+          src={src}
+          alt=""
+          className="h-full w-full"
+          style={{ objectFit }}
+          onError={() => setFailed(true)}
+        />
+      )}
     </div>
   )
 }
@@ -224,6 +235,15 @@ function InstagramCard({ post }: { post: DailyContentPost }) {
     [post.body],
   )
   const rtl = detectHebrew(caption)
+  const imageSrc = post.imagesUrl?.length
+    ? post.imagesUrl[post.imagesUrl.length - 1]
+    : null
+  const [imageFailed, setImageFailed] = useState(false)
+
+  useEffect(() => {
+    setImageFailed(false)
+  }, [imageSrc])
+
   return (
     <article className="border border-[#dbdbdb] bg-white">
       <header className="flex items-center gap-2.5 px-3 py-2.5">
@@ -241,12 +261,13 @@ function InstagramCard({ post }: { post: DailyContentPost }) {
         )}
         <p className="truncate text-sm font-semibold text-[#262626]">{title}</p>
       </header>
-      {post.imagesUrl?.length ? (
+      {imageSrc && !imageFailed ? (
         <div className="w-full bg-[#fafafa]" style={{ height: 400 }}>
           <img
-            src={post.imagesUrl[post.imagesUrl.length - 1]}
+            src={imageSrc}
             alt=""
             className="h-full w-full object-cover"
+            onError={() => setImageFailed(true)}
           />
         </div>
       ) : (
@@ -254,7 +275,7 @@ function InstagramCard({ post }: { post: DailyContentPost }) {
           className="flex w-full items-center justify-center bg-[#fafafa] text-sm text-[var(--muted)]"
           style={{ height: 240 }}
         >
-          No image
+          {imageSrc ? 'Image unavailable' : 'No image'}
         </div>
       )}
       <div className="px-3 py-2">

@@ -1025,7 +1025,18 @@ export class GeoService {
       );
     }
     if (response.status === 204) return null;
-    return this.unwrapPayload(await response.json());
+    const rawText = await response.text();
+    if (!rawText.trim()) return null;
+    try {
+      return this.unwrapPayload(JSON.parse(rawText));
+    } catch (err) {
+      throw new SourceApiError(
+        `Invalid JSON from source (${response.status}) for ${pathAndQuery}: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+        502,
+      );
+    }
   }
 
   private isoDay(v: unknown): string | null {

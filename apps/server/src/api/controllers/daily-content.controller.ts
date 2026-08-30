@@ -139,6 +139,38 @@ export class DailyContentController {
     }
   }
 
+  @Post('runs/:runId/posts/:postId/image-upload')
+  async addPostImage(
+    @TenantId() tenantId: string,
+    @Param('runId') runId: string,
+    @Param('postId') postId: string,
+  ) {
+    try {
+      return await this.dailyContent.addPostImage(tenantId, runId, postId);
+    } catch (err) {
+      rethrowAsHttp(err);
+    }
+  }
+
+  @Post('runs/:runId/posts/:postId/image-remove')
+  async removePostImage(
+    @TenantId() tenantId: string,
+    @Param('runId') runId: string,
+    @Param('postId') postId: string,
+    @Body() body: { imageUrl?: string },
+  ) {
+    try {
+      return await this.dailyContent.removePostImage(
+        tenantId,
+        runId,
+        postId,
+        body?.imageUrl ?? '',
+      );
+    } catch (err) {
+      rethrowAsHttp(err);
+    }
+  }
+
   @Get('publish-targets')
   async getPublishTargets(@TenantId() tenantId: string) {
     try {

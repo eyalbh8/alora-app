@@ -35,7 +35,9 @@ export class TenantController {
       try {
         availableDays = await this.geoService.geoTenantScanDays(tenantId);
       } catch (err) {
-        if ((err as { statusCode?: number })?.statusCode !== 400) throw err;
+        // New / unscanned workspaces often have no /scans/last payload — still return tenant.
+        const status = (err as { statusCode?: number })?.statusCode;
+        if (status !== 400 && status !== 404 && status !== 502) throw err;
       }
       return {
         tenant: {

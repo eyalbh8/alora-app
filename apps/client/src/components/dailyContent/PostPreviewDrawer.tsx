@@ -4,6 +4,7 @@ import { EmptyState } from '../EmptyState'
 import { ErrorState } from '../ErrorState'
 import type { DailyContentPost } from '../../api/dailyContent'
 import { BlogPostPreview } from './BlogPostPreview'
+import { PostImageControls } from './PostImageControls'
 import { PublishBar } from './PublishBar'
 import { SocialPostCard } from './SocialPostCard'
 
@@ -178,6 +179,8 @@ export function PostPreviewDrawer({
                       {activePost.postId}
                     </span>
                   </div>
+
+                  <PostImageControls runId={runId} post={activePost} />
 
                   {activePost.platform === 'BLOG' ? (
                     <BlogPostPreview runId={runId} post={activePost} />

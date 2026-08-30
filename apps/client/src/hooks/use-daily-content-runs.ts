@@ -8,8 +8,11 @@ import {
   getDailyContentRuns,
   getDailyContentSettings,
   publishDailyContentPost,
+  removePostImage,
+  requestPostImageUpload,
   updateDailyContentPost,
   updateDailyContentSettings,
+  uploadFileToSignedUrl,
   type DailyContentPostPatch,
   type DailyContentSettings,
 } from '../api/dailyContent'
@@ -143,6 +146,57 @@ export function usePublishDailyContentPost(runId: string) {
       void queryClient.invalidateQueries({
         queryKey: ['dailyContent', 'dayPosts', selectedAccount?.id],
       })
+    },
+  })
+}
+
+function invalidatePostQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+  accountId: string | undefined,
+  runId: string,
+) {
+  void queryClient.invalidateQueries({
+    queryKey: queryKeys.dailyContent.runPosts(accountId, runId),
+  })
+  void queryClient.invalidateQueries({
+    queryKey: ['dailyContent', 'dayPosts', accountId],
+  })
+}
+
+export function useReplacePostImage(runId: string) {
+  const queryClient = useQueryClient()
+  const { selectedAccount } = useAccountStore()
+  return useMutation({
+    mutationFn: async ({
+      postId,
+      file,
+      currentImageUrl,
+    }: {
+      postId: string
+      file: File
+      currentImageUrl?: string | null
+    }) => {
+      if (currentImageUrl) {
+        await removePostImage(runId, postId, currentImageUrl)
+      }
+      const slot = await requestPostImageUpload(runId, postId)
+      await uploadFileToSignedUrl(slot.signedUrl, file)
+      return slot
+    },
+    onSuccess: () => {
+      invalidatePostQueries(queryClient, selectedAccount?.id, runId)
+    },
+  })
+}
+
+export function useRemovePostImage(runId: string) {
+  const queryClient = useQueryClient()
+  const { selectedAccount } = useAccountStore()
+  return useMutation({
+    mutationFn: ({ postId, imageUrl }: { postId: string; imageUrl: string }) =>
+      removePostImage(runId, postId, imageUrl),
+    onSuccess: () => {
+      invalidatePostQueries(queryClient, selectedAccount?.id, runId)
     },
   })
 }
