@@ -129,17 +129,16 @@ body.nav-open {
   overflow: hidden;
 }
 
-button,
-a {
-  font: inherit;
-}
+@layer base {
+  button,
+  a {
+    font: inherit;
+  }
 
-a {
-  color: inherit;
-}
-
-button {
-  color: inherit;
+  a,
+  button {
+    color: inherit;
+  }
 }
 
 p {
