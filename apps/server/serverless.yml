@@ -111,6 +111,16 @@ functions:
     timeout: 900
     memorySize: 2048
 
+  publishedUrlTracker:
+    name: menchly-${self:provider.stage}-published-url-tracker
+    image:
+      name: appimage
+      command:
+        - dist/lambdas/published-url-tracker-lambda.handler
+    timeout: 300
+    memorySize: 1024
+    events: ${self:custom.publishedUrlTrackerScheduleEvents.${self:provider.stage}, []}
+
 plugins:
   - serverless-offline
 
@@ -125,5 +135,12 @@ custom:
     prod:
       - schedule:
           rate: cron(*/5 * * * ? *)
+          enabled: true
+    dev: []
+  # Hourly is enough: each tenant is gated on its own local midnight hour.
+  publishedUrlTrackerScheduleEvents:
+    prod:
+      - schedule:
+          rate: cron(0 * * * ? *)
           enabled: true
     dev: []

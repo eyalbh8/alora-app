@@ -74,6 +74,33 @@ export type ZernioCreatePostResult = {
   raw: unknown;
 };
 
+/** A post read back from Zernio (list or fetch-by-id). */
+export type ZernioPost = {
+  postId: string | null;
+  status: string | null;
+  title: string | null;
+  publishedAt: string | null;
+  scheduledFor: string | null;
+  createdAt: string | null;
+  platforms: ZernioPlatformResult[];
+  raw: Record<string, unknown>;
+};
+
+export type ZernioListPostsParams = {
+  accountId?: string;
+  profileId?: string;
+  platform?: string;
+  status?: string;
+  /** `zernio` (authored here) or `external` (synced from the platform). */
+  source?: 'zernio' | 'external';
+  /** YYYY-MM-DD or full ISO 8601. */
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+};
+
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
   return value as Record<string, unknown>;
@@ -85,6 +112,52 @@ function pickId(obj: Record<string, unknown> | null): string | null {
   if (obj.id != null) return String(obj.id);
   if (obj.accountId != null) return String(obj.accountId);
   return null;
+}
+
+function optionalString(value: unknown): string | null {
+  return value != null ? String(value) : null;
+}
+
+function parsePlatformResults(raw: unknown[]): ZernioPlatformResult[] {
+  return raw.map((item) => {
+    const row = asRecord(item) ?? {};
+    const account =
+      typeof row.accountId === 'string'
+        ? row.accountId
+        : pickId(asRecord(row.accountId));
+    return {
+      platform: String(row.platform ?? ''),
+      accountId: account,
+      status: optionalString(row.status),
+      platformPostUrl:
+        row.platformPostUrl != null
+          ? String(row.platformPostUrl)
+          : row.url != null
+            ? String(row.url)
+            : row.permalink != null
+              ? String(row.permalink)
+              : null,
+      error: optionalString(row.error),
+    };
+  });
+}
+
+function parsePost(raw: unknown): ZernioPost | null {
+  const post = asRecord(raw);
+  if (!post) return null;
+  const platformsRaw = Array.isArray(post.platforms)
+    ? (post.platforms as unknown[])
+    : [];
+  return {
+    postId: pickId(post),
+    status: optionalString(post.status),
+    title: optionalString(post.title),
+    publishedAt: optionalString(post.publishedAt ?? post.published_at),
+    scheduledFor: optionalString(post.scheduledFor ?? post.scheduled_for),
+    createdAt: optionalString(post.createdAt ?? post.created_at),
+    platforms: parsePlatformResults(platformsRaw),
+    raw: post,
+  };
 }
 
 @Injectable()
@@ -359,34 +432,53 @@ export class ZernioService {
         ? (obj.platforms as unknown[])
         : [];
 
-    const platforms: ZernioPlatformResult[] = platformsRaw.map((item) => {
-      const row = asRecord(item) ?? {};
-      const account =
-        typeof row.accountId === 'string'
-          ? row.accountId
-          : pickId(asRecord(row.accountId));
-      return {
-        platform: String(row.platform ?? ''),
-        accountId: account,
-        status: row.status != null ? String(row.status) : null,
-        platformPostUrl:
-          row.platformPostUrl != null
-            ? String(row.platformPostUrl)
-            : row.url != null
-              ? String(row.url)
-              : row.permalink != null
-                ? String(row.permalink)
-                : null,
-        error: row.error != null ? String(row.error) : null,
-      };
-    });
-
     return {
       postId,
       status: post?.status != null ? String(post.status) : null,
-      platforms,
+      platforms: parsePlatformResults(platformsRaw),
       raw,
     };
+  }
+
+  /** Fetch one post. Published posts carry platformPostUrl per platform. */
+  async getPost(postId: string): Promise<ZernioPost | null> {
+    let raw: unknown;
+    try {
+      raw = await this.zernioRequest(`/posts/${encodeURIComponent(postId)}`);
+    } catch (err) {
+      if (err instanceof ZernioApiError && err.statusCode === 404) return null;
+      throw err;
+    }
+    const obj = asRecord(raw) ?? {};
+    return parsePost(asRecord(obj.post) ?? asRecord(asRecord(obj.data)?.post) ?? obj);
+  }
+
+  /** List posts, newest first by default. Published posts include platformPostUrl. */
+  async listPosts(params: ZernioListPostsParams = {}): Promise<ZernioPost[]> {
+    const query = new URLSearchParams();
+    if (params.accountId) query.set('accountId', params.accountId);
+    if (params.profileId) query.set('profileId', params.profileId);
+    if (params.platform) query.set('platform', params.platform);
+    if (params.status) query.set('status', params.status);
+    if (params.source) query.set('source', params.source);
+    if (params.dateFrom) query.set('dateFrom', params.dateFrom);
+    if (params.dateTo) query.set('dateTo', params.dateTo);
+    query.set('page', String(params.page ?? 1));
+    query.set('limit', String(params.limit ?? 25));
+    query.set('sort', params.sort ?? 'created-desc');
+
+    const raw = await this.zernioRequest(`/posts?${query.toString()}`);
+    const obj = asRecord(raw);
+    const list = Array.isArray(raw)
+      ? raw
+      : Array.isArray(obj?.posts)
+        ? (obj!.posts as unknown[])
+        : Array.isArray(obj?.data)
+          ? (obj!.data as unknown[])
+          : [];
+    return list
+      .map((item) => parsePost(item))
+      .filter((p): p is ZernioPost => Boolean(p));
   }
 
   async presignMedia(opts: {

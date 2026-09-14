@@ -6,6 +6,7 @@ import { SourceApiService } from '../source-api.service';
 import { DailyContentService } from './daily-content.service';
 import { DailyContentOptimizerService } from './daily-content-optimizer.service';
 import { DailyContentLlmService } from './daily-content-llm.service';
+import { PublishedUrlTrackerService } from './published-url-tracker.service';
 import { DailyContentController } from '../../controllers/daily-content.controller';
 import { IntegrationsModule } from '../integrations/integrations.module';
 
@@ -22,7 +23,12 @@ import { IntegrationsModule } from '../integrations/integrations.module';
     DailyContentLlmService,
     DailyContentService,
     DailyContentOptimizerService,
+    PublishedUrlTrackerService,
   ],
-  exports: [DailyContentService, DailyContentOptimizerService],
+  exports: [
+    DailyContentService,
+    DailyContentOptimizerService,
+    PublishedUrlTrackerService,
+  ],
 })
 export class DailyContentModule {}

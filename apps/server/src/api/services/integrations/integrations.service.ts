@@ -15,7 +15,7 @@ import {
   type IgeoBlogKind,
 } from "./platform-map";
 
-type BlogSiteRow = {
+export type BlogSiteRow = {
   id: string;
   name: string;
   url: string | null;
@@ -127,7 +127,7 @@ export class IntegrationsService {
     };
   }
 
-  private async loadIgeoBlogSites(tenantId: string): Promise<BlogSiteRow[]> {
+  async loadIgeoBlogSites(tenantId: string): Promise<BlogSiteRow[]> {
     try {
       const { accountId, apiKey } =
         await this.sourceApi.resolveCredentials(tenantId);
