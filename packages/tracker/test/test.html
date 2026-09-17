@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Alora AI Traffic Tracker - Test Page</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 32px 24px 64px;
+        line-height: 1.6;
+      }
+      h1 {
+        font-size: 24px;
+        margin-bottom: 4px;
+      }
+      h2 {
+        font-size: 16px;
+        margin-top: 32px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        opacity: 0.6;
+      }
+      .status {
+        padding: 16px 20px;
+        border-radius: 10px;
+        border: 1px solid;
+        font-weight: 600;
+        margin: 20px 0;
+      }
+      .status.detected {
+        border-color: #1a7f4b;
+        background: #e8f6ee;
+        color: #0f5132;
+      }
+      .status.idle {
+        border-color: #9aa0a6;
+        background: #f1f3f4;
+        color: #3c4043;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14px;
+      }
+      th,
+      td {
+        text-align: left;
+        border-bottom: 1px solid #dadce0;
+        padding: 8px 10px;
+        vertical-align: top;
+      }
+      th {
+        width: 170px;
+        font-weight: 600;
+        opacity: 0.7;
+      }
+      td {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        word-break: break-all;
+      }
+      ul {
+        padding-left: 20px;
+      }
+      li {
+        margin: 6px 0;
+      }
+      button {
+        font: inherit;
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: 1px solid #9aa0a6;
+        background: transparent;
+        cursor: pointer;
+      }
+      code {
+        background: #f1f3f4;
+        padding: 1px 5px;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AI Traffic Tracker - Test Page</h1>
+    <p>
+      Serve this file over HTTP (not <code>file://</code>) so the tracker's
+      <code>fetch</code> can run. From the repo root:
+      <code>npx http-server packages/tracker -p 8080</code>, then open
+      <code>http://localhost:8080/test/test.html</code>.
+    </p>
+
+    <div id="status" class="status idle">Checking detection status...</div>
+
+    <h2>Current page</h2>
+    <table>
+      <tbody>
+        <tr><th>URL</th><td id="info-url"></td></tr>
+        <tr><th>Path</th><td id="info-path"></td></tr>
+        <tr><th>Referrer</th><td id="info-referrer"></td></tr>
+        <tr><th>utm_source</th><td id="info-utm-source"></td></tr>
+        <tr><th>utm_medium</th><td id="info-utm-medium"></td></tr>
+        <tr><th>utm_campaign</th><td id="info-utm-campaign"></td></tr>
+        <tr><th>User agent</th><td id="info-ua"></td></tr>
+        <tr><th>Screen</th><td id="info-screen"></td></tr>
+        <tr><th>Language</th><td id="info-language"></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Test scenarios</h2>
+    <ul>
+      <li><a id="link-chatgpt" href="#">Reload tagged as ChatGPT</a> (<code>utm_source=chatgpt</code>)</li>
+      <li><a id="link-claude" href="#">Reload tagged as Claude</a> (<code>utm_source=claude</code>)</li>
+      <li><a id="link-perplexity" href="#">Reload tagged as Perplexity</a> (<code>utm_source=perplexity</code>)</li>
+      <li><a id="link-negative" href="#">Reload tagged as a newsletter</a> (should NOT fire)</li>
+      <li><a id="link-clean" href="#">Reload with no parameters</a> (should NOT fire)</li>
+    </ul>
+    <p><button id="copy-url" type="button">Copy ChatGPT test URL</button></p>
+
+    <h2>Verifying the round trip</h2>
+    <ul>
+      <li>Open DevTools &rarr; Network and filter for <code>track</code>. A tagged reload should show one <code>POST</code>.</li>
+      <li>The tracker is silent by design, so no console output means it either fired or opted out. Use the banner above to tell which.</li>
+      <li>
+        Confirm the row landed:
+        <code>SELECT provider, source, path, timestamp FROM analytics_events ORDER BY timestamp DESC LIMIT 10;</code>
+      </li>
+      <li>Referrer-based detection cannot be simulated by editing the URL; it needs a real click-through from an AI chat interface.</li>
+    </ul>
+
+    <script>
+      // Mirrors the detection gate in src/tracker.js so the page can explain why
+      // the tracker did or did not fire. Keep these lists in sync.
+      var AI_HOSTS = [
+        'chatgpt.com', 'chat.openai.com', 'openai.com', 'claude.ai', 'anthropic.com',
+        'perplexity.ai', 'pplx.ai', 'gemini.google.com', 'bard.google.com',
+        'aistudio.google.com', 'copilot.microsoft.com', 'edgeservices.bing.com',
+        'grok.com', 'grok.x.ai', 'x.ai', 'chat.deepseek.com', 'deepseek.com', 'meta.ai',
+      ];
+      var AI_UTM_TOKENS = [
+        'chatgpt', 'chat-gpt', 'gpt', 'openai', 'claude', 'anthropic', 'perplexity',
+        'pplx', 'gemini', 'bard', 'copilot', 'bingchat', 'bing-chat', 'grok',
+        'deepseek', 'meta-ai', 'metaai', 'llama',
+      ];
+
+      var params = new URLSearchParams(window.location.search || '');
+      var utmSource = params.get('utm_source');
+      var referrer = document.referrer || '';
+
+      function text(id, value) {
+        document.getElementById(id).textContent = value || '(none)';
+      }
+
+      text('info-url', window.location.href);
+      text('info-path', window.location.pathname);
+      text('info-referrer', referrer);
+      text('info-utm-source', utmSource);
+      text('info-utm-medium', params.get('utm_medium'));
+      text('info-utm-campaign', params.get('utm_campaign'));
+      text('info-ua', navigator.userAgent);
+      text('info-screen', window.screen.width + 'x' + window.screen.height);
+      text('info-language', navigator.language);
+
+      var matchedHost = null;
+      if (referrer) {
+        try {
+          var host = new URL(referrer).hostname.toLowerCase().replace(/^www\./, '');
+          for (var i = 0; i < AI_HOSTS.length; i++) {
+            if (host === AI_HOSTS[i] || host.endsWith('.' + AI_HOSTS[i])) {
+              matchedHost = AI_HOSTS[i];
+              break;
+            }
+          }
+        } catch (err) {
+          /* unparseable referrer */
+        }
+      }
+
+      var matchedToken = null;
+      if (utmSource) {
+        var lowered = utmSource.toLowerCase();
+        for (var j = 0; j < AI_UTM_TOKENS.length; j++) {
+          if (lowered.indexOf(AI_UTM_TOKENS[j]) !== -1) {
+            matchedToken = AI_UTM_TOKENS[j];
+            break;
+          }
+        }
+      }
+
+      var banner = document.getElementById('status');
+      if (matchedHost || matchedToken) {
+        banner.className = 'status detected';
+        banner.textContent =
+          'AI traffic detected via ' +
+          (matchedHost ? 'referrer host "' + matchedHost + '"' : 'utm_source token "' + matchedToken + '"') +
+          '. The tracker will POST one event.';
+      } else {
+        banner.className = 'status idle';
+        banner.textContent =
+          'No AI traffic detected, so the tracker exits without sending anything. ' +
+          'This is the expected result for ordinary visitors.';
+      }
+
+      var base = window.location.origin + window.location.pathname;
+      var chatgptUrl = base + '?utm_source=chatgpt&utm_medium=ai-chat&utm_campaign=test';
+
+      function setLink(id, query) {
+        document.getElementById(id).href = query ? base + '?' + query : base;
+      }
+      setLink('link-chatgpt', 'utm_source=chatgpt&utm_medium=ai-chat&utm_campaign=test');
+      setLink('link-claude', 'utm_source=claude&utm_medium=ai-chat&utm_campaign=test');
+      setLink('link-perplexity', 'utm_source=perplexity&utm_medium=ai-chat&utm_campaign=test');
+      setLink('link-negative', 'utm_source=newsletter&utm_medium=email');
+      setLink('link-clean', '');
+
+      document.getElementById('copy-url').addEventListener('click', function () {
+        var button = this;
+        navigator.clipboard.writeText(chatgptUrl).then(
+          function () {
+            button.textContent = 'Copied';
+            window.setTimeout(function () {
+              button.textContent = 'Copy ChatGPT test URL';
+            }, 1500);
+          },
+          function () {
+            button.textContent = 'Copy failed';
+          },
+        );
+      });
+    </script>
+
+    <!-- Replace data-account-id with a real tenant id and point data-endpoint at your API. -->
+    <script
+      src="../../../apps/client/public/v1/tracker.min.js"
+      data-account-id="00000000-0000-0000-0000-000000000000"
+      data-endpoint="http://localhost:3003/api/snapshots/track"
+      async
+    ></script>
+  </body>
+</html>

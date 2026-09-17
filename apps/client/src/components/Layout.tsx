@@ -10,6 +10,7 @@ import {
   Activity,
   Bot,
   CalendarClock,
+  Code2,
   Heart,
   LayoutDashboard,
   Link2,
@@ -38,8 +39,10 @@ const NAV: Array<{
   { to: "/sentiment", label: "Sentiment", icon: Heart },
   { to: "/competitors", label: "Competitors", icon: Users },
   { to: "/marketplace", label: "Marketplace", icon: Store },
-  { to: "/ai-traffic", label: "AI Traffic", icon: Activity },
+  // `end` so /ai-traffic/setup does not also mark AI Traffic active.
+  { to: "/ai-traffic", label: "AI Traffic", end: true, icon: Activity },
   { to: "/ai-crawlers", label: "AI Crawlers", icon: Bot },
+  { to: "/ai-traffic/setup", label: "Tracker setup", icon: Code2 },
   { to: "/content", label: "Content", icon: Newspaper },
   { to: "/integrations", label: "Integrations", icon: Plug },
   {

@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { LlmVisitTrendsChart } from '../components/ai-traffic/LlmVisitTrendsChart'
 import { TrafficBreakdownCards } from '../components/ai-traffic/TrafficBreakdownCards'
 import { TrafficEntryCardsRow } from '../components/ai-traffic/TrafficEntryCardsRow'
@@ -35,6 +36,22 @@ export function AiTrafficScreen() {
   }
   if (!payload) {
     return <EmptyState title="No AI traffic data" message="No traffic events for the selected range." />
+  }
+
+  // `hasEvents` is false until the tracker reports for the first time, which is
+  // different from an empty date range: point the user at the install snippet
+  // rather than leaving them with a blank dashboard.
+  if (payload.hasEvents === false) {
+    return (
+      <EmptyState
+        title="Tracker not installed yet"
+        message="Add the tracker snippet to your site to start measuring visits that arrive from AI assistants."
+      >
+        <Link to="/ai-traffic/setup" className="button button--primary mt-1 inline-flex">
+          Set up the tracker
+        </Link>
+      </EmptyState>
+    )
   }
 
   return (

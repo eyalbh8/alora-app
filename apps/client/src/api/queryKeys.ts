@@ -57,6 +57,7 @@ export const queryKeys = {
   },
   traffic: (accountId: string | undefined, filters: GeoFilters) =>
     ['traffic', accountId, filters] as const,
+  trackerStatus: (accountId?: string) => ['trackerStatus', accountId] as const,
   crawlers: (accountId: string | undefined, filters: GeoFilters) =>
     ['crawlers', 'source-range', accountId, filters] as const,
 }

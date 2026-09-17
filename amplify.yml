@@ -15,3 +15,15 @@ frontend:
     paths:
       - node_modules/**/*
       - apps/client/node_modules/**/*
+customHeaders:
+  # Versioned URL, so the tracker can be cached indefinitely. Publish breaking
+  # changes under /v2/ rather than mutating this file.
+  - pattern: '/v1/tracker.min.js'
+    headers:
+      - key: 'Cache-Control'
+        value: 'public, max-age=31536000, immutable'
+      # Loaded cross-origin from customer sites.
+      - key: 'Access-Control-Allow-Origin'
+        value: '*'
+      - key: 'Content-Type'
+        value: 'application/javascript; charset=utf-8'

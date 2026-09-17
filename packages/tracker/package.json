@@ -1,0 +1,14 @@
+{
+  "name": "@alora/tracker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "First-party AI traffic tracker script embedded on customer websites",
+  "scripts": {
+    "build": "node build.mjs",
+    "lint": "echo 'no lint configured'",
+    "test": "echo 'no tests yet'"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

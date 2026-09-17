@@ -20,6 +20,7 @@ import { MarketplaceScreen } from './screens/MarketplaceScreen'
 import { MentionsScreen } from './screens/MentionsScreen'
 import { PromptsScreen } from './screens/PromptsScreen'
 import { SentimentScreen } from './screens/SentimentScreen'
+import { TrackerSetupScreen } from './screens/TrackerSetupScreen'
 import { NotFoundScreen } from './screens/NotFoundScreen'
 import {
   AnalyticsScreenLayout,
@@ -83,6 +84,8 @@ export default function App() {
                           <Route element={<AnalyticsScreenLayout title="AI Traffic" variant="traffic" />}>
                             <Route path="/ai-traffic" element={<AiTrafficScreen />} />
                           </Route>
+                          {/* Outside AnalyticsScreenLayout: setup has no date filters. */}
+                          <Route path="/ai-traffic/setup" element={<TrackerSetupScreen />} />
                           <Route element={<AnalyticsScreenLayout title="AI Crawlers" variant="crawlers" />}>
                             <Route path="/ai-crawlers" element={<AiCrawlersScreen />} />
                           </Route>

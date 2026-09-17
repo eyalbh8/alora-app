@@ -56,6 +56,7 @@ model WhitelabelTenant {
   dailyContentRuns       DailyContentRun[]
   zernioAccounts         ZernioAccount[]
   publishedPosts         PublishedPost[]
+  analyticsEvents        AnalyticsEvent[]
 
   @@map("whitelabel_tenants")
 }
@@ -99,6 +100,43 @@ model PublishedPost {
   @@index([tenantId])
   @@index([runId])
   @@map("published_posts")
+}
+
+/// First-party AI traffic event captured by the tracker script or the no-JS pixel.
+/// `provider` is resolved at write time by ai-signals.util so aggregate queries
+/// can filter on an indexed column instead of re-deriving it per query.
+model AnalyticsEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  trackerVersion String   @default("v1") @map("tracker_version")
+  timestamp      DateTime @db.Timestamptz(6)
+  url            String
+  path           String
+  referrer       String?
+  userAgent      String   @map("user_agent")
+  source         String
+  botName        String?  @map("bot_name")
+  provider       String?
+  utmSource      String?  @map("utm_source")
+  utmMedium      String?  @map("utm_medium")
+  utmCampaign    String?  @map("utm_campaign")
+  browser        String?
+  os             String?
+  device         String?
+  screen         String?
+  platform       String?
+  language       String?
+  country        String?
+  city           String?
+  region         String?
+  ip             String?
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tenant WhitelabelTenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, timestamp])
+  @@index([tenantId, provider, timestamp])
+  @@map("analytics_events")
 }
 
 /// One daily automation run per tenant per local calendar day.

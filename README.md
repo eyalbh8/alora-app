@@ -10,7 +10,8 @@ Menchly-app/
 │   ├── client/          # Vite + React 19 SPA
 │   └── server/          # NestJS + Prisma + Serverless
 ├── packages/
-│   └── shared/          # @alora/shared (types + utils)
+│   ├── shared/          # @alora/shared (types + utils)
+│   └── tracker/         # @alora/tracker (embeddable AI traffic script)
 ├── docs/
 ├── amplify.yml
 └── amplify-redirects.json
@@ -66,3 +67,14 @@ Prerequisites:
 ## API surface
 
 - `GET /api/snapshots/*` — accounts, tenant, snapshots, traffic, crawlers, geo/*
+- `POST /api/snapshots/track` — public AI traffic ingest (no auth; see below)
+
+## AI traffic tracker
+
+First-party tracking for visits arriving from AI assistants. The embeddable
+script lives in `packages/tracker` and is published to `/v1/tracker.min.js`;
+`GET /api/snapshots/traffic` serves the dashboard from our own
+`analytics_events` table rather than the upstream Source API.
+
+See [docs/TRACKER.md](docs/TRACKER.md) for install snippets, detection rules,
+endpoints and limitations.

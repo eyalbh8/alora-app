@@ -1,5 +1,10 @@
 import { apiGet } from './client'
-import type { AiCrawlersPayload, AiTrafficPayload, GeoFilters } from './types'
+import type {
+  AiCrawlersPayload,
+  AiTrafficPayload,
+  GeoFilters,
+  TrackerStatus,
+} from './types'
 
 function filtersToQuery(filters: GeoFilters): string {
   const q = new URLSearchParams({ startDate: filters.startDate, endDate: filters.endDate })
@@ -15,4 +20,9 @@ export function getTraffic(filters: GeoFilters): Promise<AiTrafficPayload> {
 
 export function getCrawlers(filters: GeoFilters): Promise<AiCrawlersPayload> {
   return apiGet<AiCrawlersPayload>(`/crawlers?${filtersToQuery(filters)}`)
+}
+
+/** Whether the tracker script has ever reported an event for this workspace. */
+export function getTrackerStatus(): Promise<TrackerStatus> {
+  return apiGet<TrackerStatus>('/tracker/status')
 }

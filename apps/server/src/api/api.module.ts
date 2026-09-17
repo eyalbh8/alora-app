@@ -13,6 +13,7 @@ import { SnapshotsService } from './services/snapshots.service';
 import { SourceApiService } from './services/source-api.service';
 import { DailyContentModule } from './services/daily-content/daily-content.module';
 import { IntegrationsModule } from './services/integrations/integrations.module';
+import { TrackingModule } from './services/tracking/tracking.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { IntegrationsModule } from './services/integrations/integrations.module'
     CommonModule,
     DailyContentModule,
     IntegrationsModule,
+    TrackingModule,
   ],
   controllers: [
     AccountsController,

@@ -297,7 +297,7 @@ export interface AiTrafficPayload {
   topBrowsers?: Array<Record<string, unknown>>
   browsers?: Array<Record<string, unknown>>
   historicalData?: Array<Record<string, unknown>>
-  availableCountries?: string[]
+  availableCountries?: Array<{ value: string; label: string; count: number }>
   // error-shaped snapshots
   error?: boolean
   message?: string
@@ -320,6 +320,13 @@ export interface AiCrawlersPayload {
   detail?: string
   statusCode?: number
   path?: string
+}
+
+/** Install state of the first-party AI traffic tracker for a workspace. */
+export interface TrackerStatus {
+  hasEvents: boolean
+  eventCount: number
+  lastEventAt: string | null
 }
 
 /** Branded / me-in-prompt filter values (AccountIncluded / AccountNotIncluded). */
