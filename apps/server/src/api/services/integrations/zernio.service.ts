@@ -160,6 +160,44 @@ function parsePost(raw: unknown): ZernioPost | null {
   };
 }
 
+/**
+ * Native feed items from GET /accounts/:id/posts. Shape is platform-native
+ * (permalink, createdTime) rather than the authored /posts envelope.
+ */
+function parseAccountFeedPost(
+  raw: unknown,
+  zernioAccountId: string,
+): ZernioPost | null {
+  const post = asRecord(raw);
+  if (!post) return null;
+  const url =
+    optionalString(post.permalink) ??
+    optionalString(post.platformPostUrl) ??
+    optionalString(post.url);
+  const publishedAt =
+    optionalString(post.createdTime) ??
+    optionalString(post.publishedAt) ??
+    optionalString(post.createdAt);
+  const platform = optionalString(post.platform) ?? '';
+  return {
+    postId: pickId(post),
+    status: optionalString(post.status) ?? (url ? 'published' : null),
+    title: optionalString(post.title),
+    publishedAt,
+    scheduledFor: null,
+    createdAt: publishedAt,
+    platforms: [
+      {
+        platform,
+        accountId: zernioAccountId,
+        status: optionalString(post.status) ?? (url ? 'published' : null),
+        platformPostUrl: url,
+      },
+    ],
+    raw: post,
+  };
+}
+
 @Injectable()
 export class ZernioService {
   private readonly logger = new Logger(ZernioService.name);
@@ -451,6 +489,33 @@ export class ZernioService {
     }
     const obj = asRecord(raw) ?? {};
     return parsePost(asRecord(obj.post) ?? asRecord(asRecord(obj.data)?.post) ?? obj);
+  }
+
+  /**
+   * Native posts already on the connected account (Facebook page, LinkedIn
+   * company, Instagram). This is a different payload from /posts: Facebook and
+   * LinkedIn often appear here even when /posts?source=external is empty.
+   */
+  async listAccountPosts(
+    accountId: string,
+    params: { limit?: number } = {},
+  ): Promise<ZernioPost[]> {
+    const query = new URLSearchParams();
+    query.set('limit', String(params.limit ?? 25));
+    const raw = await this.zernioRequest(
+      `/accounts/${encodeURIComponent(accountId)}/posts?${query.toString()}`,
+    );
+    const obj = asRecord(raw);
+    const list = Array.isArray(raw)
+      ? raw
+      : Array.isArray(obj?.posts)
+        ? (obj!.posts as unknown[])
+        : Array.isArray(obj?.data)
+          ? (obj!.data as unknown[])
+          : [];
+    return list
+      .map((item) => parseAccountFeedPost(item, accountId))
+      .filter((p): p is ZernioPost => Boolean(p));
   }
 
   /** List posts, newest first by default. Published posts include platformPostUrl. */

@@ -4,6 +4,7 @@ import { after, describe, it } from 'node:test';
 import {
   blogRootCandidates,
   findBlogArticleForDay,
+  pickHtmlListingArticle,
 } from '../api/services/daily-content/blog-url-discovery.util';
 
 type Routes = Record<string, { status?: number; body: string; type?: string }>;
@@ -208,5 +209,38 @@ describe('findBlogArticleForDay failure handling', () => {
       timeZone: 'UTC',
     });
     assert.equal(found, null);
+  });
+});
+
+describe('pickHtmlListingArticle', () => {
+  it('picks the /blog article whose card is dated that day', () => {
+    const html = `
+      <a href="/blog/older-guide">Older</a>
+      <p>September 15, 2026</p>
+      <a href="/blog/how-to-choose-the-right-advertising-agency-for-your-business">
+        How to Choose the Right Advertising Agency for Your Business
+      </a>
+      <p>Updated September 16, 2026</p>
+    `;
+    const found = pickHtmlListingArticle(html, 'https://growbi.co/blog', '2026-09-16');
+    assert.equal(
+      found?.url,
+      'https://growbi.co/blog/how-to-choose-the-right-advertising-agency-for-your-business',
+    );
+    assert.equal(found?.source, 'html');
+  });
+
+  it('does not steal the next card date for the featured article', () => {
+    const html = `
+      <a href="/blog/med-spa-marketing-agency-patient-flow-smaller-clinics">Featured</a>
+      <p>September 14, 2026</p>
+      <a href="/blog/how-to-choose-the-right-advertising-agency-for-your-business">Agency</a>
+      <p>Updated September 16, 2026</p>
+    `;
+    const found = pickHtmlListingArticle(html, 'https://growbi.co/blog', '2026-09-16');
+    assert.equal(
+      found?.url,
+      'https://growbi.co/blog/how-to-choose-the-right-advertising-agency-for-your-business',
+    );
   });
 });

@@ -12,8 +12,10 @@ import {
 import type { PlatformsMap, SocialMediaProvider } from './mcp-posts.client';
 import {
   findBlogArticleForDay,
+  findBlogArticleViaAiScan,
   type BlogArticleCandidate,
 } from './blog-url-discovery.util';
+import { DailyContentLlmService } from './daily-content-llm.service';
 
 /** Social platforms swept nightly. Adding X here is all it takes. */
 export const TRACKED_PLATFORMS: SocialMediaProvider[] = [
@@ -87,6 +89,7 @@ export class PublishedUrlTrackerService {
     @Inject(forwardRef(() => IntegrationsService))
     private readonly integrations: IntegrationsService,
     private readonly zernio: ZernioService,
+    private readonly llm: DailyContentLlmService,
   ) {}
 
   /** Cron entry: sweep every tenant whose local clock just passed midnight. */
@@ -380,14 +383,36 @@ export class PublishedUrlTrackerService {
     zernioPostId: string | null;
     publishedAt: Date | null;
   } | null> {
-    const posts = await this.zernio.listPosts({
-      accountId: opts.zernioAccountId,
-      // Widened by a day on each side because Zernio filters on its own
-      // calendar, then narrowed to the account's local day below.
-      dateFrom: localDateDaysAgo(opts.localDate, 1),
-      dateTo: localDateDaysAgo(opts.localDate, -1),
-      sort: 'created-desc',
-      limit: ZERNIO_PAGE_LIMIT,
+    // Zernio defaults to origin=zernio when `source` is omitted, which hides
+    // native uploads synced from the platform (origin=external). The nightly
+    // sweep has to see both: posts we published and posts they uploaded.
+    const [authored, external, accountFeed] = await Promise.all([
+      this.zernio.listPosts({
+        accountId: opts.zernioAccountId,
+        source: 'zernio',
+        dateFrom: localDateDaysAgo(opts.localDate, 1),
+        dateTo: localDateDaysAgo(opts.localDate, -1),
+        sort: 'created-desc',
+        limit: ZERNIO_PAGE_LIMIT,
+      }),
+      this.zernio.listPosts({
+        accountId: opts.zernioAccountId,
+        source: 'external',
+        dateFrom: localDateDaysAgo(opts.localDate, 1),
+        dateTo: localDateDaysAgo(opts.localDate, -1),
+        sort: 'created-desc',
+        limit: ZERNIO_PAGE_LIMIT,
+      }),
+      this.zernio.listAccountPosts(opts.zernioAccountId, {
+        limit: ZERNIO_PAGE_LIMIT,
+      }),
+    ]);
+    const seen = new Set<string>();
+    const posts = [...authored, ...external, ...accountFeed].filter((p) => {
+      const key = p.postId ?? `${p.createdAt}:${p.platforms[0]?.platformPostUrl ?? ''}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
     });
 
     const sameDay = posts.filter((p) =>
@@ -508,11 +533,33 @@ export class PublishedUrlTrackerService {
         }`,
       );
     }
-    if (tenant.domain) bases.push(tenant.domain);
+    if (tenant.domain) {
+      bases.push(tenant.domain);
+      bases.push(`${tenant.domain.replace(/\/+$/, '')}/blog`);
+    }
 
     for (const baseUrl of [...new Set(bases)]) {
       const found = await findBlogArticleForDay({ baseUrl, localDate, timeZone });
       if (found) return found;
+    }
+
+    if (this.llm.hasLlmConfigured()) {
+      for (const baseUrl of [...new Set(bases)]) {
+        try {
+          const found = await findBlogArticleViaAiScan({
+            listingUrl: /^https?:\/\//i.test(baseUrl) ? baseUrl : `https://${baseUrl}`,
+            localDate,
+            completeJson: (system, user) => this.llm.completeJson(system, user),
+          });
+          if (found) return found;
+        } catch (err) {
+          this.logger.warn(
+            `AI blog scan failed for ${tenant.id} at ${baseUrl}: ${
+              err instanceof Error ? err.message : err
+            }`,
+          );
+        }
+      }
     }
 
     const shopify = await this.prisma.zernioAccount.findFirst({
