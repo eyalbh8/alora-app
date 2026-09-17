@@ -52,6 +52,8 @@ model WhitelabelTenant {
   dailyContentHour       Int               @default(5) @map("daily_content_hour")
   /// Zernio multi-tenant profile id (one per Menchly workspace).
   zernioProfileId        String?           @map("zernio_profile_id")
+  /// When true, GET /traffic reads analytics_events; otherwise iGEO ai-dashboard-data.
+  firstPartyTraffic      Boolean           @default(false) @map("first_party_traffic")
   users                  WlUserTenant[]
   dailyContentRuns       DailyContentRun[]
   zernioAccounts         ZernioAccount[]

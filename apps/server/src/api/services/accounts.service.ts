@@ -10,6 +10,8 @@ export type AccountListItem = {
   name: string | null;
   domain: string | null;
   sourceAccountId: string;
+  /** When true, AI Traffic uses Menchly tracker data instead of iGEO. */
+  firstPartyTraffic: boolean;
   account: {
     id: string;
     title: string;
@@ -49,6 +51,7 @@ type TenantRow = {
   source_account_id: string;
   domains: string[] | null;
   logo: string | null;
+  first_party_traffic: boolean;
 };
 
 @Injectable()
@@ -68,7 +71,8 @@ export class AccountsService {
           t.domain,
           t.source_account_id,
           t.domains,
-          t.logo
+          t.logo,
+          t.first_party_traffic
         FROM whitelabel_tenants t
         WHERE t.enabled = true
         ORDER BY t.name, t.id
@@ -81,7 +85,8 @@ export class AccountsService {
           t.domain,
           t.source_account_id,
           t.domains,
-          t.logo
+          t.logo,
+          t.first_party_traffic
         FROM wl_user_tenants ut
         JOIN whitelabel_tenants t ON t.id = ut.tenant_id
         WHERE ut.user_id = ${userId} AND t.enabled = true
@@ -158,6 +163,7 @@ export class AccountsService {
         source_account_id: workspaceId,
         domains,
         logo,
+        first_party_traffic: false,
       })
     );
   }
@@ -173,6 +179,7 @@ export class AccountsService {
       name: row.name,
       domain: row.domain,
       sourceAccountId: row.source_account_id,
+      firstPartyTraffic: row.first_party_traffic,
       account: {
         id: row.source_account_id,
         title: row.name || '',

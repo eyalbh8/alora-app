@@ -41,7 +41,8 @@ export function AiTrafficScreen() {
   // `hasEvents` is false until the tracker reports for the first time, which is
   // different from an empty date range: point the user at the install snippet
   // rather than leaving them with a blank dashboard.
-  if (payload.hasEvents === false) {
+  const usesFirstPartyTracker = selectedAccount?.firstPartyTraffic === true
+  if (usesFirstPartyTracker && payload.hasEvents === false) {
     return (
       <EmptyState
         title="Tracker not installed yet"

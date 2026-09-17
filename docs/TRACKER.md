@@ -4,9 +4,23 @@ First-party tracking for visits that arrive from AI assistants. A small script o
 the customer's site reports qualifying visits to our API, which stores them in
 `analytics_events` and aggregates them for the AI Traffic dashboard.
 
-This replaces the upstream Source API as the data source for `/ai-traffic`.
-Crawler analytics on `/ai-crawlers` still come from upstream, because AI crawlers
-do not execute JavaScript.
+Workspaces with **`first_party_traffic = true`** on `whitelabel_tenants` use this
+pipeline for **AI Traffic**. Everyone else (e.g. Nayax on the iGEO
+`public.igeo.ai` tracker) keeps **`GET /traffic` → iGEO `ai-dashboard-data`**.
+
+Crawler analytics on `/ai-crawlers` always come from iGEO/Cloudflare, because AI
+crawlers do not execute JavaScript.
+
+Enable first-party traffic for a workspace:
+
+```sql
+UPDATE whitelabel_tenants
+SET first_party_traffic = true
+WHERE id = '<workspace-uuid>';
+```
+
+Also add the site's hostname to `domain` / `domains` so ingest accepts the
+browser `Origin` header.
 
 ## Pipeline
 

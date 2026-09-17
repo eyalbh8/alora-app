@@ -1,6 +1,7 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { TenantGuard } from '../../auth/tenant.guard';
 import { TenantId } from '../../auth/decorators';
+import { PrismaService } from '../../prisma/prisma.service';
 import { GeoService } from '../services/geo.service';
 import { SourceApiService } from '../services/source-api.service';
 import { AnalyticsService } from '../services/tracking/analytics.service';
@@ -10,19 +11,29 @@ import { rethrowAsHttp } from '../utils/http-error';
 @UseGuards(TenantGuard)
 export class TrafficController {
   constructor(
+    private readonly prisma: PrismaService,
     private readonly geoService: GeoService,
     private readonly sourceApi: SourceApiService,
     private readonly analytics: AnalyticsService,
   ) {}
 
   /**
-   * AI referral traffic, served from first-party `analytics_events` captured by
-   * our own tracker. Filter parsing and previous-period maths are reused from
-   * the GEO services so range semantics match the other analytics screens.
+   * AI referral traffic. Workspaces with `first_party_traffic` use our tracker
+   * (`analytics_events`); everyone else keeps the linked iGEO ai-dashboard feed
+   * (e.g. Nayax on the public.igeo.ai tracker).
    */
   @Get('traffic')
   async traffic(@TenantId() tenantId: string, @Query() query: Record<string, string>) {
     try {
+      const tenant = await this.prisma.whitelabelTenant.findUnique({
+        where: { id: tenantId },
+        select: { firstPartyTraffic: true },
+      });
+
+      if (!tenant?.firstPartyTraffic) {
+        return await this.geoService.geoTraffic(tenantId, query);
+      }
+
       const filters = this.geoService.parseGeoFilters(query);
       const previous = this.sourceApi.previousPeriod(filters);
 

@@ -24,6 +24,7 @@ import {
 import { AccountSwitcher } from "./AccountSwitcher";
 import { MenchlyLogo } from "./MenchlyLogo";
 import { useIsAdmin } from "../hooks/useCurrentUser";
+import { useAccountStore } from "../store/useAccountStore";
 
 const NAV: Array<{
   to: string;
@@ -66,7 +67,14 @@ export function Layout() {
   const [navOpen, setNavOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const isAdmin = useIsAdmin();
-  const navItems = NAV.filter((item) => !item.adminOnly || isAdmin);
+  const firstPartyTraffic = useAccountStore(
+    (state) => state.selectedAccount?.firstPartyTraffic ?? false,
+  );
+  const navItems = NAV.filter((item) => {
+    if (item.adminOnly && !isAdmin) return false;
+    if (item.to === "/ai-traffic/setup" && !firstPartyTraffic) return false;
+    return true;
+  });
 
   useEffect(() => {
     setNavOpen(false);

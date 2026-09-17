@@ -6,6 +6,8 @@ export interface Account {
   name: string | null
   domain: string | null
   sourceAccountId: string | null
+  /** AI Traffic from Menchly tracker; false = iGEO dashboard data. */
+  firstPartyTraffic?: boolean
   account: {
     id: string
     title: string
